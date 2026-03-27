@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import { Children } from "react";
 
 const pickupPersonSchema = new mongoose.Schema({
   name: {
