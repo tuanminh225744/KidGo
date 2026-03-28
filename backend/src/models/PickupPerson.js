@@ -1,31 +1,34 @@
 import mongoose from "mongoose";
 
-const pickupPersonSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true,
+const pickupPersonSchema = new mongoose.Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+    },
+    phone: {
+      type: String,
+      required: true,
+    },
+    children: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Children",
+      required: true,
+    },
+    relationship: {
+      type: String,
+      required: true,
+    },
+    avtar: {
+      type: String,
+    },
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
+    },
   },
-  phone: {
-    type: String,
-    required: true,
-  },
-  children: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: "Children",
-    required: true,
-  },
-  relationship: {
-    type: String,
-    required: true,
-  },
-  avtar: {
-    type: String,
-  },
-  status: {
-    type: String,
-    enum: ["active", "inactive"],
-    default: "active",
-  },
-});
+  { timestamps: true },
+);
 
 export default mongoose.model("PickupPerson", pickupPersonSchema);
