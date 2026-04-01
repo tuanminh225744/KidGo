@@ -1,0 +1,174 @@
+.map-routing-container {
+  display: flex;
+  height: 100vh;
+  gap: 20px;
+  padding: 20px;
+  background-color: #f5f5f5;
+}
+
+.map-controls {
+  width: 300px;
+  background-color: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.map-controls h2 {
+  margin: 0;
+  font-size: 20px;
+  color: #333;
+  border-bottom: 2px solid #1890ff;
+  padding-bottom: 10px;
+}
+
+.instructions {
+  background-color: #e6f7ff;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 4px solid #1890ff;
+  font-size: 13px;
+  color: #0050b3;
+}
+
+.instructions p {
+  margin: 5px 0;
+}
+
+.error-message {
+  background-color: #fff1f0;
+  color: #cf1322;
+  padding: 12px;
+  border-radius: 6px;
+  border-left: 4px solid #cf1322;
+  font-size: 13px;
+}
+
+.route-info {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  color: white;
+  padding: 15px;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.info-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+}
+
+.info-item .label {
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.info-item .value {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.loading {
+  text-align: center;
+  color: #1890ff;
+  font-weight: 500;
+  padding: 10px;
+  background-color: #e6f7ff;
+  border-radius: 6px;
+}
+
+.reset-btn {
+  background-color: #f5222d;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: 500;
+  transition: background-color 0.3s ease;
+}
+
+.reset-btn:hover {
+  background-color: #cf1322;
+}
+
+.selected-points {
+  background-color: #fafafa;
+  padding: 12px;
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+}
+
+.selected-points h3 {
+  margin: 0 0 10px 0;
+  font-size: 14px;
+  color: #333;
+}
+
+.point {
+  background-color: white;
+  padding: 8px;
+  margin-bottom: 8px;
+  border-left: 3px solid #1890ff;
+  border-radius: 4px;
+  font-size: 12px;
+}
+
+.point strong {
+  display: block;
+  color: #1890ff;
+  margin-bottom: 4px;
+}
+
+.point span {
+  color: #666;
+  font-family: monospace;
+}
+
+.map {
+  flex: 1;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  z-index: 1;
+}
+
+/* Leaflet custom styles */
+.leaflet-container {
+  border-radius: 8px;
+}
+
+.leaflet-control-attribution {
+  background-color: rgba(255, 255, 255, 0.8);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .map-routing-container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .map-controls {
+    width: 100%;
+    height: auto;
+    max-height: 300px;
+  }
+
+  .map {
+    height: 500px;
+  }
+}
+
+/* Marker popup styling */
+.leaflet-popup-content {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 5px;
+}
