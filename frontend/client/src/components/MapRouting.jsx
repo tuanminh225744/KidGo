@@ -138,10 +138,9 @@ const MapRouting = () => {
       console.log("📍 Tọa độ gửi:", coordinates);
 
       const response = await axios.post(
-        `/api/openrouteservice/v2/directions/driving-car`,
+        `https://api.openrouteservice.org/v2/directions/driving-car`,
         {
           coordinates: coordinates,
-          profile: "driving-car",
           extra_info: ["waytype", "steepness"],
         },
         {
@@ -251,13 +250,16 @@ const MapRouting = () => {
     setError(null);
 
     try {
-      const response = await axios.get("/api/openrouteservice/geocode/search", {
-        params: {
-          api_key: apiKey,
-          text: searchText,
-          size: 5,
+      const response = await axios.get(
+        "https://api.openrouteservice.org/geocode/search",
+        {
+          params: {
+            api_key: apiKey,
+            text: searchText,
+            size: 5,
+          },
         },
-      });
+      );
 
       const features = response.data?.features;
       if (!features || features.length === 0) {
