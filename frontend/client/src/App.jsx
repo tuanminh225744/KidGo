@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import MapRouting from "./components/MapRouting";
 import reactLogo from "./assets/react.svg";
@@ -7,8 +6,6 @@ import heroImg from "./assets/hero.png";
 import "./App.css";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <Router>
       <nav className="navbar">

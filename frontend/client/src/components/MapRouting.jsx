@@ -5,6 +5,7 @@ import {
   Marker,
   Popup,
   Polyline,
+  CircleMarker,
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
@@ -47,6 +48,13 @@ const endMarkerIcon = new L.Icon({
   shadowSize: [41, 41],
 });
 
+const currentLocationIcon = new L.DivIcon({
+  className: "current-location-icon",
+  html: "<div class='current-location-dot'></div>",
+  iconSize: [22, 22],
+  iconAnchor: [11, 11],
+});
+
 const MapClick = ({ onMapClick }) => {
   const map = useMap();
 
@@ -71,6 +79,12 @@ const MapRouting = () => {
   const [duration, setDuration] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const [searchText, setSearchText] = useState("");
+  const [searchLocation, setSearchLocation] = useState(null);
+  const [currentLocation, setCurrentLocation] = useState(null);
+  const [isSearching, setIsSearching] = useState(false);
+  const [map, setMap] = useState(null);
   const mapRef = useRef(null);
 
   const handleMapClick = (latlng) => {
@@ -83,6 +97,21 @@ const MapRouting = () => {
       }
     }
   };
+
+  useEffect(() => {
+    console.log("🧩 useEffect mount");
+    // Tự động yêu cầu lấy vị trí hiện tại khi component khởi tạo
+    handleGeolocation();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // Nếu có vị trí hiện tại và map tồn tại, đưa map trung tâm vào vị trí đó.
+    if (map && currentLocation) {
+      console.log("🧩 flyTo currentLocation", currentLocation);
+      map.flyTo([currentLocation.lat, currentLocation.lon], 14);
+    }
+  }, [map, currentLocation]);
 
   const calculateRoute = async (coords) => {
     setLoading(true);
@@ -109,9 +138,10 @@ const MapRouting = () => {
       console.log("📍 Tọa độ gửi:", coordinates);
 
       const response = await axios.post(
-        `https://api.openrouteservice.org/v2/directions/driving-car`,
+        `/api/openrouteservice/v2/directions/driving-car`,
         {
           coordinates: coordinates,
+          profile: "driving-car",
           extra_info: ["waytype", "steepness"],
         },
         {
@@ -206,13 +236,175 @@ const MapRouting = () => {
     setError(null);
   };
 
+  const handleSearchLocation = async () => {
+    const apiKey = import.meta.env.VITE_APP_MAP_API_KEY;
+    if (!searchText?.trim()) {
+      setError("Vui lòng nhập tên địa điểm để tìm.");
+      return;
+    }
+    if (!apiKey) {
+      setError("❌ API key không được cấu hình.");
+      return;
+    }
+
+    setIsSearching(true);
+    setError(null);
+
+    try {
+      const response = await axios.get("/api/openrouteservice/geocode/search", {
+        params: {
+          api_key: apiKey,
+          text: searchText,
+          size: 5,
+        },
+      });
+
+      const features = response.data?.features;
+      if (!features || features.length === 0) {
+        setError("Không tìm thấy địa điểm. Vui lòng thử lại.");
+        setIsSearching(false);
+        return;
+      }
+
+      const best = features[0];
+      const [lon, lat] = best.geometry.coordinates;
+      const label = best.properties?.label || searchText;
+
+      const selected = { lat, lon, label };
+      setSearchLocation(selected);
+
+      if (map) {
+        map.flyTo([lat, lon], 14);
+      }
+
+      setIsSearching(false);
+    } catch (err) {
+      console.error("Lỗi geocoding:", err.response?.data || err.message);
+      setError("Lỗi tìm địa điểm. Vui lòng kiểm tra API key và thử lại.");
+      setIsSearching(false);
+    }
+  };
+
+  const handleGeolocation = () => {
+    console.log("🧩 handleGeolocation called");
+    if (!navigator.geolocation) {
+      setError("Trình duyệt không hỗ trợ geolocation.");
+      return;
+    }
+
+    setError(null);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+        const current = {
+          lat: latitude,
+          lon: longitude,
+          label: "Vị trí hiện tại",
+        };
+        setCurrentLocation(current);
+        console.log("📍 Vị trí hiện tại:", current);
+        const startPoint = [latitude, longitude];
+        setPoints((prev) => {
+          if (prev.length === 0) {
+            return [startPoint];
+          }
+          if (prev[0][0] === latitude && prev[0][1] === longitude) {
+            return prev;
+          }
+          return [startPoint, ...(prev[1] ? [prev[1]] : [])];
+        });
+
+        if (map) {
+          map.flyTo([latitude, longitude], 14);
+        }
+      },
+      (err) => {
+        setError("Không lấy được vị trí hiện tại: " + err.message);
+      },
+    );
+  };
+
+  const setSearchLocationAsStart = (location) => {
+    const locationToUse = location || searchLocation;
+    if (!locationToUse) {
+      setError("Chưa có vị trí cần dùng làm điểm đi.");
+      return;
+    }
+
+    const step = [locationToUse.lat, locationToUse.lon];
+    const newPoints = [step];
+
+    if (points[1]) {
+      newPoints.push(points[1]);
+    } else if (points[0] && points.length === 1) {
+      // Nếu đã có 1 điểm thì dùng searchLocation thay điểm xuất phát
+      if (points[0] !== step) {
+        newPoints[0] = step;
+      }
+    }
+
+    setPoints(newPoints);
+
+    if (newPoints.length === 2) {
+      calculateRoute(newPoints);
+    }
+  };
+
   return (
     <div className="map-routing-container">
       <div className="map-controls">
         <h2>Lập kế hoạch tuyến đường</h2>
+
+        <div className="search-group">
+          <input
+            type="text"
+            placeholder="Nhập tên địa điểm..."
+            value={searchText}
+            onChange={(e) => setSearchText(e.target.value)}
+          />
+          <button onClick={handleSearchLocation} disabled={isSearching}>
+            {isSearching ? "Đang tìm..." : "Tìm địa điểm"}
+          </button>
+        </div>
+
+        <div className="search-location">
+          {currentLocation && (
+            <div className="current-location-info">
+              <strong>Vị trí hiện tại:</strong>
+              <div>{currentLocation.label}</div>
+              <div>
+                {currentLocation.lat.toFixed(6)},{" "}
+                {currentLocation.lon.toFixed(6)}
+              </div>
+              <button
+                className="use-start-btn"
+                onClick={() => setSearchLocationAsStart(currentLocation)}
+              >
+                Dùng làm điểm đi
+              </button>
+            </div>
+          )}
+
+          {searchLocation && (
+            <div className="found-location-info">
+              <strong>Vị trí tìm được:</strong>
+              <div>{searchLocation.label}</div>
+              <div>
+                {searchLocation.lat.toFixed(6)}, {searchLocation.lon.toFixed(6)}
+              </div>
+              <button
+                className="use-start-btn"
+                onClick={setSearchLocationAsStart}
+              >
+                Dùng làm điểm đi
+              </button>
+            </div>
+          )}
+        </div>
+
         <div className="instructions">
           <p>
-            📍 Nhấp vào bản đồ để chọn điểm xuất phát và điểm đến (chọn 2 điểm)
+            Nhấp vào bản đồ để chọn điểm xuất phát và điểm đến (chọn 2 điểm)
           </p>
           {points.length > 0 && <p>Đã chọn: {points.length}/2 điểm</p>}
         </div>
@@ -256,9 +448,10 @@ const MapRouting = () => {
       </div>
 
       <MapContainer
-        center={[10.7769, 106.7009]}
+        center={[20.997796, 105.856523]}
         zoom={12}
         className="map"
+        whenCreated={setMap}
         ref={mapRef}
       >
         <TileLayer
@@ -267,6 +460,50 @@ const MapRouting = () => {
         />
 
         <MapClick onMapClick={handleMapClick} />
+
+        {currentLocation && (
+          <>
+            <CircleMarker
+              center={[currentLocation.lat, currentLocation.lon]}
+              radius={16}
+              pathOptions={{
+                color: "#0099ff",
+                weight: 5,
+                fillColor: "#79c5ff",
+                fillOpacity: 0.35,
+              }}
+            >
+              <Popup>
+                Vị trí hiện tại: <br />
+                {currentLocation.label}
+              </Popup>
+            </CircleMarker>
+            <Marker
+              position={[currentLocation.lat, currentLocation.lon]}
+              icon={currentLocationIcon}
+            >
+              <Popup>Vị trí hiện tại</Popup>
+            </Marker>
+          </>
+        )}
+
+        {searchLocation && !currentLocation && (
+          <CircleMarker
+            center={[searchLocation.lat, searchLocation.lon]}
+            radius={10}
+            pathOptions={{
+              color: "#40a9ff",
+              weight: 3,
+              fillColor: "#cceaff",
+              fillOpacity: 0.5,
+            }}
+          >
+            <Popup>
+              Vị trí tìm được: <br />
+              {searchLocation.label}
+            </Popup>
+          </CircleMarker>
+        )}
 
         {points[0] && (
           <Marker position={points[0]} icon={startMarkerIcon}>
