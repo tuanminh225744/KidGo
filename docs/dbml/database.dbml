@@ -1,0 +1,255 @@
+Project KidGo {
+  database_type: "MongoDB"
+}
+
+/* ===================== CORE ===================== */
+
+Table User {
+  _id ObjectId [pk]
+  phone string [unique]
+  email string
+  fullName string
+  avatar string
+  role string
+  isVerified boolean
+  deviceTokens string[]
+  createdAt datetime
+  updatedAt datetime
+}
+
+Table Kid {
+  _id ObjectId [pk]
+  parentId ObjectId [ref: > User._id]
+  fullName string
+  dateOfBirth datetime
+  avatar string
+  phone string
+  school string
+  notes string
+  isActive boolean
+  createdAt datetime
+}
+
+Table Driver {
+  _id ObjectId [pk]
+  phone string [unique]
+  fullName string
+  avatar string
+  licenseNumber string [unique]
+  licenseExpiry datetime
+  status string
+  isOnline boolean
+  currentLocation Point // GeoJSON Point
+  certificationLevel int
+  totalTrips int
+  rating float
+  deviceTokens string[]
+  createdAt datetime
+}
+
+Table Vehicle {
+  _id ObjectId [pk]
+  driverId ObjectId [ref: > Driver._id]
+  licensePlate string [unique]
+  brand string
+  model string
+  color string
+  seatCount int
+  inspectionExpiry datetime
+  photos string[]
+  isActive boolean
+}
+
+/* ===================== OPS ===================== */
+
+Table Route {
+  _id ObjectId [pk]
+  parentId ObjectId [ref: > User._id]
+  name string
+  pickupAddress string
+  pickupCoords Point // GeoJSON Point
+  dropoffAddress string
+  dropoffCoords Point // GeoJSON Point
+  waypoints Point[] // Array of GeoJSON Points
+  estimatedDuration int
+  estimatedDistance float
+  isDefault boolean
+}
+
+Table TripSchedule {
+  _id ObjectId [pk]
+  parentId ObjectId [ref: > User._id]
+  kidId ObjectId [ref: > Kid._id]
+  preferredDriverId ObjectId [ref: > Driver._id]
+  routeId ObjectId [ref: > Route._id]
+  repeatDays int[]
+  pickupTime string
+  isActive boolean
+  startDate datetime
+  endDate datetime
+  subscriptionId ObjectId [ref: > Subscription._id]
+}
+
+Table Booking {
+  _id ObjectId [pk]
+  parentId ObjectId [ref: > User._id]
+  kidId ObjectId [ref: > Kid._id]
+  routeId ObjectId [ref: > Route._id]
+  scheduleId ObjectId [ref: > TripSchedule._id]
+  preferredDriverId ObjectId [ref: > Driver._id]
+  assignedDriverId ObjectId [ref: > Driver._id]
+  status string
+  scheduledTime datetime
+  type string
+  createdAt datetime
+}
+
+Table Trip {
+  _id ObjectId [pk]
+  bookingId ObjectId [ref: > Booking._id]
+  driverId ObjectId [ref: > Driver._id]
+  kidId ObjectId [ref: > Kid._id]
+  parentId ObjectId [ref: > User._id]
+  vehicleId ObjectId [ref: > Vehicle._id]
+  status string
+  plannedRoute PlannedRoute // Embedded sub-schema
+  actualRoute Point[] // Array of GeoJSON Points
+  scheduledPickupTime datetime
+  actualPickupTime datetime
+  scheduledDropoffTime datetime
+  actualDropoffTime datetime
+  pickupPhoto string
+  dropoffPhoto string
+  pinVerified boolean
+  distance float
+  createdAt datetime
+}
+
+Table Subscription {
+  _id ObjectId [pk]
+  parentId ObjectId [ref: > User._id]
+  plan string
+  status string
+  startDate datetime
+  endDate datetime
+  tripsPerMonth int
+  usedTrips int
+  price float
+  autoRenew boolean
+  createdAt datetime
+}
+
+/* ===================== SAFETY ===================== */
+
+Table Alert {
+  _id ObjectId [pk]
+  tripId ObjectId [ref: > Trip._id]
+  driverId ObjectId [ref: > Driver._id]
+  parentId ObjectId [ref: > User._id]
+  type string
+  level string
+  status string
+  detectedAt datetime
+  resolvedAt datetime
+  resolvedBy string // 'parent', 'driver', 'admin', 'system'
+  location Point // GeoJSON Point
+  metadata json // Mixed data (deviation_meters, stop_duration, etc.)
+  note string
+}
+
+Table LocationLog {
+  _id ObjectId [pk]
+  tripId ObjectId [ref: > Trip._id]
+  coords Point // GeoJSON Point
+  speed float
+  heading float
+  accuracy float
+  recordedAt datetime
+}
+
+Table Confirmation {
+  _id ObjectId [pk]
+  tripId ObjectId [ref: > Trip._id]
+  type string
+  photoUrl string
+  pinEntered string
+  pinVerified boolean
+  confirmedAt datetime
+  confirmedByDriverId ObjectId [ref: > Driver._id]
+  location Point // GeoJSON Point
+}
+
+Table PinCode {
+  _id ObjectId [pk]
+  kidId ObjectId [ref: > Kid._id, unique]
+  pinHash string
+  createdAt datetime
+  updatedAt datetime
+  lastUsedAt datetime
+}
+
+/* ===================== SUPPORT ===================== */
+
+Table Review {
+  _id ObjectId [pk]
+  tripId ObjectId [ref: > Trip._id, unique]
+  parentId ObjectId [ref: > User._id]
+  driverId ObjectId [ref: > Driver._id]
+  rating int
+  comment string
+  tags string[]
+  createdAt datetime
+}
+
+Table Notification {
+  _id ObjectId [pk]
+  recipientId ObjectId
+  recipientType string
+  type string
+  title string
+  body string
+  channel string
+  status string // 'sent', 'delivered', 'failed'
+  refId ObjectId // Reference to Trip/Alert/etc.
+  createdAt datetime
+}
+
+/* ===================== ADDITIONAL TABLES ===================== */
+
+Table DriverCertification {
+  _id ObjectId [pk]
+  driverId ObjectId [ref: > Driver._id]
+  previousLevel int
+  newLevel int
+  reason string
+  changedAt datetime
+  changedBy string // 'system', 'admin'
+}
+
+Table PreferredDriver {
+  _id ObjectId [pk]
+  parentId ObjectId [ref: > User._id]
+  driverId ObjectId [ref: > Driver._id]
+  nickname string
+  priority int
+  addedAt datetime
+}
+
+/* ===================== SUB-SCHEMAS (for reference) ===================== */
+
+/*
+Type Point {
+  type string // Always 'Point'
+  coordinates number[] // [longitude, latitude]
+}
+
+Type PlannedRoute {
+  pickupAddress string
+  pickupCoords Point
+  dropoffAddress string
+  dropoffCoords Point
+  waypoints Point[]
+  estimatedDuration int
+  estimatedDistance float
+}
+*/
