@@ -1,5 +1,5 @@
 import { Schema, model, models } from "mongoose";
-import { PointSchema } from "./geoSchemas.js";
+import { PointSchema } from "../geoSchemas.js";
 
 const AlertSchema = new Schema({
   tripId: { type: Schema.Types.ObjectId, ref: "Trip", required: true },
@@ -8,12 +8,12 @@ const AlertSchema = new Schema({
   type: {
     type: String,
     enum: [
-      "detour",
-      "unplanned_stop",
-      "speed",
-      "gps_lost",
-      "early_end",
-      "major_detour",
+      "detour",         //Lệch tuyến nhẹ
+      "unplanned_stop", //Dừng ngoài kế hoạch
+      "speed",          //Chạy quá tốc độ
+      "gps_lost",       //Mất tín hiệu gps
+      "early_end",      //Kết thúc sớm bất thường
+      "major_detour",   //Lệch tuyến nghiêm trọng
     ],
     index: true,
   },

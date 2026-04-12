@@ -1,5 +1,5 @@
 import { Schema, model, models } from "mongoose";
-import { PointSchema } from "./geoSchemas.js";
+import { PointSchema } from "../geoSchemas.js";
 
 const DriverSchema = new Schema(
   {
@@ -10,7 +10,7 @@ const DriverSchema = new Schema(
     licenseExpiry: { type: Date },
     status: {
       type: String,
-      enum: ["pending", "active", "suspended", "rejected"],
+      enum: ["pending", "active", "suspended", "rejected"], //Đang chờ, được chấp nhận, bị đình chỉ, từ chối
       default: "pending",
       index: true,
     },

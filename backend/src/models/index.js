@@ -8,26 +8,26 @@
  */
 
 // Core
-export { default as User }    from './user.model.js';
-export { default as Kid }     from './kid.model.js';
-export { default as Driver }  from './driver.model.js';
-export { default as Vehicle } from './vehicle.model.js';
+export { default as User } from './core/user.model.js';
+export { default as Kid } from './core/kid.model.js';
+export { default as Driver } from './core/driver.model.js';
+export { default as Vehicle } from './core/vehicle.model.js';
 
 // Operational
-export { default as Route }        from './route.model.js';
-export { default as TripSchedule } from './tripSchedule.model.js';
-export { default as Booking }      from './booking.model.js';
-export { default as Subscription } from './subscription.model.js';
-export { default as Trip }         from './trip.model.js';
+export { default as Route } from './operational/route.model.js';
+export { default as TripSchedule } from './operational/tripSchedule.model.js';
+export { default as Booking } from './operational/booking.model.js';
+export { default as Subscription } from './operational/subscription.model.js';
+export { default as Trip } from './operational/trip.model.js';
 
 // Safety & Log
-export { default as Alert }        from './alert.model.js';
-export { default as LocationLog }  from './locationLog.model.js';
+export { default as Alert } from './safetyAndLogs/alert.model.js';
+export { default as LocationLog } from './safetyAndLogs/locationLog.model.js';
 export { default as Confirmation } from './confirmation.model.js';
-export { default as PinCode }      from './pinCode.model.js';
+export { default as PinCode } from './safetyAndLogs/pinCode.model.js';
 
 // Support
-export { default as Review }               from './review.model.js';
-export { default as Notification }         from './notification.model.js';
-export { default as DriverCertification }  from './driverCertification.model.js';
-export { default as PreferredDriver }      from './preferredDriver.model.js';
+export { default as Review } from './review.model.js';
+export { default as Notification } from './notification.model.js';
+export { default as DriverCertification } from './driverCertification.model.js';
+export { default as PreferredDriver } from './preferredDriver.model.js';

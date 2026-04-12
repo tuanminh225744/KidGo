@@ -1,5 +1,5 @@
 import { Schema, model, models } from "mongoose";
-import { PointSchema } from "./geoSchemas.js";
+import { PointSchema } from "../geoSchemas.js";
 
 const RouteSchema = new Schema({
   parentId: {
