@@ -27,7 +27,7 @@ export { default as Confirmation } from './confirmation.model.js';
 export { default as PinCode } from './safetyAndLogs/pinCode.model.js';
 
 // Support
-export { default as Review } from './review.model.js';
-export { default as Notification } from './notification.model.js';
-export { default as DriverCertification } from './driverCertification.model.js';
-export { default as PreferredDriver } from './preferredDriver.model.js';
+export { default as Review } from './support/review.model.js';
+export { default as Notification } from './support/notification.model.js';
+export { default as DriverCertification } from './support/driverCertification.model.js';
+export { default as PreferredDriver } from './support/preferredDriver.model.js';
