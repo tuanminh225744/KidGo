@@ -14,6 +14,7 @@ const DriverSchema = new Schema(
       index: true,
     },
     isOnline: { type: Boolean, default: false, index: true },
+    rideStatus: { type: String, enum: ['free', 'driving_to_pickup', 'waiting_for_kid', 'in_trip'], default: 'free', index: true },
     currentLocation: { type: PointSchema },
     certificationLevel: { type: Number, min: 0, max: 5, default: 0 },
     totalTrips: { type: Number, default: 0 },
