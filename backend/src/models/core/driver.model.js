@@ -1,4 +1,5 @@
-import { Schema, model, models } from "mongoose";
+import mongoose from 'mongoose';
+const { Schema, model, models } = mongoose;
 import { PointSchema } from "../geoSchemas.js";
 
 const DriverSchema = new Schema(
@@ -17,6 +18,7 @@ const DriverSchema = new Schema(
     certificationLevel: { type: Number, min: 0, max: 5, default: 0 },
     totalTrips: { type: Number, default: 0 },
     rating: { type: Number, min: 1, max: 5 },
+    isActive: { type: Boolean, default: true },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );
