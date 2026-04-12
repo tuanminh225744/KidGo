@@ -2,7 +2,7 @@
 import dotenv from "dotenv";
 dotenv.config();
 
-import { verifyOTP } from "../services/otp.service.js";
+import { verifyOTP } from "../services/authentication.service.js";
 
 const email = process.argv[2];
 const otp = process.argv[3];
