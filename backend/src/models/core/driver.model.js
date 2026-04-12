@@ -3,9 +3,7 @@ import { PointSchema } from "../geoSchemas.js";
 
 const DriverSchema = new Schema(
   {
-    phone: { type: String, required: true, unique: true },
-    fullName: { type: String, required: true },
-    avatar: { type: String },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
     licenseNumber: { type: String, required: true, unique: true },
     licenseExpiry: { type: Date },
     status: {
@@ -19,7 +17,6 @@ const DriverSchema = new Schema(
     certificationLevel: { type: Number, min: 0, max: 5, default: 0 },
     totalTrips: { type: Number, default: 0 },
     rating: { type: Number, min: 1, max: 5 },
-    deviceTokens: { type: [String], default: [] },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );
