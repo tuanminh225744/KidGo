@@ -35,7 +35,7 @@ const TripSchema = new Schema(
     actualDropoffTime:    { type: Date },
     pickupPhoto:          { type: String },
     dropoffPhoto:         { type: String },
-    pinVerified:          { type: Boolean, default: false },
+    otpVerified:          { type: Boolean, default: false },
     distance:             { type: Number }, // km thực tế
   },
   { timestamps: { createdAt: true, updatedAt: false } }

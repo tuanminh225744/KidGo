@@ -11,6 +11,8 @@ const KidSchema = new Schema(
     school:      { type: String },
     notes:       { type: String },
     isActive:    { type: Boolean, default: true },
+    securityQuestion: { type: String },
+    securityAnswer:   { type: String }, // Store hashed answer
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );

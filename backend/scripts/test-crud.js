@@ -77,6 +77,16 @@ const runTests = async () => {
     const updatedKid = await kidService.updateKid(testKidId, { school: 'Primary School 1' });
     console.log('Updated Kid School:', updatedKid.school);
 
+    console.log('\n[7.1] Testing setupSecurityQuestion (Kid Service)');
+    await kidService.setupSecurityQuestion(testKidId, 'What is your favorite color?', 'Blue');
+    console.log('Security question setup complete.');
+
+    console.log('\n[7.2] Testing verifySecurityAnswer (Kid Service)');
+    const isCorrect = await kidService.verifySecurityAnswer(testKidId, 'blue'); // Testing case insensitivity
+    console.log('Is "blue" correct answer?:', isCorrect);
+    const isWrong = await kidService.verifySecurityAnswer(testKidId, 'red');
+    console.log('Is "red" correct answer?:', isWrong);
+
     console.log('\n[8] Testing createDriver (Driver Service)');
     const driverUser = new User({
       phone: '0888888888',

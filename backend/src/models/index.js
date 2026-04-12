@@ -3,7 +3,7 @@
  *
  * Core:       User, Kid, Driver, Vehicle
  * Ops:        Route, TripSchedule, Booking, Subscription, Trip
- * Safety/Log: Alert, LocationLog, Confirmation, PinCode
+ * Safety/Log: Alert, LocationLog, Confirmation
  * Support:    Review, Notification, DriverCertification, PreferredDriver
  */
 
@@ -24,7 +24,6 @@ export { default as Trip } from './operational/trip.model.js';
 export { default as Alert } from './safetyAndLogs/alert.model.js';
 export { default as LocationLog } from './safetyAndLogs/locationLog.model.js';
 export { default as Confirmation } from './confirmation.model.js';
-export { default as PinCode } from './safetyAndLogs/pinCode.model.js';
 
 // Support
 export { default as Review } from './support/review.model.js';

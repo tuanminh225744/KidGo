@@ -1,4 +1,5 @@
 import Kid from '../models/core/kid.model.js';
+import bcrypt from 'bcryptjs';
 
 /**
  * Create a new Kid
@@ -72,5 +73,61 @@ export const softDeleteKid = async (kidId) => {
     return deletedKid;
   } catch (error) {
     throw new Error(`Error soft deleting kid: ${error.message}`);
+  }
+};
+
+/**
+ * Setup a security question and hashed answer for a Kid
+ * @param {String} kidId 
+ * @param {String} question 
+ * @param {String} answer 
+ * @returns {Object} Updated kid document
+ */
+export const setupSecurityQuestion = async (kidId, question, answer) => {
+  try {
+    const salt = await bcrypt.genSalt(10);
+    const hashedAnswer = await bcrypt.hash(answer.toLowerCase().trim(), salt);
+    
+    const updatedKid = await Kid.findByIdAndUpdate(
+      kidId,
+      { 
+        $set: { 
+          securityQuestion: question, 
+          securityAnswer: hashedAnswer 
+        } 
+      },
+      { returnDocument: 'after', runValidators: true }
+    );
+    
+    if (!updatedKid) {
+      throw new Error('Kid not found');
+    }
+    return updatedKid;
+  } catch (error) {
+    throw new Error(`Error setting up security question: ${error.message}`);
+  }
+};
+
+/**
+ * Verify the security answer for a Kid
+ * @param {String} kidId 
+ * @param {String} answer 
+ * @returns {Boolean} true if valid, false otherwise
+ */
+export const verifySecurityAnswer = async (kidId, answer) => {
+  try {
+    const kid = await Kid.findById(kidId);
+    if (!kid || !kid.isActive) {
+      throw new Error('Kid not found or is inactive');
+    }
+    
+    if (!kid.securityAnswer) {
+      throw new Error('Security question not set up for this kid');
+    }
+
+    const isMatch = await bcrypt.compare(answer.toLowerCase().trim(), kid.securityAnswer);
+    return isMatch;
+  } catch (error) {
+    throw new Error(`Error verifying security answer: ${error.message}`);
   }
 };
