@@ -1,13 +1,15 @@
-import { Schema, model, models } from 'mongoose';
+import mongoose from 'mongoose';
+const { Schema, model, models } = mongoose;
 
 const UserSchema = new Schema(
   {
-    phone:        { type: String, required: true, unique: true },
-    email:        { type: String, index: true, sparse: true },
-    fullName:     { type: String, required: true },
-    avatar:       { type: String },
-    role:         { type: String, enum: ['parent', 'admin'], default: 'parent' },
-    isVerified:   { type: Boolean, default: false },
+    phone: { type: String, required: true, unique: true },
+    email: { type: String, required: true, index: true, unique: true },
+    password: { type: String, required: true },
+    fullName: { type: String, required: true },
+    avatar: { type: String },
+    role: { type: String, enum: ['parent', 'driver', 'admin'], default: 'parent' },
+    isVerified: { type: Boolean, default: false },
     deviceTokens: { type: [String], default: [] }, // FCM tokens
   },
   { timestamps: true }

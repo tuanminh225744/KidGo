@@ -1,7 +1,7 @@
 // scripts/test-send-otp.js
 import dotenv from "dotenv";
 dotenv.config();
-import { sendOTP } from "../services/authentication.service.js";
+import { sendOTP } from "../src/services/authentication.service.js";
 
 const email = process.argv[2];
 
