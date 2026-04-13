@@ -2,6 +2,7 @@ import cron from 'node-cron';
 import Redis from 'ioredis';
 import * as turf from '@turf/turf';
 import Trip from '../models/operational/trip.model.js';
+import LocationLog from '../models/safetyAndLogs/locationLog.model.js';
 import { getIo } from '../sockets/socketManager.js';
 
 const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
@@ -14,16 +15,15 @@ export const runTripAnalytics = async () => {
 
         for (const trip of activeTrips) {
             const driverIdStr = trip.driverId.toString();
-            // Kéo nguyên cục Lịch sử 5 tọa độ gần nhất (60 giây) từ Redis về
+            // Kéo lịch sử buffer GPS từ Redis về
             const rawBuffer = await redisClient.lrange(`trip_buffer:${driverIdStr}`, 0, -1);
 
             if (rawBuffer.length < 2) continue; // Phải có ít nhất 2 nhịp nhảy để làm toán
 
-            // redis lrange trả về mảng với INDEX 0 LÀ ĐIỂM MỚI NHẤT (Vừa push cuối cùng)
+            // redis lrange: INDEX 0 LÀ ĐIỂM MỚI NHẤT
             const pts = rawBuffer.map(str => JSON.parse(str));
             const newestPoint = pts[0];
             const previousPoint = pts[1];
-            const oldestPoint = pts[pts.length - 1];
 
             // Setup Không Gian TurfJS
             const currentPosition = turf.point([newestPoint.lng, newestPoint.lat]);
@@ -41,43 +41,43 @@ export const runTripAnalytics = async () => {
 
             if (timeDiffHours > 0) {
                 const speedKmh = distKm / timeDiffHours;
-                if (speedKmh > 50) { // Nếu vượt 50km/h
+                if (speedKmh > 50) {
                     const warningKey = `speeding_warning:${trip._id}`;
                     const warningStart = await redisClient.get(warningKey);
 
                     if (!warningStart) {
-                        // Lần đầu phát hiện: Lưu bộ đếm thời gian và cảnh báo KÍN cho Bác Tài
-                        await redisClient.setex(warningKey, 180, Date.now()); // Expire 3 phút tự động xóa
+                        // Lần đầu: Cảnh báo kín Bác Tài, lưu "án tích" trong Redis
+                        await redisClient.setex(warningKey, 180, Date.now()); // tự xóa sau 3 phút
                         io.of('/driver').to(trip.driverId.toString()).emit('trip_alert_speeding', {
                             title: 'Cảnh báo Tốc Độ!',
                             message: `Bạn đang chạy ${Math.round(speedKmh)}km/h. Vui lòng giảm tốc độ để đảm bảo an toàn cho bé!`,
                         });
                     } else {
-                        // Đã có tiền án, kiểm tra thời gian ngoan cố
+                        // Đã có "án tích": kiểm tra xem có cải tà quy chính chưa
                         const timeElapsedMs = Date.now() - parseInt(warningStart);
-                        if (timeElapsedMs > 2 * 60 * 1000) { // Quá 2 phút vẫn chưa chịu phanh lại
-                            // Lúc này mới Báo động Đỏ cho Phụ huynh
+                        if (timeElapsedMs > 60 * 1000) { // > 1 phút vẫn không chịu phanh
                             io.of('/parent').to(trip.parentId.toString()).emit('trip_alert_speeding', {
                                 title: 'Cảnh báo Tốc Độ tài xế!',
-                                message: `Tài xế đang di chuyển khá nhanh (${Math.round(speedKmh)}km/h) trong liên tục hơn 2 phút qua. Bố/Mẹ có thể nhắn tin nhắc nhở bác tài nhé.`,
+                                message: `Tài xế đang di chuyển khá nhanh (${Math.round(speedKmh)}km/h) liên tục hơn 1 phút qua. Bố/Mẹ có thể nhắn tin nhắc nhở bác tài nhé.`,
                             });
                         }
                     }
                 } else {
-                    // Nếu ngoan ngoãn giảm tốc độ xuống < 50km/h, xóa ngay "án tích" trong Redis
+                    // Ngoan ngoãn giảm tốc -> xóa "án tích" trong Redis
                     await redisClient.del(`speeding_warning:${trip._id}`);
                 }
             }
 
             // ============================================
-            // 2. TÍNH TOÁN NGỦ GẬT / DỪNG LẠI (Tạm thời Đóng chức năng này theo yêu cầu)
+            // 2. TÍNH TOÁN NGỦ GẬT / DỪNG LẠI
             // ============================================
-            // (Chờ nâng cấp và mở lại sau...)
+            // (Tạm thời đóng theo yêu cầu — mở lại sau)
+
             // ============================================
-            // 3. TÍNH TOÁN SẮP ĐẾN NHÀ (Proximity Alert)
+            // 3. SẮP ĐẾN NHÀ (Proximity Alert)
             // ============================================
             const distToDropoff = turf.distance(currentPosition, dropoffPosition, { units: 'kilometers' });
-            if (distToDropoff < 0.5) { // Cách nhà < 500 mét
+            if (distToDropoff < 0.5) {
                 io.of('/parent').to(trip.parentId.toString()).emit('approaching_dropoff', {
                     title: 'Bé cưng sắp về tới!',
                     message: `Khoảng cách chỉ còn ${Math.round(distToDropoff * 1000)}m. Mẹ chuẩn bị ra đón bé nha.`,
@@ -86,43 +86,32 @@ export const runTripAnalytics = async () => {
             }
 
             // ============================================
-            // 4. LƯU MẢNG ĐƯỜNG ĐI LỊCH SỬ CHỐNG RÁC DB (Map Snapping)
+            // 4. GHI LOCATION LOG (Single Source of Truth)
             // ============================================
-            /* 
-             Bởi vì Mảng actualRoute có thể bự kinh khủng, ta chỉ lưu điểm NewestPoint VÀO MONGO 
-             NẾU khoảng cách so với điểm lưu trước đó văng ra xa quá 10 mét.
-            */
-            let shouldSave = false;
-
-            if (!trip.actualRoute || trip.actualRoute.length === 0) {
-                shouldSave = true; // Khai trương điểm đầu tiên
-            } else {
-                const lastSaved = trip.actualRoute[trip.actualRoute.length - 1];
-                const shiftDist = turf.distance(
-                    turf.point(lastSaved.coordinates),
-                    currentPosition,
-                    { units: 'kilometers' }
-                );
-                if (shiftDist >= 0.01) { // 0.01 km = 10 mét
-                    shouldSave = true;
+            // Lưu toàn bộ điểm GPS trong buffer vào LocationLog (raw, full resolution).
+            // KHÔNG ghi vào Trip.actualRoute nữa — getCompressedRoute() sẽ tính từ LocationLog khi cần.
+            const logDocs = pts.map((pt, i) => {
+                let speed = null;
+                if (i < pts.length - 1) {
+                    const nextPt = pts[i + 1];
+                    const d = turf.distance(
+                        turf.point([nextPt.lng, nextPt.lat]),
+                        turf.point([pt.lng, pt.lat]),
+                        { units: 'kilometers' }
+                    );
+                    const tHrs = (pt.time - nextPt.time) / (1000 * 60 * 60);
+                    speed = tHrs > 0 ? d / tHrs : 0;
                 }
-            }
-
-            if (shouldSave) {
-                const geoJsonFormat = {
-                    type: 'Point',
-                    coordinates: [newestPoint.lng, newestPoint.lat]
+                return {
+                    tripId: trip._id,
+                    coords: { type: 'Point', coordinates: [pt.lng, pt.lat] },
+                    speed: speed !== null ? Math.round(speed) : undefined,
+                    recordedAt: new Date(pt.time),
                 };
-                // Push thẳng mảng bằng DB cấp thấp để không khóa lock document
-                await Trip.updateOne(
-                    { _id: trip._id },
-                    { $push: { actualRoute: geoJsonFormat } }
-                );
-                // console.log(`[TripMonitor] Đã đồng bộ 1 tọa độ nén vào Database cho chuyến ${trip._id}`);
-            }
+            });
+            await LocationLog.insertMany(logDocs, { ordered: false });
 
-            // Xóa sạch Buffer List hiện tại cùa tài xế trên Redis để Phút tiếp theo nó bắt đầu đo lại từ đầu
-            // Tính toán xong thì ta đốt củi qua cầu!
+            // Đốt cầu: Xóa sạch buffer để phút tiếp theo đo lại từ đầu
             await redisClient.del(`trip_buffer:${driverIdStr}`);
         }
 
