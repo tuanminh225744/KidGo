@@ -108,6 +108,12 @@ export const updateLocationInRedis = async (driverId, lat, lng) => {
 
     // 2. Lưu vào Redis GEO để phục vụ tìm kiếm bán kính (nearby search) hiệu năng siêu cao
     await redisClient.geoadd('driver_locations_geo', lng, lat, driverId.toString());
+
+    // 3. Đẩy vào Buffer ngắn hạn (trip_buffer) phục vụ riêng cho Cảnh Sát Bản Đồ (CronJob Monitor) tính toán
+    const payloadStr = JSON.stringify({ lat, lng, time: Date.now() });
+    await redisClient.lpush(`trip_buffer:${driverId.toString()}`, payloadStr);
+    // Cắt ngọn, chỉ xài RAM lưu kho lưu đúng 6 điểm gần nhất (60 giây vòng đời)
+    await redisClient.ltrim(`trip_buffer:${driverId.toString()}`, 0, 5);
   } catch (error) {
     console.error(`Lỗi cập nhật Redis cho tài xế ${driverId}:`, error);
   }

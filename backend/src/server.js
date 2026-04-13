@@ -5,6 +5,7 @@ import http from "http";
 import { syncLocationsToDB } from "./services/driver.service.js";
 import { initSocketConfig } from "./sockets/socketManager.js";
 import { startScheduleScanner } from "./cronjobs/scheduleScanner.js";
+import { startTripMonitor } from "./cronjobs/tripMonitor.js";
 
 dotenv.config();
 
@@ -15,6 +16,8 @@ const httpServer = http.createServer(app);
 initSocketConfig(httpServer);
 // Kích hoạt vệ tinh quét Lịch Trình tự động gọi xe
 startScheduleScanner();
+// Kích hoạt Cảnh Sát Máy (Giám sát Tốc Độ, Sai Tuyến)
+startTripMonitor();
 
 connectDB();
 
