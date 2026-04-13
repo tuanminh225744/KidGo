@@ -4,6 +4,7 @@ import express from "express";
 import http from "http";
 import { syncLocationsToDB } from "./services/driver.service.js";
 import { initSocketConfig } from "./sockets/socketManager.js";
+import { startScheduleScanner } from "./cronjobs/scheduleScanner.js";
 
 dotenv.config();
 
@@ -12,6 +13,8 @@ const httpServer = http.createServer(app);
 
 // Gọi khối lệnh gốc trung tâm quản lý mọi namespace socket
 initSocketConfig(httpServer);
+// Kích hoạt vệ tinh quét Lịch Trình tự động gọi xe
+startScheduleScanner();
 
 connectDB();
 
