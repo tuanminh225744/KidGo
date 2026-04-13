@@ -1,4 +1,5 @@
-import { Schema, model, models } from 'mongoose';
+import mongoose from 'mongoose';
+const { Schema, model, models } = mongoose;
 
 const VehicleSchema = new Schema({
   driverId:         { type: Schema.Types.ObjectId, ref: 'Driver', required: true, index: true },

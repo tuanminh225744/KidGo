@@ -2,6 +2,8 @@ import Booking from '../models/operational/booking.model.js';
 import Trip from '../models/operational/trip.model.js';
 import Route from '../models/operational/route.model.js';
 import Driver from '../models/core/driver.model.js';
+import Vehicle from '../models/core/vehicle.model.js';
+import mongoose from 'mongoose';
 import { getIo } from '../sockets/socketManager.js';
 import { getNearbyDrivers } from './driver.service.js';
 
@@ -212,8 +214,26 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
         // Xóa ngầm Timer gợn sóng hay Timeout 5 phút vì xe đã có chủ chốt
         clearBookingTimer(booking._id);
 
-        // Khóa trạng thái tài xế lên "Đang chờ đón khách" tránh để bị push spam
+        // Khóa trạng thái tài xế
         await Driver.findByIdAndUpdate(driverId, { rideStatus: 'waiting_for_kid' });
+
+        // Tự động Khởi tạo Hành trình (Trip)
+        const vehicle = await Vehicle.findOne({ driverId: driverId, isActive: true });
+        const route = await Route.findById(booking.routeId);
+        
+        const newTrip = new Trip({
+            bookingId: booking._id,
+            driverId: driverId,
+            kidId: booking.kidId,
+            parentId: booking.parentId,
+            vehicleId: vehicle ? vehicle._id : new mongoose.Types.ObjectId(), // Dùng mock ID nếu test data chưa có xe
+            status: 'scheduled',
+            plannedRoute: route ? {
+                pickupCoords: route.pickupCoords,
+                dropoffCoords: route.dropoffCoords
+            } : {}
+        });
+        await newTrip.save();
 
         const io = getIo();
         io.of('/parent').to(booking.parentId.toString()).emit('driver_accepted_booking', {
