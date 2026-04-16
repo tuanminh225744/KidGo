@@ -220,7 +220,7 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
         // Tự động Khởi tạo Hành trình (Trip)
         const vehicle = await Vehicle.findOne({ driverId: driverId, isActive: true });
         const route = await Route.findById(booking.routeId);
-        
+
         const newTrip = new Trip({
             bookingId: booking._id,
             driverId: driverId,
