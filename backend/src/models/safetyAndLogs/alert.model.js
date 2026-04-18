@@ -1,4 +1,5 @@
-import { Schema, model, models } from "mongoose";
+import mongoose from "mongoose";
+const { Schema, model, models } = mongoose;
 import { PointSchema } from "../geoSchemas.js";
 
 const AlertSchema = new Schema({
@@ -8,12 +9,12 @@ const AlertSchema = new Schema({
   type: {
     type: String,
     enum: [
-      "detour",         //Lệch tuyến nhẹ
+      "detour", //Lệch tuyến nhẹ
       "unplanned_stop", //Dừng ngoài kế hoạch
-      "speed",          //Chạy quá tốc độ
-      "gps_lost",       //Mất tín hiệu gps
-      "early_end",      //Kết thúc sớm bất thường
-      "major_detour",   //Lệch tuyến nghiêm trọng
+      "speed", //Chạy quá tốc độ
+      "gps_lost", //Mất tín hiệu gps
+      "early_end", //Kết thúc sớm bất thường
+      "major_detour", //Lệch tuyến nghiêm trọng
     ],
     index: true,
   },
