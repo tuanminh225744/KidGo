@@ -1,4 +1,5 @@
 import User from '../models/core/user.model.js';
+import Driver from '../models/core/driver.model.js';
 
 /**
  * Get user by ID including their role-specific details
@@ -59,5 +60,32 @@ export const softDeleteUser = async (userId) => {
     return deletedUser;
   } catch (error) {
     throw new Error(`Error soft deleting user: ${error.message}`);
+  }
+};
+
+/**
+ * Toggle user active status and sync with Driver mapping if applicable
+ * @param {String} userId 
+ * @param {Boolean} isActive 
+ * @returns {Object} Updated user document
+ */
+export const toggleUserStatus = async (userId, isActive) => {
+  try {
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { isActive },
+      { returnDocument: "after", runValidators: true }
+    );
+    if (!updatedUser) {
+      throw new Error("User not found");
+    }
+
+    if (updatedUser.driverId) {
+      await Driver.findByIdAndUpdate(updatedUser.driverId, { isActive });
+    }
+
+    return updatedUser;
+  } catch (error) {
+    throw new Error(`Error toggling user status: ${error.message}`);
   }
 };
