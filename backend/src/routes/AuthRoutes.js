@@ -8,15 +8,23 @@ import {
   logout,
 } from "../controllers/AuthController.js";
 import { authenticateToken } from "../middlewares/auth.middleware.js";
+import { validate } from "../middlewares/validate.middleware.js";
+import {
+  validateRegisterBody,
+  validateLoginBody,
+  validateSendOtpBody,
+  validateVerifyOtpBody,
+  validateRefreshTokenBody
+} from "../validators/authValidators.js";
 
 const router = express.Router();
 
 // Public routes
-router.post("/register", registerUser);
-router.post("/login", loginUser);
-router.post("/send-otp", sendOtp);
-router.post("/verify-otp", verifyOtp);
-router.post("/refresh", refreshToken);
+router.post("/register", validateRegisterBody, validate, registerUser);
+router.post("/login", validateLoginBody, validate, loginUser);
+router.post("/send-otp", validateSendOtpBody, validate, sendOtp);
+router.post("/verify-otp", validateVerifyOtpBody, validate, verifyOtp);
+router.post("/refresh", validateRefreshTokenBody, validate, refreshToken);
 
 // Protected routes (Bất cứ ai có token đều có thể đăng xuất)
 router.post("/logout", authenticateToken, logout);

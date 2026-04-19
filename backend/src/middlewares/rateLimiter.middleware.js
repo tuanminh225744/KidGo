@@ -1,9 +1,5 @@
-import Redis from "ioredis";
+import redisClient from "../config/redisClient.js";
 import { TooManyRequestsError } from "../utils/AppError.js";
-
-const redisClient = new Redis(
-  process.env.REDIS_URL || "redis://localhost:6379",
-);
 
 /**
  * Rate Limiting middleware

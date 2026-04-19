@@ -38,21 +38,13 @@ const getLogStream = (filePath) => {
   return stream;
 };
 
-const closeLogStreams = () => {
+export const closeLogStreams = () => {
   for (const stream of logStreams.values()) {
     stream.end();
   }
 };
 
 process.on("beforeExit", closeLogStreams);
-process.on("SIGINT", () => {
-  closeLogStreams();
-  process.exit();
-});
-process.on("SIGTERM", () => {
-  closeLogStreams();
-  process.exit();
-});
 
 /**
  * Logger Middleware

@@ -1,8 +1,6 @@
-import Driver from '../models/core/driver.model.js';
-import User from '../models/core/user.model.js';
-import Redis from 'ioredis';
-
-const redisClient = new Redis(process.env.REDIS_URL || 'redis://localhost:6379');
+import Driver from "../models/core/driver.model.js";
+import User from "../models/core/user.model.js";
+import redisClient from "../config/redisClient.js";
 
 // CRUD Driver *******************************************************************
 /**
@@ -18,7 +16,7 @@ export const createDriver = async (driverData) => {
     // Also update the User document to hold this driverId
     await User.findByIdAndUpdate(driverData.user, {
       driverId: newDriver._id,
-      role: 'driver' // Optionally upgrade their role
+      role: "driver", // Optionally upgrade their role
     });
 
     return newDriver;
@@ -29,14 +27,14 @@ export const createDriver = async (driverData) => {
 
 /**
  * Get Driver by ID
- * @param {String} driverId 
+ * @param {String} driverId
  * @returns {Object} Driver document
  */
 export const getDriverById = async (driverId) => {
   try {
-    const driver = await Driver.findById(driverId).populate('user');
+    const driver = await Driver.findById(driverId).populate("user");
     if (!driver || !driver.isActive) {
-      throw new Error('Driver not found or is inactive');
+      throw new Error("Driver not found or is inactive");
     }
     return driver;
   } catch (error) {
@@ -46,8 +44,8 @@ export const getDriverById = async (driverId) => {
 
 /**
  * Update Driver details
- * @param {String} driverId 
- * @param {Object} updateData 
+ * @param {String} driverId
+ * @param {Object} updateData
  * @returns {Object} Updated driver document
  */
 export const updateDriver = async (driverId, updateData) => {
@@ -55,10 +53,10 @@ export const updateDriver = async (driverId, updateData) => {
     const updatedDriver = await Driver.findByIdAndUpdate(
       driverId,
       { $set: updateData },
-      { returnDocument: 'after', runValidators: true }
+      { returnDocument: "after", runValidators: true },
     );
     if (!updatedDriver) {
-      throw new Error('Driver not found');
+      throw new Error("Driver not found");
     }
     return updatedDriver;
   } catch (error) {
@@ -68,7 +66,7 @@ export const updateDriver = async (driverId, updateData) => {
 
 /**
  * Soft delete a driver
- * @param {String} driverId 
+ * @param {String} driverId
  * @returns {Object} Soft deleted driver document
  */
 export const softDeleteDriver = async (driverId) => {
@@ -76,10 +74,10 @@ export const softDeleteDriver = async (driverId) => {
     const deletedDriver = await Driver.findByIdAndUpdate(
       driverId,
       { isActive: false },
-      { returnDocument: 'after' }
+      { returnDocument: "after" },
     );
     if (!deletedDriver) {
-      throw new Error('Driver not found');
+      throw new Error("Driver not found");
     }
     return deletedDriver;
   } catch (error) {
@@ -91,23 +89,32 @@ export const softDeleteDriver = async (driverId) => {
 
 /**
  * Lưu tọa độ mới nhận qua Socket trực tiếp vào Redis
- * @param {String} driverId 
- * @param {Number} lat 
- * @param {Number} lng 
+ * @param {String} driverId
+ * @param {Number} lat
+ * @param {Number} lng
  */
 export const updateLocationInRedis = async (driverId, lat, lng) => {
   try {
     const geoJsonPoint = {
       type: "Point",
       coordinates: [lng, lat], // GeoJSON chuẩn: [longitude, latitude]
-      updatedAt: new Date().toISOString()
+      updatedAt: new Date().toISOString(),
     };
 
     // 1. Lưu vào hash map để giữ metadata (thời gian update) truy cập O(1)
-    await redisClient.hset('driver_locations', driverId.toString(), JSON.stringify(geoJsonPoint));
+    await redisClient.hset(
+      "driver_locations",
+      driverId.toString(),
+      JSON.stringify(geoJsonPoint),
+    );
 
     // 2. Lưu vào Redis GEO để phục vụ tìm kiếm bán kính (nearby search) hiệu năng siêu cao
-    await redisClient.geoadd('driver_locations_geo', lng, lat, driverId.toString());
+    await redisClient.geoadd(
+      "driver_locations_geo",
+      lng,
+      lat,
+      driverId.toString(),
+    );
 
     // 3. Đẩy vào Buffer ngắn hạn (trip_buffer) phục vụ riêng cho Cảnh Sát Bản Đồ (CronJob Monitor) tính toán
     const payloadStr = JSON.stringify({ lat, lng, time: Date.now() });
@@ -120,12 +127,15 @@ export const updateLocationInRedis = async (driverId, lat, lng) => {
 };
 /**
  * Lấy tọa độ real-time của MỘT tài xế (Dành cho Phụ huynh theo dõi trạng thái chuyến xe đang chạy)
- * @param {String} driverId 
+ * @param {String} driverId
  * @returns {Object|null} GeoJSON Point
  */
 export const getDriverLocation = async (driverId) => {
   try {
-    const dataStr = await redisClient.hget('driver_locations', driverId.toString());
+    const dataStr = await redisClient.hget(
+      "driver_locations",
+      driverId.toString(),
+    );
     if (!dataStr) return null;
     return JSON.parse(dataStr);
   } catch (error) {
@@ -142,18 +152,22 @@ export const getDriverLocation = async (driverId) => {
  * @param {String} unit 'm' hoặc 'km'
  * @returns {Array} Danh sách tài xế trong bán kính kèm khoảng cách [[driverId, khoảng cách]]
  */
-export const getNearbyDrivers = async (lat, lng, radius = 5, unit = 'km') => {
+export const getNearbyDrivers = async (lat, lng, radius = 5, unit = "km") => {
   try {
     const nearby = await redisClient.geosearch(
-      'driver_locations_geo',
-      'FROMLONLAT', lng, lat,
-      'BYRADIUS', radius, unit,
-      'WITHDIST', // Trả kèm khoảng cách để hiển thị lên app
-      'ASC'       // Tài xế gần nhất hiện lên đầu
+      "driver_locations_geo",
+      "FROMLONLAT",
+      lng,
+      lat,
+      "BYRADIUS",
+      radius,
+      unit,
+      "WITHDIST", // Trả kèm khoảng cách để hiển thị lên app
+      "ASC", // Tài xế gần nhất hiện lên đầu
     );
     return nearby;
   } catch (error) {
-    console.error('Lỗi tìm tài xế qua Redis GEO:', error);
+    console.error("Lỗi tìm tài xế qua Redis GEO:", error);
     return [];
   }
 };
@@ -163,14 +177,14 @@ export const getNearbyDrivers = async (lat, lng, radius = 5, unit = 'km') => {
  */
 export const getRealtimeLocations = async () => {
   try {
-    const rawData = await redisClient.hgetall('driver_locations');
+    const rawData = await redisClient.hgetall("driver_locations");
     const locations = {};
     for (const [driverId, dataStr] of Object.entries(rawData)) {
       locations[driverId] = JSON.parse(dataStr);
     }
     return locations;
   } catch (error) {
-    console.error('Lỗi lấy danh sách tọa độ thực:', error);
+    console.error("Lỗi lấy danh sách tọa độ thực:", error);
     return {};
   }
 };
@@ -180,7 +194,7 @@ export const getRealtimeLocations = async () => {
  */
 export const syncLocationsToDB = async () => {
   try {
-    const rawData = await redisClient.hgetall('driver_locations');
+    const rawData = await redisClient.hgetall("driver_locations");
     const driverIds = Object.keys(rawData);
 
     if (driverIds.length === 0) return; // Không có dữ liệu để Update
@@ -191,7 +205,7 @@ export const syncLocationsToDB = async () => {
 
       const cleanPoint = {
         type: geoJsonPoint.type,
-        coordinates: geoJsonPoint.coordinates
+        coordinates: geoJsonPoint.coordinates,
       };
 
       bulkOps.push({
@@ -200,20 +214,22 @@ export const syncLocationsToDB = async () => {
           update: {
             $set: {
               currentLocation: cleanPoint,
-              isOnline: true // Gửi tọa độ = online
-            }
-          }
-        }
+              isOnline: true, // Gửi tọa độ = online
+            },
+          },
+        },
       });
     }
 
     if (bulkOps.length > 0) {
       const result = await Driver.bulkWrite(bulkOps);
-      console.log(`[Batch Sync] Đã đồng bộ ${result.modifiedCount} vị trí tài xế từ Redis xuống MongoDB.`);
+      console.log(
+        `[Batch Sync] Đã đồng bộ ${result.modifiedCount} vị trí tài xế từ Redis xuống MongoDB.`,
+      );
       // Tùy nhu cầu, chúng ta có thể làm sạch Redis của các Driver đã sync hoặc cứ để đó đè lên bằng tọa độ mới.
       // Do Hash tự động overwrite key cũ nên không bị phình to dữ liệu.
     }
   } catch (error) {
-    console.error('[Batch Sync Error] Lỗi đẩy tọa độ từ Redis vào DB:', error);
+    console.error("[Batch Sync Error] Lỗi đẩy tọa độ từ Redis vào DB:", error);
   }
 };

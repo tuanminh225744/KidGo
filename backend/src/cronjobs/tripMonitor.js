@@ -1,14 +1,10 @@
 import cron from "node-cron";
-import Redis from "ioredis";
+import redisClient from "../config/redisClient.js";
 import * as turf from "@turf/turf";
 import Trip from "../models/operational/trip.model.js";
 import LocationLog from "../models/safetyAndLogs/locationLog.model.js";
 import { getIo } from "../sockets/socketManager.js";
 import { createAlert } from "../services/alert.service.js";
-
-const redisClient = new Redis(
-  process.env.REDIS_URL || "redis://localhost:6379",
-);
 
 export const runTripAnalytics = async () => {
   try {
@@ -264,8 +260,7 @@ export const runTripAnalytics = async () => {
  * Nổ máy Cỗ máy Tính toán Không Gian Bản đồ
  */
 export const startTripMonitor = () => {
-  cron.schedule("* * * * *", runTripAnalytics);
-  console.log(
-    `✅ Khởi động thành công Trạm Khảo Sát Không Gian Bản Đồ (Trip Monitor - 1 phút/lần).`,
-  );
+  const task = cron.schedule("* * * * *", runTripAnalytics);
+  console.log(`[Jobs] Trip monitor jobs launched successfully.`);
+  return task;
 };

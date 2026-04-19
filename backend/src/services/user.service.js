@@ -8,9 +8,9 @@ import Driver from '../models/core/driver.model.js';
  */
 export const getUserById = async (userId) => {
   try {
-    const user = await User.findById(userId)
+    const user = await User.findById(userId).select("-password -deviceTokens")
       .populate('driverId'); // Populate driver info if available
-    
+
     if (!user || !user.isActive) {
       throw new Error('User not found or is inactive');
     }
@@ -32,7 +32,7 @@ export const updateUser = async (userId, updateData) => {
       userId,
       { $set: updateData },
       { returnDocument: 'after', runValidators: true }
-    );
+    ).select("-password -deviceTokens");
     if (!updatedUser) {
       throw new Error('User not found');
     }
@@ -53,7 +53,7 @@ export const softDeleteUser = async (userId) => {
       userId,
       { isActive: false },
       { returnDocument: 'after' }
-    );
+    ).select("-password -deviceTokens");
     if (!deletedUser) {
       throw new Error('User not found');
     }
@@ -75,7 +75,7 @@ export const toggleUserStatus = async (userId, isActive) => {
       userId,
       { isActive },
       { returnDocument: "after", runValidators: true }
-    );
+    ).select("-password -deviceTokens");
     if (!updatedUser) {
       throw new Error("User not found");
     }

@@ -3,12 +3,8 @@ import Driver from "../models/core/driver.model.js";
 import LocationLog from "../models/safetyAndLogs/locationLog.model.js";
 import * as turf from "@turf/turf";
 import { getIo } from "../sockets/socketManager.js";
-import Redis from "ioredis";
+import redisClient from "../config/redisClient.js";
 import { createAlert } from "./alert.service.js";
-
-const redisClient = new Redis(
-  process.env.REDIS_URL || "redis://localhost:6379",
-);
 
 /**
  * 1. Tài xế bắt đầu di chuyển đến điểm đón

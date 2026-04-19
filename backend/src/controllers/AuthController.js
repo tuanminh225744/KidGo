@@ -17,9 +17,6 @@ export const registerUser = async (req, res, next) => {
 export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    if (!email || !password) {
-       return res.status(400).json({ success: false, message: "Email và mật khẩu là bắt buộc" });
-    }
     const result = await authService.login(email, password);
     if (!result.success) {
       return res.status(401).json(result);
@@ -34,9 +31,6 @@ export const loginUser = async (req, res, next) => {
 export const sendOtp = async (req, res, next) => {
   try {
     const { email } = req.body;
-    if (!email) {
-      return res.status(400).json({ success: false, message: "Email là bắt buộc" });
-    }
     const result = await authService.sendOTP(email);
     res.status(200).json(result);
   } catch (error) {
@@ -48,9 +42,6 @@ export const sendOtp = async (req, res, next) => {
 export const verifyOtp = async (req, res, next) => {
   try {
     const { email, otp } = req.body;
-    if (!email || !otp) {
-      return res.status(400).json({ success: false, message: "Email và mã OTP là bắt buộc" });
-    }
     const result = await authService.verifyOTPAndLogin(email, otp);
     if (!result.success) {
       return res.status(400).json(result);
@@ -65,9 +56,6 @@ export const verifyOtp = async (req, res, next) => {
 export const refreshToken = async (req, res, next) => {
   try {
     const { refreshToken } = req.body;
-    if (!refreshToken) {
-      return res.status(400).json({ success: false, message: "RefreshToken là bắt buộc" });
-    }
     const result = await authService.refreshAccessToken(refreshToken);
     if (!result.success) {
       return res.status(401).json(result);
