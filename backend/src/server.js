@@ -14,6 +14,7 @@ import ReviewRoutes from "./routes/ReviewRoutes.js";
 import NotificationRoutes from "./routes/NotificationRoutes.js";
 import DashboardRoutes from "./routes/DashboardRoutes.js";
 import AdminUserRoutes from "./routes/AdminUserRoutes.js";
+import AuthRoutes from "./routes/AuthRoutes.js";
 import {
   loggerMiddleware,
   errorLoggerMiddleware,
@@ -59,6 +60,7 @@ app.use(apiLimiter);
 // ============================================
 // Routes
 // ============================================
+app.use("/api/v1/auth", AuthRoutes);
 app.use("/alerts", AlertRoutes);
 app.use("/reviews", ReviewRoutes);
 app.use("/notifications", NotificationRoutes);

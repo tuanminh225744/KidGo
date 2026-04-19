@@ -291,3 +291,50 @@ export const logout = async (userId) => {
         throw new Error('Lỗi hệ thống khi đăng xuất');
     }
 };
+
+/**
+ * Xác nhận OTP và trả JWT (Dành cho việc user nhập mã OTP thành công)
+ * Ngoài ra đổi trạng thái isVerified của User sang true nếu chưa
+ */
+export const verifyOTPAndLogin = async (email, otpCode) => {
+    try {
+        // 1. Kiểm tra OTP
+        const otpResult = await verifyOTP(email, otpCode);
+        if (!otpResult.success) {
+            return otpResult;
+        }
+
+        // 2. Lấy thông tin user
+        const user = await User.findOne({ email });
+        if (!user) {
+            return { success: false, message: 'Người dùng không tồn tại. Vui lòng đăng ký trước.' };
+        }
+
+        // 3. Nếu user chưa verify, chuyển thành verified
+        if (!user.isVerified) {
+            user.isVerified = true;
+            await user.save();
+        }
+
+        // 4. Sinh JWT và lưu refresh token
+        const { accessToken, refreshToken } = generateTokens(user._id);
+        await redisClient.set(`refreshToken:${user._id.toString()}`, refreshToken, 'EX', REFRESH_TOKEN_TTL_REDIS);
+
+        return {
+            success: true,
+            message: 'Xác thực OTP và đăng nhập thành công',
+            accessToken,
+            refreshToken,
+            user: {
+                _id: user._id,
+                email: user.email,
+                fullName: user.fullName,
+                role: user.role,
+                isVerified: user.isVerified
+            }
+        };
+    } catch (error) {
+        console.error('Lỗi khi xác thực OTP và login:', error);
+        throw new Error('Lỗi hệ thống khi cấp token');
+    }
+};
