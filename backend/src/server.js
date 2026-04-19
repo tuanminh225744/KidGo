@@ -10,6 +10,8 @@ import { initSocketConfig } from "./sockets/socketManager.js";
 import { startScheduleScanner } from "./cronjobs/scheduleScanner.js";
 import { startTripMonitor } from "./cronjobs/tripMonitor.js";
 import AlertRoutes from "./routes/AlertRoutes.js";
+import ReviewRoutes from "./routes/ReviewRoutes.js";
+import NotificationRoutes from "./routes/NotificationRoutes.js";
 import {
   loggerMiddleware,
   errorLoggerMiddleware,
@@ -56,6 +58,8 @@ app.use(apiLimiter);
 // Routes
 // ============================================
 app.use("/alerts", AlertRoutes);
+app.use("/reviews", ReviewRoutes);
+app.use("/notifications", NotificationRoutes);
 
 // 5. 404 Handler (trước error handler)
 app.use(notFoundHandler);

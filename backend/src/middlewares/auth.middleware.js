@@ -19,12 +19,13 @@ export const authenticateToken = async (req, res, next) => {
       throw new AuthenticationError("Token không tồn tại. Vui lòng đăng nhập.");
     }
 
-    if (!process.env.JWT_SECRET) {
-      return next(new AppError("Cấu hình server thiếu JWT_SECRET.", 500));
+    if (!process.env.JWT_ACCESS_SECRET) {
+      return next(new AppError("Cấu hình server thiếu JWT_ACCESS_SECRET.", 500));
     }
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const user = await User.findById(decoded.id).select("-password");
+    const decoded = jwt.verify(token, process.env.JWT_ACCESS_SECRET);
+    const userId = decoded.id || decoded.userId;
+    const user = await User.findById(userId).select("-password");
     if (!user)
       return next(new AuthenticationError("Người dùng không tồn tại."));
     if (!user.isActive)
