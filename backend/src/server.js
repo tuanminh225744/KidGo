@@ -18,6 +18,7 @@ import DashboardRoutes from "./routes/DashboardRoutes.js";
 import AdminUserRoutes from "./routes/AdminUserRoutes.js";
 import AuthRoutes from "./routes/AuthRoutes.js";
 import UserRoutes from "./routes/UserRoutes.js";
+import KidRoutes from "./routes/KidRoutes.js";
 import {
   loggerMiddleware,
   errorLoggerMiddleware,
@@ -72,6 +73,7 @@ app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 app.use("/api/v1/auth", AuthRoutes);
 app.use("/api/v1/users", UserRoutes);
+app.use("/api/v1/kids", KidRoutes);
 app.use("/alerts", AlertRoutes);
 app.use("/reviews", ReviewRoutes);
 app.use("/notifications", NotificationRoutes);
