@@ -31,3 +31,34 @@ export const upsertReview = async (parentId, data) => {
 
   return review;
 };
+
+/**
+ * Lấy danh sách đánh giá của một tài xế (có phân trang)
+ */
+export const getDriverReviews = async (driverId, { page = 1, limit = 20 } = {}) => {
+  const skip = (page - 1) * limit;
+  const mongoose = await import("mongoose");
+  const driverObjectId = new mongoose.default.Types.ObjectId(driverId);
+
+  const [reviews, total, avgResult] = await Promise.all([
+    Review.find({ driverId })
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("parentId", "fullName avatar")
+      .populate("tripId", "scheduledPickupTime scheduledDropoffTime"),
+    Review.countDocuments({ driverId }),
+    Review.aggregate([
+      { $match: { driverId: driverObjectId } },
+      { $group: { _id: null, averageRating: { $avg: "$rating" } } },
+    ]),
+  ]);
+
+  return {
+    page,
+    total,
+    totalPages: Math.ceil(total / limit),
+    averageRating: avgResult[0]?.averageRating ?? null,
+    reviews,
+  };
+};

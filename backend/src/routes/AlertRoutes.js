@@ -1,6 +1,8 @@
 import express from "express";
 import {
-  getAlerts,
+  getParentAlertsHandler,
+  getAlertDetail,
+  acknowledgeAlertHandler,
   resolveAlertController,
   escalateAlertController,
 } from "../controllers/AlertController.js";
@@ -10,7 +12,6 @@ import {
 } from "../middlewares/auth.middleware.js";
 import { validate } from "../middlewares/validate.middleware.js";
 import {
-  validateTripId,
   validateAlertId,
   validateAlertQueryParams,
   validateResolveAlertBody,
@@ -18,48 +19,71 @@ import {
 
 const router = express.Router();
 
+// Tất cả routes yêu cầu xác thực
+router.use(authenticateToken);
+
 /**
- * GET /alerts/:tripId
- * Lấy danh sách cảnh báo cho một chuyến đi
- * Query params: status (open, resolved, etc.), type (speed, detour, etc.)
- * Yêu cầu: Authentication + Validation
+ * GET /api/v1/alerts
+ * Danh sách alert của phụ huynh
+ * Role: parent
  */
 router.get(
-  "/:tripId",
-  authenticateToken,
-  validateTripId,
+  "/",
+  authorize("parent"),
   validateAlertQueryParams,
   validate,
-  getAlerts,
+  getParentAlertsHandler
 );
 
 /**
- * PUT /alerts/:alertId/resolve
- * Giải quyết cảnh báo
- * Body: { resolvedBy: 'parent' | 'driver' | 'admin' | 'system', note?: string }
- * Yêu cầu: Authentication + Validation
+ * GET /api/v1/alerts/:alertId
+ * Chi tiết alert (parent + admin)
+ * ⚠ PHẢI đặt trước các route có suffix (/acknowledge, /resolve, /escalate)
  */
-router.put(
+router.get(
+  "/:alertId",
+  validateAlertId,
+  validate,
+  getAlertDetail
+);
+
+/**
+ * PATCH /api/v1/alerts/:alertId/acknowledge
+ * Phụ huynh xác nhận đã biết
+ * Role: parent
+ */
+router.patch(
+  "/:alertId/acknowledge",
+  authorize("parent"),
+  validateAlertId,
+  validate,
+  acknowledgeAlertHandler
+);
+
+/**
+ * PATCH /api/v1/alerts/:alertId/resolve
+ * Đóng alert (parent hoặc admin)
+ */
+router.patch(
   "/:alertId/resolve",
-  authenticateToken,
+  authorize("parent", "admin"),
   validateAlertId,
   validateResolveAlertBody,
   validate,
-  resolveAlertController,
+  resolveAlertController
 );
 
 /**
- * POST /alerts/:alertId/escalate
- * Escalate cảnh báo cho admin
- * Yêu cầu: Authentication + Admin Role
+ * PATCH /api/v1/alerts/:alertId/escalate
+ * Phụ huynh yêu cầu admin hỗ trợ
+ * Role: parent
  */
-router.post(
+router.patch(
   "/:alertId/escalate",
-  authenticateToken,
-  authorize("admin"),
+  authorize("parent"),
   validateAlertId,
   validate,
-  escalateAlertController,
+  escalateAlertController
 );
 
 export default router;

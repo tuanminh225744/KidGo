@@ -191,3 +191,71 @@ const getAlertMessage = (type, metadata = {}) => {
   };
   return messages[type] || "Có cảnh báo an toàn.";
 };
+
+/**
+ * Lấy danh sách alert của phụ huynh (có filter + phân trang)
+ */
+export const getParentAlerts = async (parentId, { status, type, page = 1, limit = 20 } = {}) => {
+  const query = { parentId };
+  if (status) query.status = status;
+  if (type) query.type = type;
+
+  const skip = (page - 1) * limit;
+  const [alerts, total] = await Promise.all([
+    Alert.find(query)
+      .sort({ detectedAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("tripId", "status plannedRoute scheduledPickupTime")
+      .populate("driverId", "user licenseNumber"),
+    Alert.countDocuments(query),
+  ]);
+
+  return { page, total, totalPages: Math.ceil(total / limit), alerts };
+};
+
+/**
+ * Lấy chi tiết một alert theo ID
+ */
+export const getAlertById = async (alertId) => {
+  const alert = await Alert.findById(alertId)
+    .populate("tripId", "status plannedRoute scheduledPickupTime")
+    .populate("driverId", "user licenseNumber");
+  if (!alert) throw new Error("Cảnh báo không tồn tại.");
+  return alert;
+};
+
+/**
+ * Phụ huynh xác nhận đã biết (acknowledge)
+ */
+export const acknowledgeAlert = async (alertId, parentId) => {
+  const alert = await Alert.findById(alertId);
+  if (!alert) throw new Error("Cảnh báo không tồn tại.");
+  if (alert.parentId.toString() !== parentId.toString()) {
+    throw new Error("Bạn không có quyền xác nhận cảnh báo này.");
+  }
+  if (alert.status !== "open") {
+    throw new Error("Chỉ có thể acknowledge cảnh báo đang mở.");
+  }
+
+  alert.status = "acknowledged";
+  await alert.save();
+
+  return alert;
+};
+
+/**
+ * Admin đánh dấu cảnh báo là sai (false positive)
+ */
+export const markFalsePositive = async (alertId) => {
+  const alert = await Alert.findById(alertId);
+  if (!alert) throw new Error("Cảnh báo không tồn tại.");
+
+  alert.status = "resolved";
+  alert.resolvedBy = "admin";
+  alert.resolvedAt = new Date();
+  alert.note = "false_positive";
+  await alert.save();
+
+  return alert;
+};

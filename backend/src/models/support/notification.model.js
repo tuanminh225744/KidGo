@@ -18,6 +18,8 @@ const NotificationSchema = new Schema(
       enum: ["sent", "delivered", "failed"],
       default: "sent",
     },
+    isRead: { type: Boolean, default: false, index: true },
+    readAt: { type: Date },
     refId: { type: Schema.Types.ObjectId }, // ID của Trip / Alert liên quan
   },
   { timestamps: { createdAt: true, updatedAt: false } },

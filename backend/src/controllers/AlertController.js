@@ -1,47 +1,69 @@
 import {
-  getAlertsByTrip,
+  getParentAlerts,
+  getAlertById,
+  acknowledgeAlert,
   resolveAlert,
   escalateAlert,
 } from "../services/alert.service.js";
-import { AppError, NotFoundError } from "../utils/AppError.js";
+import { AppError } from "../utils/AppError.js";
 
 /**
- * Controller cho các API liên quan đến cảnh báo
+ * GET /api/v1/alerts
+ * Danh sách alert của phụ huynh (filter + phân trang)
+ * Role: parent
  */
-
-/**
- * Lấy danh sách cảnh báo cho một chuyến đi
- */
-export const getAlerts = async (req, res, next) => {
+export const getParentAlertsHandler = async (req, res, next) => {
   try {
-    const { tripId } = req.params;
-    const { status, type } = req.query;
-
-    const filters = {};
-    if (status) filters.status = status;
-    if (type) filters.type = type;
-
-    const alerts = await getAlertsByTrip(tripId, filters);
-    res.json({
-      success: true,
-      data: alerts,
+    const parentId = req.user.id;
+    const { status, type, page, limit } = req.query;
+    const result = await getParentAlerts(parentId, {
+      status,
+      type,
+      page: +page,
+      limit: +limit,
     });
+    res.status(200).json({ success: true, ...result });
   } catch (error) {
     next(error);
   }
 };
 
 /**
- * Giải quyết cảnh báo
+ * GET /api/v1/alerts/:alertId
+ * Chi tiết alert (parent + admin)
  */
-export const resolveAlertController = async (req, res, next) => {
+export const getAlertDetail = async (req, res, next) => {
   try {
     const { alertId } = req.params;
-    const { resolvedBy, note } = req.body;
+    const alert = await getAlertById(alertId);
 
-    const alert = await resolveAlert(alertId, resolvedBy, note);
-    res.json({
+    // Parent chỉ xem alert của mình
+    if (
+      req.user.role === "parent" &&
+      alert.parentId.toString() !== req.user.id.toString()
+    ) {
+      return next(new AppError("Bạn không có quyền xem cảnh báo này.", 403));
+    }
+
+    res.status(200).json({ success: true, data: alert });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PATCH /api/v1/alerts/:alertId/acknowledge
+ * Phụ huynh xác nhận đã biết
+ * Role: parent
+ */
+export const acknowledgeAlertHandler = async (req, res, next) => {
+  try {
+    const { alertId } = req.params;
+    const parentId = req.user.id;
+    const alert = await acknowledgeAlert(alertId, parentId);
+    res.status(200).json({
       success: true,
+      message: "Đã xác nhận cảnh báo.",
       data: alert,
     });
   } catch (error) {
@@ -50,15 +72,37 @@ export const resolveAlertController = async (req, res, next) => {
 };
 
 /**
- * Escalate cảnh báo cho admin
+ * PATCH /api/v1/alerts/:alertId/resolve
+ * Đóng alert (parent hoặc admin)
+ */
+export const resolveAlertController = async (req, res, next) => {
+  try {
+    const { alertId } = req.params;
+    const resolvedBy = req.user.role; // "parent" | "admin"
+    const { note } = req.body;
+    const alert = await resolveAlert(alertId, resolvedBy, note);
+    res.status(200).json({
+      success: true,
+      message: "Cảnh báo đã được đóng.",
+      data: alert,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PATCH /api/v1/alerts/:alertId/escalate
+ * Phụ huynh yêu cầu admin hỗ trợ
+ * Role: parent
  */
 export const escalateAlertController = async (req, res, next) => {
   try {
     const { alertId } = req.params;
-
     const alert = await escalateAlert(alertId);
-    res.json({
+    res.status(200).json({
       success: true,
+      message: "Đã gửi yêu cầu hỗ trợ đến admin.",
       data: alert,
     });
   } catch (error) {
