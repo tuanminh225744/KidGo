@@ -233,3 +233,18 @@ export const syncLocationsToDB = async () => {
     console.error("[Batch Sync Error] Lỗi đẩy tọa độ từ Redis vào DB:", error);
   }
 };
+
+/**
+ * Lấy driver profile theo userId
+ */
+export const getDriverByUserId = async (userId) => {
+  try {
+    const driver = await Driver.findOne({ user: userId }).populate("user");
+    if (!driver) {
+      throw new Error("Tài xế không tồn tại.");
+    }
+    return driver;
+  } catch (error) {
+    throw new Error(`Lỗi lấy thông tin tài xế: ${error.message}`);
+  }
+};

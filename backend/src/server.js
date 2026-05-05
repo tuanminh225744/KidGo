@@ -21,6 +21,9 @@ import UserRoutes from "./routes/UserRoutes.js";
 import KidRoutes from "./routes/KidRoutes.js";
 import RouteRoutes from "./routes/RouteRoutes.js";
 import PreferredDriverRoutes from "./routes/PreferredDriverRoutes.js";
+import BookingRoutes from "./routes/BookingRoutes.js";
+import SubscriptionRoutes from "./routes/SubscriptionRoutes.js";
+import TripScheduleRoutes from "./routes/TripScheduleRoutes.js";
 import {
   loggerMiddleware,
   errorLoggerMiddleware,
@@ -78,6 +81,9 @@ app.use("/api/v1/users", UserRoutes);
 app.use("/api/v1/kids", KidRoutes);
 app.use("/api/v1/routes", RouteRoutes);
 app.use("/api/v1/preferred-drivers", PreferredDriverRoutes);
+app.use("/api/v1/bookings", BookingRoutes);
+app.use("/api/v1/bookings/schedules", TripScheduleRoutes);
+app.use("/api/v1/subscriptions", SubscriptionRoutes);
 app.use("/alerts", AlertRoutes);
 app.use("/reviews", ReviewRoutes);
 app.use("/notifications", NotificationRoutes);
