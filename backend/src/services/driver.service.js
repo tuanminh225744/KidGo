@@ -248,3 +248,133 @@ export const getDriverByUserId = async (userId) => {
     throw new Error(`Lỗi lấy thông tin tài xế: ${error.message}`);
   }
 };
+
+// ── Admin Driver Management ─────────────────────────────────────────────────────
+
+/**
+ * Danh sách tài xế (filter theo status, phân trang, tìm kiếm)
+ */
+export const listDriversAdmin = async ({ status, search, page = 1, limit = 20 } = {}) => {
+  const query = {};
+  if (status) query.status = status;
+
+  const skip = (page - 1) * limit;
+
+  // Nếu search, cần join với User để tìm theo tên/email
+  let pipeline = [
+    { $match: query },
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "userInfo",
+      },
+    },
+    { $unwind: { path: "$userInfo", preserveNullAndEmptyArrays: true } },
+  ];
+
+  if (search) {
+    pipeline.push({
+      $match: {
+        $or: [
+          { "userInfo.fullName": { $regex: search, $options: "i" } },
+          { "userInfo.email": { $regex: search, $options: "i" } },
+          { licenseNumber: { $regex: search, $options: "i" } },
+        ],
+      },
+    });
+  }
+
+  pipeline.push(
+    { $sort: { createdAt: -1 } },
+    {
+      $facet: {
+        data: [{ $skip: skip }, { $limit: limit }],
+        total: [{ $count: "count" }],
+      },
+    }
+  );
+
+  const result = await Driver.aggregate(pipeline);
+  const drivers = result[0].data;
+  const total = result[0].total[0]?.count ?? 0;
+
+  return { page, total, totalPages: Math.ceil(total / limit), drivers };
+};
+
+/**
+ * Chi tiết tài xế theo driverId (admin)
+ */
+export const getDriverDetailAdmin = async (driverId) => {
+  const driver = await Driver.findById(driverId)
+    .populate("user", "-password -deviceTokens")
+    .populate("vehicles");
+  if (!driver) throw new Error("Tài xế không tồn tại.");
+  return driver;
+};
+
+/**
+ * Duyệt hồ sơ tài xế
+ */
+export const approveDriver = async (driverId) => {
+  const driver = await Driver.findByIdAndUpdate(
+    driverId,
+    { status: "active" },
+    { new: true }
+  );
+  if (!driver) throw new Error("Tài xế không tồn tại.");
+  return driver;
+};
+
+/**
+ * Từ chối hồ sơ tài xế
+ */
+export const rejectDriver = async (driverId) => {
+  const driver = await Driver.findByIdAndUpdate(
+    driverId,
+    { status: "rejected" },
+    { new: true }
+  );
+  if (!driver) throw new Error("Tài xế không tồn tại.");
+  return driver;
+};
+
+/**
+ * Tạm khóa tài xế
+ */
+export const suspendDriver = async (driverId) => {
+  const driver = await Driver.findByIdAndUpdate(
+    driverId,
+    { status: "suspended", isOnline: false },
+    { new: true }
+  );
+  if (!driver) throw new Error("Tài xế không tồn tại.");
+  // Đồng bộ khóa user
+  await User.findByIdAndUpdate(driver.user, { isActive: false });
+  return driver;
+};
+
+/**
+ * Cập nhật cấp chứng nhận tài xế (0-5)
+ */
+export const updateCertification = async (driverId, certificationLevel) => {
+  if (certificationLevel < 0 || certificationLevel > 5) {
+    throw new Error("certificationLevel phải từ 0 đến 5.");
+  }
+  const driver = await Driver.findByIdAndUpdate(
+    driverId,
+    { certificationLevel },
+    { new: true }
+  );
+  if (!driver) throw new Error("Tài xế không tồn tại.");
+  return driver;
+};
+
+/**
+ * Lấy vị trí live của một tài xế (từ Redis)
+ */
+export const getLiveDriverLocation = async (driverId) => {
+  const location = await getDriverLocation(driverId);
+  return { driverId, location };
+};

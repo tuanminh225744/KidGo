@@ -89,3 +89,67 @@ export const toggleUserStatus = async (userId, isActive) => {
     throw new Error(`Error toggling user status: ${error.message}`);
   }
 };
+
+// ── Admin User Management ───────────────────────────────────────────────────────
+
+/**
+ * Lấy danh sách phụ huynh (có filter + phân trang)
+ */
+export const listParents = async ({ search, isActive, page = 1, limit = 20 } = {}) => {
+  const query = { role: "parent" };
+  if (typeof isActive === "boolean") query.isActive = isActive;
+  if (search) {
+    query.$or = [
+      { fullName: { $regex: search, $options: "i" } },
+      { email: { $regex: search, $options: "i" } },
+      { phone: { $regex: search, $options: "i" } },
+    ];
+  }
+
+  const skip = (page - 1) * limit;
+  const [users, total] = await Promise.all([
+    User.find(query)
+      .select("-password -deviceTokens")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    User.countDocuments(query),
+  ]);
+
+  return { page, total, totalPages: Math.ceil(total / limit), users };
+};
+
+/**
+ * Chi tiết một phụ huynh theo userId
+ */
+export const getParentById = async (userId) => {
+  const user = await User.findById(userId).select("-password -deviceTokens");
+  if (!user || user.role !== "parent") throw new Error("Phụ huynh không tồn tại.");
+  return user;
+};
+
+/**
+ * Khóa tài khoản phụ huynh
+ */
+export const suspendUser = async (userId) => {
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { isActive: false },
+    { new: true }
+  ).select("-password -deviceTokens");
+  if (!user) throw new Error("Người dùng không tồn tại.");
+  return user;
+};
+
+/**
+ * Mở khóa tài khoản phụ huynh
+ */
+export const reactivateUser = async (userId) => {
+  const user = await User.findByIdAndUpdate(
+    userId,
+    { isActive: true },
+    { new: true }
+  ).select("-password -deviceTokens");
+  if (!user) throw new Error("Người dùng không tồn tại.");
+  return user;
+};
