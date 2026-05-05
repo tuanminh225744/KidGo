@@ -5,6 +5,7 @@ import * as turf from "@turf/turf";
 import { getIo } from "../sockets/socketManager.js";
 import redisClient from "../config/redisClient.js";
 import { createAlert } from "./alert.service.js";
+import { AppError, NotFoundError } from "../utils/AppError.js";
 
 /**
  * 1. Tài xế bắt đầu di chuyển đến điểm đón
@@ -222,4 +223,150 @@ export const getRawLocationLog = async (
     totalPages: Math.ceil(total / limit),
     points,
   };
+};
+
+/**
+ * 6. Lấy danh sách chuyến của phụ huynh (có thể filter theo status)
+ */
+export const getParentTrips = async (parentId, { status, page = 1, limit = 20 } = {}) => {
+  const query = { parentId };
+  if (status) query.status = status;
+
+  const skip = (page - 1) * limit;
+  const [trips, total] = await Promise.all([
+    Trip.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("driverId", "user licenseNumber rating")
+      .populate("kidId", "fullName avatar")
+      .populate("vehicleId", "licensePlate model color"),
+    Trip.countDocuments(query),
+  ]);
+
+  return {
+    page,
+    total,
+    totalPages: Math.ceil(total / limit),
+    trips,
+  };
+};
+
+/**
+ * 7. Lấy tất cả chuyến đang chạy của các con (parent)
+ */
+export const getActiveTrips = async (parentId) => {
+  const trips = await Trip.find({
+    parentId,
+    status: { $in: ["picking_up", "in_progress"] },
+  })
+    .populate("driverId", "user licenseNumber rating currentLocation isOnline")
+    .populate("kidId", "fullName avatar")
+    .populate("vehicleId", "licensePlate model color");
+
+  return trips;
+};
+
+/**
+ * 8. Lấy chi tiết một chuyến
+ */
+export const getTripDetail = async (tripId, userId, role) => {
+  const trip = await Trip.findById(tripId)
+    .populate("driverId", "user licenseNumber rating")
+    .populate("kidId", "fullName avatar")
+    .populate("vehicleId", "licensePlate model color")
+    .populate("bookingId");
+
+  if (!trip) throw new NotFoundError("Chuyến đi không tồn tại.");
+
+  // Kiểm tra quyền truy cập
+  if (role === "parent" && trip.parentId.toString() !== userId.toString()) {
+    throw new AppError("Bạn không có quyền xem chuyến này.", 403);
+  }
+  if (role === "driver" && trip.driverId._id?.toString() !== userId.toString()) {
+    throw new AppError("Bạn không có quyền xem chuyến này.", 403);
+  }
+
+  return trip;
+};
+
+/**
+ * 9. Huỷ chuyến (parent hoặc driver)
+ */
+export const cancelTrip = async (tripId, userId, role) => {
+  const trip = await Trip.findById(tripId);
+  if (!trip) throw new NotFoundError("Chuyến đi không tồn tại.");
+
+  if (["completed", "cancelled"].includes(trip.status)) {
+    throw new AppError("Không thể huỷ chuyến đã hoàn thành hoặc đã huỷ.", 400);
+  }
+
+  // Kiểm tra quyền huỷ
+  if (role === "parent" && trip.parentId.toString() !== userId.toString()) {
+    throw new AppError("Bạn không có quyền huỷ chuyến này.", 403);
+  }
+
+  trip.status = "cancelled";
+  await trip.save();
+
+  // Giải phóng tài xế
+  await Driver.findByIdAndUpdate(trip.driverId, { rideStatus: "free" });
+
+  const io = getIo();
+  io.of("/parent").to(trip.parentId.toString()).emit("trip_cancelled", {
+    tripId: trip._id,
+    message: "Chuyến đi đã bị huỷ.",
+    cancelledBy: role,
+  });
+
+  return trip;
+};
+
+/**
+ * 10. Ghi nhận GPS tick realtime từ tài xế
+ */
+export const recordGpsTick = async (tripId, driverId, { lat, lng, speed, heading, accuracy }) => {
+  const trip = await Trip.findById(tripId);
+  if (!trip) throw new NotFoundError("Chuyến đi không tồn tại.");
+  if (trip.status !== "in_progress") {
+    throw new AppError("Chuyến đi chưa bắt đầu hoặc đã kết thúc.", 400);
+  }
+
+  const coords = {
+    type: "Point",
+    coordinates: [lng, lat],
+  };
+
+  // Lưu log GPS vào DB (ghi nền qua Redis nếu cần)
+  const logEntry = new LocationLog({
+    tripId,
+    coords,
+    speed: speed || 0,
+    heading: heading || 0,
+    accuracy: accuracy || 0,
+    recordedAt: new Date(),
+  });
+  await logEntry.save();
+
+  // Cập nhật vị trí hiện tại của driver trong Redis
+  await redisClient.setex(
+    `driver_location:${driverId}`,
+    300,
+    JSON.stringify({ lat, lng, speed, heading, updatedAt: new Date() })
+  );
+
+  // Phát vị trí realtime qua Socket.IO cho parent
+  const io = getIo();
+  io.of("/parent").to(trip.parentId.toString()).emit("driver_location_update", {
+    tripId,
+    driverId,
+    lat,
+    lng,
+    speed,
+    heading,
+    accuracy,
+    time: new Date(),
+  });
+
+  return { ok: true };
 };

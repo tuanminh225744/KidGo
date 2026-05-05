@@ -24,6 +24,9 @@ import PreferredDriverRoutes from "./routes/PreferredDriverRoutes.js";
 import BookingRoutes from "./routes/BookingRoutes.js";
 import SubscriptionRoutes from "./routes/SubscriptionRoutes.js";
 import TripScheduleRoutes from "./routes/TripScheduleRoutes.js";
+import TripRoutes from "./routes/TripRoutes.js";
+import DriverRoutes from "./routes/DriverRoutes.js";
+import ConfirmationRoutes from "./routes/ConfirmationRoutes.js";
 import {
   loggerMiddleware,
   errorLoggerMiddleware,
@@ -81,14 +84,17 @@ app.use("/api/v1/users", UserRoutes);
 app.use("/api/v1/kids", KidRoutes);
 app.use("/api/v1/routes", RouteRoutes);
 app.use("/api/v1/preferred-drivers", PreferredDriverRoutes);
+app.use("/api/v1/bookings/schedules", TripScheduleRoutes); // phải đứng trước /bookings
 app.use("/api/v1/bookings", BookingRoutes);
-app.use("/api/v1/bookings/schedules", TripScheduleRoutes);
 app.use("/api/v1/subscriptions", SubscriptionRoutes);
-app.use("/alerts", AlertRoutes);
-app.use("/reviews", ReviewRoutes);
-app.use("/notifications", NotificationRoutes);
-app.use("/dashboard", DashboardRoutes);
-app.use("/admin/users", AdminUserRoutes);
+app.use("/api/v1/drivers", DriverRoutes);
+app.use("/api/v1/trips", TripRoutes);
+app.use("/api/v1", ConfirmationRoutes); // /api/v1/trips/:tripId/confirmations + /api/v1/upload/confirmation-photo
+app.use("/api/v1/alerts", AlertRoutes);
+app.use("/api/v1/reviews", ReviewRoutes);
+app.use("/api/v1/notifications", NotificationRoutes);
+app.use("/api/v1/admin", DashboardRoutes);
+app.use("/api/v1/admin/users", AdminUserRoutes);
 
 // 5. 404 Handler (trước error handler)
 app.use(notFoundHandler);

@@ -1,5 +1,6 @@
-import { Schema, model, models } from "mongoose";
-import { PointSchema } from "./geoSchemas.js";
+import mongoose from "mongoose";
+const { Schema, model, models } = mongoose;
+import { PointSchema } from "../geoSchemas.js";
 
 const ConfirmationSchema = new Schema({
   tripId: { type: Schema.Types.ObjectId, ref: "Trip", required: true },

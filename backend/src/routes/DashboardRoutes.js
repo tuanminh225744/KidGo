@@ -10,12 +10,16 @@ const router = express.Router();
 router.use(authenticateToken);
 router.use(authorize("admin"));
 
-// Route: GET /dashboard/admin/stats
-// Admin lấy thống kê cơ bản
-router.get("/admin/stats", getAdminStats);
+/**
+ * GET /api/v1/admin/dashboard
+ * Tổng quan: trips hôm nay, drivers online, open alerts
+ */
+router.get("/dashboard", getAdminStats);
 
-// Route: GET /dashboard/admin/reports
-// Admin lấy báo cáo analytics
-router.get("/admin/reports", getReports);
+/**
+ * GET /api/v1/admin/reports
+ * Báo cáo nâng cao (trips/ngày, alert rate, driver ratings)
+ */
+router.get("/reports", getReports);
 
 export default router;
