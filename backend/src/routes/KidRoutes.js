@@ -87,5 +87,4 @@ router.delete(
   validate,
   deleteKid,
 );
-
 export default router;
