@@ -8,6 +8,7 @@ import {
   clearPendingEmail,
   sendOtp,
 } from "../services/auth.service.js";
+import { useAuthStore } from "../store/useAuthStore.js";
 
 export default function OTP() {
   const navigate = useNavigate();
@@ -118,6 +119,7 @@ export default function OTP() {
               accessToken: result.accessToken,
               refreshToken: result.refreshToken,
             });
+            useAuthStore.getState().setUser(result.user);
             clearPendingEmail();
             navigate("/kid-profile");
           }}

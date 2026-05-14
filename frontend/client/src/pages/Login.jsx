@@ -2,6 +2,7 @@ import { ArrowLeft, Mail, Lock, LogIn, ChevronRight } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser, setAuthTokens } from "../services/auth.service.js";
+import { useAuthStore } from "../store/useAuthStore.js";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -27,6 +28,8 @@ export default function Login() {
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,
     });
+    
+    useAuthStore.getState().setUser(result.user);
 
     navigate("/home");
   };

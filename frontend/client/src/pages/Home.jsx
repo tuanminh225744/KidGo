@@ -18,6 +18,7 @@ import { getCurrentProfile } from "../services/user.service.js";
 import { getActiveTripsList } from "../services/trip.service.js";
 import { getUnreadCount } from "../services/notification.service.js";
 import { getParentAlerts } from "../services/alert.service.js";
+import { useAuthStore } from "../store/useAuthStore.js";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -27,6 +28,7 @@ export default function Home() {
   const [activeTrips, setActiveTrips] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
+  const { user, setUser } = useAuthStore();
 
   useEffect(() => {
     loadAllData();
@@ -57,6 +59,8 @@ export default function Home() {
     const result = await getCurrentProfile();
     if (result.success) {
       setProfile(result.data);
+      // Cập nhật lại zustand store để đồng bộ trạng thái mới nhất
+      setUser(result.data);
     }
   };
 
@@ -96,7 +100,7 @@ export default function Home() {
           <div>
             <p className="text-xs text-on-surface-variant">Xin chào,</p>
             <h1 className="text-xl font-bold text-primary leading-tight">
-              {profile ? profile.fullName : "Phụ huynh"} 👋
+              {profile ? profile.fullName : (user ? user.fullName : "Phụ huynh")} 👋
             </h1>
           </div>
         </div>
