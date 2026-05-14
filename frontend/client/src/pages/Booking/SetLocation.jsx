@@ -205,6 +205,8 @@ export default function SetLocation() {
                 tripType,
                 startPoint,
                 endPoint,
+                pickupText,
+                dropoffText,
                 routeInfo
               }
             });

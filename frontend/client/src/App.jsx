@@ -31,7 +31,7 @@ function App() {
       {!hideNav && (
         <nav className="fixed bottom-0 left-0 right-0 max-w-[430px] mx-auto bg-white/80 backdrop-blur-md border-t border-outline-variant/30 flex justify-around py-3 px-6 z-50 rounded-t-3xl shadow-lg">
           <button
-            onClick={() => navigate("/")}
+            onClick={() => navigate("/home")}
             className={`flex flex-col items-center gap-1 ${location.pathname === "/" ? "text-primary" : "text-on-surface-variant"}`}
           >
             <Home size={24} />

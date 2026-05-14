@@ -223,9 +223,9 @@ export const syncLocationsToDB = async () => {
 
     if (bulkOps.length > 0) {
       const result = await Driver.bulkWrite(bulkOps);
-      console.log(
-        `[Batch Sync] Đã đồng bộ ${result.modifiedCount} vị trí tài xế từ Redis xuống MongoDB.`,
-      );
+      // console.log(
+      //   `[Batch Sync] Đã đồng bộ ${result.modifiedCount} vị trí tài xế từ Redis xuống MongoDB.`,
+      // );
       // Tùy nhu cầu, chúng ta có thể làm sạch Redis của các Driver đã sync hoặc cứ để đó đè lên bằng tọa độ mới.
       // Do Hash tự động overwrite key cũ nên không bị phình to dữ liệu.
     }
@@ -254,7 +254,12 @@ export const getDriverByUserId = async (userId) => {
 /**
  * Danh sách tài xế (filter theo status, phân trang, tìm kiếm)
  */
-export const listDriversAdmin = async ({ status, search, page = 1, limit = 20 } = {}) => {
+export const listDriversAdmin = async ({
+  status,
+  search,
+  page = 1,
+  limit = 20,
+} = {}) => {
   const query = {};
   if (status) query.status = status;
 
@@ -293,7 +298,7 @@ export const listDriversAdmin = async ({ status, search, page = 1, limit = 20 } 
         data: [{ $skip: skip }, { $limit: limit }],
         total: [{ $count: "count" }],
       },
-    }
+    },
   );
 
   const result = await Driver.aggregate(pipeline);
@@ -321,7 +326,7 @@ export const approveDriver = async (driverId) => {
   const driver = await Driver.findByIdAndUpdate(
     driverId,
     { status: "active" },
-    { new: true }
+    { new: true },
   );
   if (!driver) throw new Error("Tài xế không tồn tại.");
   return driver;
@@ -334,7 +339,7 @@ export const rejectDriver = async (driverId) => {
   const driver = await Driver.findByIdAndUpdate(
     driverId,
     { status: "rejected" },
-    { new: true }
+    { new: true },
   );
   if (!driver) throw new Error("Tài xế không tồn tại.");
   return driver;
@@ -347,7 +352,7 @@ export const suspendDriver = async (driverId) => {
   const driver = await Driver.findByIdAndUpdate(
     driverId,
     { status: "suspended", isOnline: false },
-    { new: true }
+    { new: true },
   );
   if (!driver) throw new Error("Tài xế không tồn tại.");
   // Đồng bộ khóa user
@@ -365,7 +370,7 @@ export const updateCertification = async (driverId, certificationLevel) => {
   const driver = await Driver.findByIdAndUpdate(
     driverId,
     { certificationLevel },
-    { new: true }
+    { new: true },
   );
   if (!driver) throw new Error("Tài xế không tồn tại.");
   return driver;

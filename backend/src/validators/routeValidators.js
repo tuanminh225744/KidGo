@@ -8,9 +8,7 @@ export const validateRouteIdParam = [
 
 export const validateCreateRoute = [
   body("name")
-    .notEmpty()
-    .withMessage("name là bắt buộc")
-    .bail()
+    .optional()
     .isString()
     .withMessage("name phải là chuỗi văn bản")
     .trim(),
