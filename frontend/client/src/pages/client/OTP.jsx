@@ -7,8 +7,8 @@ import {
   setAuthTokens,
   clearPendingEmail,
   sendOtp,
-} from "../services/auth.service.js";
-import { useAuthStore } from "../store/useAuthStore.js";
+} from "../../services/auth.service.js";
+import { useAuthStore } from "../../store/useAuthStore.js";
 
 export default function OTP() {
   const navigate = useNavigate();

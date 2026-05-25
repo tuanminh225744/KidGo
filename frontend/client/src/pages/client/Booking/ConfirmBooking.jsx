@@ -2,9 +2,9 @@ import { X, MapPin, Calendar, Car, Shield, Check, Info, ArrowLeft, Loader2 } fro
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'motion/react';
-import { getKidById } from '../../services/kid.service.js';
-import { createRoute } from '../../services/route.service.js';
-import { createBooking, createTripSchedule } from '../../services/booking.service.js';
+import { getKidById } from '../../../services/kid.service.js';
+import { createRoute } from '../../../services/route.service.js';
+import { createBooking, createTripSchedule } from '../../../services/booking.service.js';
 
 export default function ConfirmBooking() {
   const navigate = useNavigate();
@@ -41,7 +41,7 @@ export default function ConfirmBooking() {
       alert("Thiếu thông tin đặt xe. Vui lòng thử lại.");
       return;
     }
-    
+
     setIsSubmitting(true);
     try {
       // 1. Create Route
@@ -69,7 +69,7 @@ export default function ConfirmBooking() {
       } else {
         const dayMap = { sun: 0, mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6 };
         const repeatDays = (recurringDays || []).map(d => dayMap[d]).filter(d => d !== undefined);
-        
+
         const d = new Date(bookingDateTime);
         const pickupTime = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`;
 
@@ -115,7 +115,7 @@ export default function ConfirmBooking() {
           <div className="flex items-center justify-between pb-4 border-b border-outline-variant/20">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full overflow-hidden bg-primary-fixed flex items-center justify-center shadow-inner">
-                 <img src={kid?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${kid?.fullName || 'Kid'}`} alt={kid?.fullName || 'Bé'} className="w-full h-full object-cover" />
+                <img src={kid?.avatar || `https://api.dicebear.com/7.x/avataaars/svg?seed=${kid?.fullName || 'Kid'}`} alt={kid?.fullName || 'Bé'} className="w-full h-full object-cover" />
               </div>
               <h3 className="text-xl font-bold text-on-surface">{kid?.fullName || 'Đang tải...'}</h3>
             </div>
@@ -139,7 +139,7 @@ export default function ConfirmBooking() {
               <Calendar size={22} fill="currentColor" stroke="none" />
             </div>
             <p className="text-sm font-bold text-on-surface">
-              {tripType === 'one-time' ? formattedDateTime : `Định kỳ từ ${recurringStartDate} lúc ${new Date(bookingDateTime).toLocaleTimeString('vi-VN', {hour: '2-digit', minute:'2-digit'})}`}
+              {tripType === 'one-time' ? formattedDateTime : `Định kỳ từ ${recurringStartDate} lúc ${new Date(bookingDateTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}`}
             </p>
           </div>
 
@@ -165,7 +165,7 @@ export default function ConfirmBooking() {
               <p className="text-sm font-bold text-on-surface">Mã PIN đã thiết lập</p>
             </div>
             <span className="bg-green-50 text-green-700 px-3 py-1 rounded-full text-[10px] font-bold flex items-center gap-1">
-               <Check size={12} strokeWidth={3} /> Bảo mật
+              <Check size={12} strokeWidth={3} /> Bảo mật
             </span>
           </div>
         </section>
@@ -185,14 +185,14 @@ export default function ConfirmBooking() {
       </main>
 
       <footer className="fixed bottom-0 left-0 right-0 p-5 bg-white/80 backdrop-blur-md z-30 max-w-[430px] mx-auto">
-        <button 
+        <button
           onClick={handleConfirm}
           disabled={isSubmitting}
           className="w-full h-16 bg-gradient-to-r from-primary-container to-[#6366F1] text-white rounded-3xl font-bold text-xl flex items-center justify-center gap-3 shadow-2xl shadow-primary/30 active:scale-[0.98] transition-all disabled:opacity-70 disabled:scale-100"
         >
           {isSubmitting ? <Loader2 size={24} className="animate-spin" /> : "✓ Xác nhận đặt xe"}
         </button>
-        <button 
+        <button
           onClick={() => navigate('/booking/driver')}
           className="w-full mt-4 text-primary font-bold text-sm flex items-center justify-center gap-2"
         >
@@ -203,13 +203,13 @@ export default function ConfirmBooking() {
       {/* Success Modal */}
       <AnimatePresence>
         {showSuccess && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 backdrop-blur-sm px-6"
           >
-            <motion.div 
+            <motion.div
               initial={{ scale: 0.9, y: 20 }}
               animate={{ scale: 1, y: 0 }}
               className="bg-white w-full max-w-sm rounded-[40px] p-8 flex flex-col items-center text-center shadow-2xl relative overflow-hidden"
@@ -221,15 +221,15 @@ export default function ConfirmBooking() {
               <p className="text-on-surface-variant text-sm font-medium mb-10 leading-relaxed">
                 Hệ thống đang tìm tài xế phù hợp cho bé {kid?.fullName || "của bạn"}<span className="animate-pulse">...</span>
               </p>
-              
+
               <div className="w-full space-y-4">
-                <button 
+                <button
                   onClick={() => navigate('/tracking')}
                   className="w-full h-14 bg-primary-container text-white rounded-2xl font-bold text-lg hover:brightness-110 transition-all active:scale-95"
                 >
                   Theo dõi chuyến đi
                 </button>
-                <button 
+                <button
                   onClick={() => navigate('/')}
                   className="w-full h-14 bg-surface-container-high text-on-surface rounded-2xl font-bold text-lg hover:bg-outline-variant transitions-colors active:scale-95"
                 >

@@ -13,12 +13,12 @@ import {
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { getKidsByParent } from "../services/kid.service.js";
-import { getCurrentProfile } from "../services/user.service.js";
-import { getActiveTripsList } from "../services/trip.service.js";
-import { getUnreadCount } from "../services/notification.service.js";
-import { getParentAlerts } from "../services/alert.service.js";
-import { useAuthStore } from "../store/useAuthStore.js";
+import { getKidsByParent } from "../../services/kid.service.js";
+import { getCurrentProfile } from "../../services/user.service.js";
+import { getActiveTripsList } from "../../services/trip.service.js";
+import { getUnreadCount } from "../../services/notification.service.js";
+import { getParentAlerts } from "../../services/alert.service.js";
+import { useAuthStore } from "../../store/useAuthStore.js";
 
 export default function Home() {
   const navigate = useNavigate();

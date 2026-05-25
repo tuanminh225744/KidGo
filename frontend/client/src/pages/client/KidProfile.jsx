@@ -18,7 +18,7 @@ import {
   setupSecurityQuestion,
   getKidSecurityQuestion,
   uploadKidAvatar,
-} from "../services/kid.service.js";
+} from "../../services/kid.service.js";
 
 export default function KidProfile() {
   const navigate = useNavigate();

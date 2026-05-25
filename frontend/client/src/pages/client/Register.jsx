@@ -13,7 +13,7 @@ import {
   registerUser,
   sendOtp,
   savePendingEmail,
-} from "../services/auth.service.js";
+} from "../../services/auth.service.js";
 
 export default function Register() {
   const navigate = useNavigate();

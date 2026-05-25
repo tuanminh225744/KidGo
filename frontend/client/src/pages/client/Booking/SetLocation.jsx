@@ -1,7 +1,7 @@
 import { X, Route as RouteIcon, MapPin, ArrowRight, ArrowUpDown, History, Home as HomeIcon } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import MapRouting from '../../components/MapRouting';
+import MapRouting from '../../../components/MapRouting';
 
 export default function SetLocation() {
   const navigate = useNavigate();

@@ -1,21 +1,5 @@
 import api from "../api/axios.js";
 
-const handleResponse = async (promise) => {
-  try {
-    const { data } = await promise;
-    return data;
-  } catch (error) {
-    return {
-      success: false,
-      message:
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        "Đã có lỗi xảy ra khi gọi API",
-    };
-  }
-};
-
 export const getCurrentProfile = async () => {
-  return handleResponse(api.get("/users/me"));
+  return api.get("/users/me");
 };

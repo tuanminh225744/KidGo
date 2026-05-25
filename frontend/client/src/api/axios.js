@@ -22,7 +22,7 @@ axiosInstance.interceptors.request.use(
 );
 
 axiosInstance.interceptors.response.use(
-  (response) => response,
+  (response) => response.data,
   async (error) => {
     const originalRequest = error.config;
 
@@ -63,7 +63,14 @@ axiosInstance.interceptors.response.use(
       }
     }
 
-    return Promise.reject(error);
+    return {
+      success: false,
+      message:
+        error.response?.data?.message ||
+        error.response?.data?.error ||
+        error.message ||
+        "Đã có lỗi xảy ra khi gọi API",
+    };
   },
 );
 

@@ -4,40 +4,24 @@ const ACCESS_TOKEN_KEY = "accessToken";
 const REFRESH_TOKEN_KEY = "refreshToken";
 const PENDING_EMAIL_KEY = "authPendingEmail";
 
-const handleResponse = async (promise) => {
-  try {
-    const { data } = await promise;
-    return data;
-  } catch (error) {
-    return {
-      success: false,
-      message:
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        "Đã có lỗi xảy ra khi gọi API",
-    };
-  }
-};
-
 export const registerUser = async (payload) => {
-  return handleResponse(api.post("/auth/register", payload));
+  return api.post("/auth/register", payload);
 };
 
 export const loginUser = async (email, password) => {
-  return handleResponse(api.post("/auth/login", { email, password }));
+  return api.post("/auth/login", { email, password });
 };
 
 export const sendOtp = async (email) => {
-  return handleResponse(api.post("/auth/send-otp", { email }));
+  return api.post("/auth/send-otp", { email });
 };
 
 export const verifyOtp = async (email, otp) => {
-  return handleResponse(api.post("/auth/verify-otp", { email, otp }));
+  return api.post("/auth/verify-otp", { email, otp });
 };
 
 export const refreshAuthToken = async (refreshToken) => {
-  return handleResponse(api.post("/auth/refresh", { refreshToken }));
+  return api.post("/auth/refresh", { refreshToken });
 };
 
 export const setAuthTokens = ({ accessToken, refreshToken }) => {

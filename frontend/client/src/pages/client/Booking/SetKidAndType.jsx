@@ -1,7 +1,7 @@
 import { X, Check, Plus, Calendar, RefreshCcw, ArrowRight } from 'lucide-react';
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { getKidsByParent } from '../../services/kid.service.js';
+import { getKidsByParent } from '../../../services/kid.service.js';
 
 export default function SetKidAndType() {
   const navigate = useNavigate();
