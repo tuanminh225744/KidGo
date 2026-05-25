@@ -1,54 +1,81 @@
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ChevronLeft, Settings, Star, Navigation, ShieldCheck, Calendar, CheckCircle2 } from 'lucide-react';
-import { DRIVER_DATA } from '../constants';
+import { getDriverProfile, toggleDriverStatus } from '../../services/driver.service';
+import { useNavigate } from 'react-router-dom';
 
-
-
-
-
-
-export const ProfileScreen = ({ onNavigate }) => {
+export const ProfileScreen = () => {
+  const navigate = useNavigate();
+  const [profile, setProfile] = useState(null);
   const [isAccepting, setIsAccepting] = useState(true);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await getDriverProfile();
+        if (res?.data?.data) {
+          setProfile(res.data.data);
+          setIsAccepting(res.data.data.isAvailable ?? true);
+        }
+      } catch (error) {
+        console.error('Lỗi khi tải profile:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProfile();
+  }, []);
+
+  const handleToggleStatus = async () => {
+    try {
+      const newStatus = !isAccepting;
+      setIsAccepting(newStatus);
+      await toggleDriverStatus({ isAvailable: newStatus });
+    } catch (error) {
+      console.error('Lỗi khi đổi trạng thái:', error);
+      setIsAccepting(!isAccepting);
+    }
+  };
+
+  const displayData = profile || {};
 
   return (
     <div className="pb-24 overflow-y-auto h-screen">
-      <div className="bg-primary pt-12 pb-24 px-6 relative rounded-b-[40px]">
-        <div className="flex justify-between items-center text-white mb-8">
-          <button onClick={() => onNavigate('home')} className="p-2 -ml-2"><ChevronLeft size={24} /></button>
-          <h1 className="text-xl font-bold">Hồ sơ</h1>
-          <button className="p-2 -mr-2"><Settings size={24} /></button>
-        </div>
+      <div className="absolute top-0 left-0 right-0 h-40 bg-[#1D7C45] rounded-b-[40px] z-0"></div>
 
-        <div className="flex flex-col items-center">
-          <div className="relative mb-4">
-            <img
-              src={DRIVER_DATA.avatar}
-              alt="Avatar"
-              className="w-24 h-24 rounded-full border-4 border-white/20 object-cover" />
-            
-            <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#d97706] text-white text-[10px] font-bold px-3 py-1 rounded-full border-2 border-primary">
-              Cấp 3
-            </div>
+      <div className="relative z-10 px-6 pt-12 flex justify-between items-center text-white mb-6">
+        <button onClick={() => navigate(-1)} className="p-2 -ml-2"><ChevronLeft size={28} /></button>
+        <h1 className="text-xl font-bold">Hồ sơ của tôi</h1>
+        <button className="p-2 -mr-2"><Settings size={24} /></button>
+      </div>
+
+      <div className="flex flex-col items-center">
+        <div className="relative mb-4">
+          <img
+            src={displayData?.avatar || '/default-avatar.png'}
+            alt="Avatar"
+            className="w-24 h-24 rounded-full border-4 border-white/20 object-cover" />
+
+          <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-[#d97706] text-white text-[10px] font-bold px-3 py-1 rounded-full border-2 border-primary">
+            Cấp 3
           </div>
-          <h2 className="text-white text-xl font-bold mb-1">{DRIVER_DATA.name}</h2>
-          <div className="flex items-center gap-2 text-white/80 text-sm">
-            <Star size={14} className="fill-accent text-accent" />
-            <span>4.8 • 142 chuyến</span>
-          </div>
+        </div>
+        <h2 className="text-white text-xl font-bold mb-1">{displayData?.name || displayData?.fullName}</h2>
+        <div className="flex items-center gap-2 text-white/80 text-sm">
+          <Star size={14} className="fill-accent text-accent" />
+          <span>{displayData?.rating || 4.8} • {displayData?.totalTrips || 142} chuyến</span>
         </div>
       </div>
 
       <div className="px-5 -mt-12">
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-5 mb-4 flex justify-between items-center">
           <div className="flex items-center gap-3">
-             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-             <span className="font-medium text-primary text-sm">Đang nhận chuyến</span>
+            <div className={`w-2 h-2 rounded-full ${isAccepting ? 'bg-green-500 animate-pulse' : 'bg-gray-400'}`}></div>
+            <span className="font-medium text-primary text-sm">{isAccepting ? 'Đang nhận chuyến' : 'Ngưng nhận chuyến'}</span>
           </div>
           <button
-            onClick={() => setIsAccepting(!isAccepting)}
+            onClick={handleToggleStatus}
             className={`w-14 h-7 rounded-full p-1 transition-colors relative ${isAccepting ? 'bg-primary' : 'bg-gray-200'}`}>
-            
             <div className={`w-5 h-5 rounded-full bg-white shadow-md transition-transform ${isAccepting ? 'translate-x-7' : 'translate-x-0'}`}></div>
           </button>
         </div>
@@ -78,14 +105,14 @@ export const ProfileScreen = ({ onNavigate }) => {
               <Navigation className="text-primary" size={20} />
               <span className="text-gray-600 text-sm">Biển số xe</span>
             </div>
-            <span className="font-bold text-sm">51G-123.45</span>
+            <span className="font-bold text-sm">{displayData?.vehiclePlate || '51G-123.45'}</span>
           </div>
           <div className="p-4 flex items-center justify-between border-b border-gray-50">
             <div className="flex items-center gap-4">
               <ShieldCheck className="text-primary" size={20} />
               <span className="text-gray-600 text-sm">Hạng GPLX</span>
             </div>
-            <span className="font-bold text-sm">B2</span>
+            <span className="font-bold text-sm">{displayData?.licenseType || 'B2'}</span>
           </div>
           <div className="p-4 flex items-center justify-between border-b border-gray-50">
             <div className="flex items-center gap-4">
@@ -105,6 +132,6 @@ export const ProfileScreen = ({ onNavigate }) => {
           </div>
         </div>
       </div>
-    </div>);
-
+    </div>
+  );
 };

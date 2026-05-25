@@ -70,6 +70,7 @@ axiosInstance.interceptors.response.use(
         error.response?.data?.error ||
         error.message ||
         "Đã có lỗi xảy ra khi gọi API",
+      errors: error.response?.data?.errors,
     };
   },
 );

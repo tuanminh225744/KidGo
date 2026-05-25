@@ -6,7 +6,7 @@ import Login from "./pages/client/Login.jsx";
 import Register from "./pages/client/Register.jsx";
 import OTP from "./pages/client/OTP.jsx";
 import KidProfile from "./pages/client/KidProfile.jsx";
-import Booking from "./pages/client/Booking/index.js";
+import Booking from "./pages/client/Booking";
 import Tracking from "./pages/client/Tracking.jsx";
 import BottomNav from "./pages/client/BottomNav.jsx";
 

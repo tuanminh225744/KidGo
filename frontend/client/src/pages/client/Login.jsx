@@ -31,7 +31,7 @@ export default function Login() {
 
     useAuthStore.getState().setUser(result.user);
 
-    navigate("/home");
+    navigate("/client/home");
   };
 
   return (
@@ -110,7 +110,7 @@ export default function Login() {
           Bạn chưa có tài khoản?
           <button
             type="button"
-            onClick={() => navigate("/register")}
+            onClick={() => navigate("/client/register")}
             className="text-primary font-bold ml-2 hover:underline underline-offset-4"
           >
             Đăng ký ngay <ChevronRight size={16} className="inline-block" />

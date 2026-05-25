@@ -40,7 +40,7 @@ export default function Register() {
     });
 
     if (!result.success) {
-      setError(result.message || "Đăng ký thất bại. Vui lòng thử lại.");
+      setError(result?.errors?.[0]?.msg || result?.message || "Đăng ký thất bại. Vui lòng thử lại.");
       setLoading(false);
       return;
     }
@@ -58,14 +58,14 @@ export default function Register() {
 
     setSuccessMessage("Đăng ký thành công. Mã OTP đã được gửi vào email.");
     setLoading(false);
-    navigate("/otp");
+    navigate("/client/otp");
   };
 
   return (
     <div className="flex-1 flex flex-col bg-surface min-h-screen">
       <header className="p-5 flex items-center justify-between sticky top-0 bg-transparent z-10">
         <button
-          onClick={() => navigate("/login")}
+          onClick={() => navigate("/client/login")}
           className="w-10 h-10 flex items-center justify-center text-primary rounded-full hover:bg-surface-container-low active:scale-90 transition-transform"
         >
           <ArrowLeft size={24} />
@@ -204,7 +204,7 @@ export default function Register() {
           <p className="text-sm text-on-surface-variant">
             Bạn đã có tài khoản?
             <button
-              onClick={() => navigate("/login")}
+              onClick={() => navigate("/client/login")}
               className="text-primary-container font-bold ml-1 hover:underline underline-offset-4"
             >
               Đăng nhập ngay

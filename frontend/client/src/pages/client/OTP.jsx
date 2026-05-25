@@ -43,7 +43,7 @@ export default function OTP() {
     <div className="flex-1 flex flex-col bg-surface min-h-screen pb-28">
       <header className="p-5 flex items-center justify-between">
         <button
-          onClick={() => navigate("/register")}
+          onClick={() => navigate("/client/register")}
           className="w-10 h-10 flex items-center justify-center text-primary rounded-full hover:bg-surface-container-low active:scale-90 transition-transform"
         >
           <ArrowLeft size={24} />
