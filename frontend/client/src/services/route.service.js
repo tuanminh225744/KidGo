@@ -11,3 +11,11 @@ export const getRoutesByParent = async () => {
 export const getRouteById = async (routeId) => {
   return api.get(`/routes/${routeId}`);
 };
+
+export const updateRoute = async (routeId, updateData) => {
+  return api.put(`/routes/${routeId}`, updateData);
+};
+
+export const deleteRoute = async (routeId) => {
+  return api.delete(`/routes/${routeId}`);
+};

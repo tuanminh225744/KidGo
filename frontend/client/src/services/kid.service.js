@@ -21,8 +21,7 @@ export const deleteKid = async (kidId) => {
 };
 
 export const setupSecurityQuestion = async (kidId, question, answer) => {
-  return
-  api.put(`/kids/${kidId}/security-question`, {
+  return api.put(`/kids/${kidId}/security-question`, {
     securityQuestion: question,
     securityAnswer: answer,
   });
@@ -33,8 +32,7 @@ export const getKidSecurityQuestion = async (kidId) => {
 };
 
 export const verifySecurityAnswer = async (kidId, answer) => {
-  return
-  api.post(`/kids/${kidId}/security-answer/verify`, {
+  return api.post(`/kids/${kidId}/security-answer/verify`, {
     securityAnswer: answer,
   });
 };
@@ -42,11 +40,9 @@ export const verifySecurityAnswer = async (kidId, answer) => {
 export const uploadKidAvatar = async (kidId, file) => {
   const formData = new FormData();
   formData.append("avatar", file);
-  return
-  api.post(`/kids/${kidId}/upload-avatar`, formData, {
+  return api.post(`/kids/${kidId}/upload-avatar`, formData, {
     headers: {
       "Content-Type": "multipart/form-data",
     },
-  })
-    ;
+  });
 };

@@ -10,6 +10,14 @@ export const getBookings = async () => {
   return api.get("/bookings");
 };
 
+export const getBookingDetail = async (bookingId) => {
+  return api.get(`/bookings/${bookingId}`);
+};
+
+export const cancelBooking = async (bookingId) => {
+  return api.delete(`/bookings/${bookingId}`);
+};
+
 // --- Trip Schedule (Recurring) ---
 
 export const createTripSchedule = async (scheduleData) => {
