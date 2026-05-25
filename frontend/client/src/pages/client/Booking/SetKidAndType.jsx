@@ -77,7 +77,7 @@ export default function SetKidAndType() {
             ))
           )}
 
-          <div onClick={() => navigate('/kid-profile')} className="border-2 border-dashed border-outline-variant rounded-3xl p-5 flex flex-col items-center justify-center text-center bg-transparent active:bg-surface-container-low transition-all cursor-pointer h-full">
+          <div onClick={() => navigate('/client/kid-profile')} className="border-2 border-dashed border-outline-variant rounded-3xl p-5 flex flex-col items-center justify-center text-center bg-transparent active:bg-surface-container-low transition-all cursor-pointer h-full">
             <div className="w-12 h-12 rounded-full bg-primary-container/10 text-primary-container flex items-center justify-center mb-2">
               <Plus size={32} />
             </div>

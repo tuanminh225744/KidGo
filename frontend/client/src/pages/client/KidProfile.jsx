@@ -150,7 +150,7 @@ export default function KidProfile() {
     <div className="flex-1 flex flex-col bg-surface min-h-screen">
       <header className="px-5 py-4 flex justify-between items-center sticky top-0 bg-white z-20 shadow-sm">
         <button
-          onClick={() => navigate(-1)}
+          onClick={() => navigate('/client/home')}
           className="flex items-center justify-center p-2 rounded-full hover:bg-surface-container-low active:scale-90 transition-transform"
         >
           <ArrowLeft size={24} className="text-primary" />
@@ -159,13 +159,13 @@ export default function KidProfile() {
         <div className="w-10" />
       </header>
 
-      <main className="flex-1 px-5 py-8 space-y-10 pb-52">
+      <main className="flex-1 px-5 py-8 space-y-10 pb-30">
         {/* Avatar Section */}
         <section className="flex flex-col items-center">
           <div className="relative group">
             <div className="w-32 h-32 rounded-full bg-surface-container-high flex items-center justify-center border-4 border-white shadow-xl overflow-hidden ring-4 ring-primary/5">
               <img
-                src={avatarPreview || formData.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=placeholder"}
+                src={avatarPreview || formData.avatar || "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg"}
                 alt="Kid avatar"
                 className="w-full h-full object-cover"
               />
@@ -341,28 +341,29 @@ export default function KidProfile() {
             </div>
           </div>
         </section>
+        <div className="max-w-[430px] mx-auto z-30">
+          {error && (
+            <div className="text-sm text-error font-semibold mb-3 text-center">
+              {error}
+            </div>
+          )}
+          {success && (
+            <div className="text-sm text-primary font-semibold mb-3 text-center">
+              {success}
+            </div>
+          )}
+          <button
+            onClick={handleSave}
+            disabled={loading}
+            className="w-full bg-primary-container text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-xl active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? "Đang lưu..." : "Lưu hồ sơ"} <Save size={20} />
+          </button>
+        </div>
       </main>
 
       {/* Button */}
-      <div className="fixed bottom-28 left-0 right-0 p-5 bg-gradient-to-t from-surface via-surface to-transparent pt-10 max-w-[430px] mx-auto z-30">
-        {error && (
-          <div className="text-sm text-error font-semibold mb-3 text-center">
-            {error}
-          </div>
-        )}
-        {success && (
-          <div className="text-sm text-primary font-semibold mb-3 text-center">
-            {success}
-          </div>
-        )}
-        <button
-          onClick={handleSave}
-          disabled={loading}
-          className="w-full bg-primary-container text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-xl active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-        >
-          {loading ? "Đang lưu..." : "Lưu hồ sơ"} <Save size={20} />
-        </button>
-      </div>
+
     </div>
   );
 }

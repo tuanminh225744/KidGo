@@ -121,7 +121,7 @@ export default function OTP() {
             });
             useAuthStore.getState().setUser(result.user);
             clearPendingEmail();
-            navigate("/kid-profile");
+            navigate("/client/kid-profile");
           }}
           disabled={loading}
           className="w-full max-w-sm bg-primary-container text-white py-4 rounded-2xl font-bold text-lg shadow-xl shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"

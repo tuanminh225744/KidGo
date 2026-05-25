@@ -61,7 +61,7 @@ export const PinEntryScreen = ({ tripData }) => {
 
       <div className="px-10 mb-12">
         <div className="bg-white rounded-3xl p-4 border border-gray-100 flex items-center gap-4 mb-6 shadow-sm">
-          <img src={data.avatar || CHILD_DATA.avatar} className="w-14 h-14 rounded-2xl object-cover" />
+          <img src={data.avatar} className="w-14 h-14 rounded-2xl object-cover" />
           <div className="flex-1">
             <h3 className="font-bold text-base leading-tight">{data.name || data.kidName || 'Bé Minh'}</h3>
             <div className="flex items-center gap-1 text-[10px] text-gray-500 mt-0.5">

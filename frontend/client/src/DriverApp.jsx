@@ -11,6 +11,8 @@ import { InTripScreen } from "./pages/driver/InTripScreen.jsx";
 import { PinEntryScreen } from "./pages/driver/PinEntryScreen.jsx";
 import { DropOffScreen } from "./pages/driver/DropOffScreen.jsx";
 import { SummaryScreen } from "./pages/driver/SummaryScreen.jsx";
+import Login from "./pages/driver/Login.jsx";
+import Register from "./pages/driver/Register.jsx";
 
 export default function DriverApp() {
   return (
@@ -18,6 +20,8 @@ export default function DriverApp() {
       <div className="flex-1 overflow-y-auto relative pb-20">
         <Routes>
           <Route path="/" element={<Navigate to="home" replace />} />
+          <Route path="login" element={<Login />} />
+          <Route path="register" element={<Register />} />
           <Route path="home" element={<HomeScreen />} />
           <Route path="schedule" element={<ScheduleView />} />
           <Route path="history" element={<HistoryView />} />

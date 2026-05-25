@@ -234,7 +234,7 @@ export default function Home() {
               Con của bạn
             </h2>
             <button
-              onClick={() => navigate("/kid-profile")}
+              onClick={() => navigate("/client/kid-profile")}
               className="text-primary font-bold text-sm hover:underline"
             >
               Thêm bé +
@@ -255,7 +255,7 @@ export default function Home() {
               {kids.map((kid) => (
                 <button
                   key={kid._id}
-                  onClick={() => navigate(`/kid-profile?kidId=${kid._id}`)}
+                  onClick={() => navigate(`/client/kid-profile?kidId=${kid._id}`)}
                   className="bg-white p-4 rounded-3xl soft-shadow flex flex-col items-center text-center border border-outline-variant/30 hover:shadow-lg active:scale-95 transition-all"
                 >
                   <div className="w-16 h-16 rounded-full overflow-hidden mb-3 border-2 border-primary-fixed">

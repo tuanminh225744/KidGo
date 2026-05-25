@@ -19,7 +19,7 @@ export default function BottomNav() {
   ];
 
   // Hide BottomNav on detail screens
-  const hideOnScreens = ['in-trip', 'pin', 'drop-off', 'summary', 'deviation'];
+  const hideOnScreens = ['login', 'register', 'in-trip', 'pin', 'drop-off', 'summary', 'deviation'];
   if (hideOnScreens.includes(currentView)) return null;
 
   return (
