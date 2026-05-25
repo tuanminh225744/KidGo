@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import ClientApp from "./ClientApp.jsx";
 import DriverApp from "./DriverApp.jsx";
+import AdminApp from "./AdminApp.jsx";
 
 function App() {
   return (
@@ -15,6 +16,9 @@ function App() {
         
         {/* Driver Routes */}
         <Route path="/driver/*" element={<DriverApp />} />
+        
+        {/* Admin Routes */}
+        <Route path="/admin/*" element={<AdminApp />} />
       </Routes>
     </div>
   );

@@ -24,6 +24,12 @@ export default function Login() {
       return;
     }
 
+    if (result?.user?.role !== "parent") {
+      setError("Bạn không có quyền truy cập vào trang dành cho phụ huynh");
+      setLoading(false);
+      return;
+    }
+
     setAuthTokens({
       accessToken: result.accessToken,
       refreshToken: result.refreshToken,

@@ -1,4 +1,4 @@
-import { Mail, Lock, LogIn, ChevronRight } from "lucide-react";
+import { Mail, Lock, LogIn } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser, setAuthTokens } from "../../services/auth.service.js";
@@ -25,11 +25,13 @@ export default function Login() {
         return;
       }
 
-      if (result?.user?.role !== "driver") {
-        setError("Tài khoản không có quyền truy cập");
+      if (result?.user?.role !== "admin") {
+        setError("Bạn không có quyền truy cập vào trang quản trị");
         setLoading(false);
         return;
       }
+
+      console.log("Login result:", result);
 
       setAuthTokens({
         accessToken: result.accessToken,
@@ -38,7 +40,7 @@ export default function Login() {
 
       useAuthStore.getState().setUser(result.user);
 
-      navigate("/driver/home");
+      navigate("/admin/home");
     } catch (err) {
       setError(err.response?.data?.message || err.message || "Đăng nhập thất bại. Vui lòng thử lại.");
     } finally {
@@ -50,16 +52,16 @@ export default function Login() {
     <div className="flex-1 flex flex-col bg-surface min-h-screen px-6 pt-20 pb-28">
       <div className="text-center">
         <div className="flex justify-center mb-6">
-          <div className="w-24 h-24 bg-green-600 rounded-[2rem] flex items-center justify-center shadow-2xl relative overflow-hidden">
+          <div className="w-24 h-24 bg-blue-600 rounded-[2rem] flex items-center justify-center shadow-2xl relative overflow-hidden">
             <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
             <span className="text-white text-5xl font-extrabold tracking-tighter">
               KG
             </span>
           </div>
         </div>
-        <h1 className="text-4xl font-extrabold text-green-600 mb-2">Kid Go</h1>
+        <h1 className="text-4xl font-extrabold text-blue-600 mb-2">Kid Go</h1>
         <p className="text-on-surface-variant font-medium">
-          Dành cho Tài xế
+          Dành cho Quản trị viên
         </p>
       </div>
 
@@ -67,7 +69,7 @@ export default function Login() {
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-1.5">
             <label className="text-xs font-bold text-on-surface-variant px-1 uppercase tracking-widest">
-              Email / Số điện thoại
+              Email / Tài khoản
             </label>
             <div className="relative">
               <Mail
@@ -78,8 +80,8 @@ export default function Login() {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="taixe@email.com"
-                className="w-full bg-surface-container-low border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-green-500 outline-none transition-all font-medium"
+                placeholder="admin@email.com"
+                className="w-full bg-surface-container-low border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
               />
             </div>
           </div>
@@ -98,7 +100,7 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-surface-container-low border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-green-500 outline-none transition-all font-medium"
+                className="w-full bg-surface-container-low border-none rounded-2xl py-4 pl-12 pr-4 focus:ring-2 focus:ring-blue-500 outline-none transition-all font-medium"
               />
             </div>
           </div>
@@ -110,28 +112,15 @@ export default function Login() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 text-white py-4 rounded-2xl font-bold text-lg shadow-xl shadow-green-600/30 mt-4 flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-blue-600 text-white py-4 rounded-2xl font-bold text-lg shadow-xl shadow-blue-600/30 mt-4 flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? "Đang đăng nhập..." : "Đăng nhập"} <LogIn size={20} />
           </button>
         </form>
       </div>
 
-      <div className="mt-12 text-center">
-        <p className="text-on-surface-variant font-medium">
-          Bạn chưa có tài khoản?
-          <button
-            type="button"
-            onClick={() => navigate("/driver/register")}
-            className="text-green-600 font-bold ml-2 hover:underline underline-offset-4"
-          >
-            Đăng ký ngay <ChevronRight size={16} className="inline-block" />
-          </button>
-        </p>
-      </div>
-
       <div className="mt-auto mb-10 text-center text-[10px] text-outline font-bold tracking-[0.2em]">
-        KID GO DRIVER © 2026
+        KID GO ADMIN © 2026
       </div>
     </div>
   );
