@@ -13,6 +13,19 @@ export const registerUser = async (req, res, next) => {
   }
 };
 
+// POST /api/v1/auth/register-driver
+export const registerDriver = async (req, res, next) => {
+  try {
+    const result = await authService.registerDriver(req.body);
+    if (!result.success) {
+      return res.status(400).json(result);
+    }
+    res.status(201).json(result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // POST /api/v1/auth/login
 export const loginUser = async (req, res, next) => {
   try {

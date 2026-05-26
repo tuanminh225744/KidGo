@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { registerDriver } from "../../services/auth.service";
 
 export default function Register() {
   const navigate = useNavigate();
@@ -46,11 +47,24 @@ export default function Register() {
   const handleSubmitStep2 = async (e) => {
     e.preventDefault();
     setLoading(true);
-    // Mock API call to submit driver registration data
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const payload = {
+        ...formData,
+        seatCount: Number(formData.seatCount),
+      };
+
+      const response = await registerDriver(payload);
+
+      if (!response?.success) {
+        throw new Error(response?.message || "Đăng ký tài xế không thành công");
+      }
+
       setStep(3);
-    }, 1500);
+    } catch (error) {
+      alert(error.message || "Đăng ký tài xế không thành công");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

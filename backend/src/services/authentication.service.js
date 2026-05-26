@@ -4,6 +4,8 @@ import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/core/user.model.js";
+import Driver from "../models/core/driver.model.js";
+import Vehicle from "../models/core/vehicle.model.js";
 dotenv.config();
 
 // Gửi, xác nhận OTP **************************************************************************
@@ -146,6 +148,113 @@ export const register = async (userData) => {
   } catch (error) {
     console.error("Lỗi khi đăng ký:", error);
     throw new Error("Đăng ký không thành công");
+  }
+};
+
+/**
+ * Đăng ký tài xế
+ * Tạo đồng thời User + Driver + Vehicle từ payload frontend register driver
+ */
+export const registerDriver = async (payload) => {
+  const {
+    email,
+    phone,
+    fullName,
+    password,
+    licenseNumber,
+    licenseExpiry,
+    licensePlate,
+    brand,
+    model,
+    color,
+    seatCount,
+    inspectionExpiry,
+  } = payload;
+
+  const session = await User.startSession();
+  try {
+    let result = null;
+
+    await session.withTransaction(async () => {
+      const existingUser = await User.findOne({
+        $or: [{ phone }, { email }],
+      }).session(session);
+      if (existingUser) {
+        throw new Error("Email hoặc số điện thoại đã tồn tại");
+      }
+
+      const duplicateDriver = await Driver.findOne({ licenseNumber }).session(session);
+      if (duplicateDriver) {
+        throw new Error("Số GPLX đã tồn tại");
+      }
+
+      const duplicateVehicle = await Vehicle.findOne({ licensePlate }).session(session);
+      if (duplicateVehicle) {
+        throw new Error("Biển số xe đã tồn tại");
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(password, salt);
+
+      const [newUser] = await User.create(
+        [
+          {
+            phone,
+            email,
+            fullName,
+            password: hashedPassword,
+            role: "driver",
+            isVerified: false,
+          },
+        ],
+        { session },
+      );
+
+      const [newDriver] = await Driver.create(
+        [
+          {
+            user: newUser._id,
+            licenseNumber,
+            licenseExpiry: licenseExpiry ? new Date(licenseExpiry) : undefined,
+            status: "pending",
+          },
+        ],
+        { session },
+      );
+
+      const vehicleData = {
+        driverId: newDriver._id,
+        licensePlate,
+        brand,
+        model,
+        color,
+        seatCount: seatCount ? Number(seatCount) : undefined,
+        inspectionExpiry: inspectionExpiry ? new Date(inspectionExpiry) : undefined,
+      };
+
+      const [newVehicle] = await Vehicle.create([vehicleData], { session });
+
+      result = {
+        success: true,
+        message: "Đăng ký tài xế thành công. Hồ sơ đang chờ duyệt.",
+        user: {
+          _id: newUser._id,
+          email: newUser.email,
+          phone: newUser.phone,
+          fullName: newUser.fullName,
+          role: newUser.role,
+        },
+        driver: newDriver,
+        vehicle: newVehicle,
+      };
+    });
+
+    return result;
+  } catch (error) {
+    console.error("Lỗi khi đăng ký tài xế:", error);
+    return { success: false, message: error.message || "Đăng ký tài xế không thành công" };
+  } finally {
+    session.endSession();
   }
 };
 

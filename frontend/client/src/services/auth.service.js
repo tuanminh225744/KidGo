@@ -8,6 +8,10 @@ export const registerUser = async (payload) => {
   return api.post("/auth/register", payload);
 };
 
+export const registerDriver = async (payload) => {
+  return api.post("/auth/register-driver", payload);
+};
+
 export const loginUser = async (email, password) => {
   return api.post("/auth/login", { email, password });
 };

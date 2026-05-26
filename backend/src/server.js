@@ -15,6 +15,7 @@ import AlertRoutes from "./routes/AlertRoutes.js";
 import ReviewRoutes from "./routes/ReviewRoutes.js";
 import NotificationRoutes from "./routes/NotificationRoutes.js";
 import DashboardRoutes from "./routes/DashboardRoutes.js";
+import AdminDriverRoutes from "./routes/AdminDriverRoutes.js";
 import AdminUserRoutes from "./routes/AdminUserRoutes.js";
 import AuthRoutes from "./routes/AuthRoutes.js";
 import UserRoutes from "./routes/UserRoutes.js";
@@ -94,6 +95,7 @@ app.use("/api/v1/alerts", AlertRoutes);
 app.use("/api/v1/reviews", ReviewRoutes);
 app.use("/api/v1/notifications", NotificationRoutes);
 app.use("/api/v1/admin", DashboardRoutes);
+app.use("/api/v1/admin/drivers", AdminDriverRoutes);
 app.use("/api/v1/admin/users", AdminUserRoutes);
 
 // 5. 404 Handler (trước error handler)

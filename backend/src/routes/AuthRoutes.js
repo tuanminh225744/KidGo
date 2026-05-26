@@ -1,6 +1,7 @@
 import express from "express";
 import {
   registerUser,
+  registerDriver,
   loginUser,
   sendOtp,
   verifyOtp,
@@ -11,6 +12,7 @@ import { authenticateToken } from "../middlewares/auth.middleware.js";
 import { validate } from "../middlewares/validate.middleware.js";
 import {
   validateRegisterBody,
+  validateRegisterDriverBody,
   validateLoginBody,
   validateSendOtpBody,
   validateVerifyOtpBody,
@@ -21,6 +23,7 @@ const router = express.Router();
 
 // Public routes
 router.post("/register", validateRegisterBody, validate, registerUser);
+router.post("/register-driver", validateRegisterDriverBody, validate, registerDriver);
 router.post("/login", validateLoginBody, validate, loginUser);
 router.post("/send-otp", validateSendOtpBody, validate, sendOtp);
 router.post("/verify-otp", validateVerifyOtpBody, validate, verifyOtp);
