@@ -13,7 +13,7 @@ import BottomNav from "./pages/client/BottomNav.jsx";
 export default function ClientApp() {
   return (
     <>
-      <div className="flex-1 overflow-y-auto">
+      <div className="max-w-[430px] flex-1 overflow-y-auto">
         <Routes>
           <Route path="/" element={<HomeView />} />
           <Route path="home" element={<HomeView />} />

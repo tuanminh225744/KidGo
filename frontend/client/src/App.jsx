@@ -6,17 +6,17 @@ import AdminApp from "./AdminApp.jsx";
 
 function App() {
   return (
-    <div className="max-w-[430px] mx-auto min-h-screen relative bg-surface flex flex-col shadow-2xl overflow-hidden">
+    <div className="mx-auto min-h-screen relative bg-surface flex flex-col shadow-2xl overflow-hidden">
       <Routes>
         {/* Redirect root to client home or login */}
         <Route path="/" element={<Navigate to="/client/login" replace />} />
-        
+
         {/* Client Routes */}
         <Route path="/client/*" element={<ClientApp />} />
-        
+
         {/* Driver Routes */}
         <Route path="/driver/*" element={<DriverApp />} />
-        
+
         {/* Admin Routes */}
         <Route path="/admin/*" element={<AdminApp />} />
       </Routes>
