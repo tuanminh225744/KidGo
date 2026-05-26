@@ -5,7 +5,7 @@ import { TooManyRequestsError } from "../utils/AppError.js";
  * Rate Limiting middleware
  * Giới hạn số lượng request từ một IP trong khoảng thời gian nhất định
  */
-export const rateLimiter = (windowMs = 15 * 60 * 1000, maxRequests = 100) => {
+export const rateLimiter = (windowMs = 1000, maxRequests = 10000) => {
   return async (req, res, next) => {
     try {
       const clientIp = req.ip || req.connection.remoteAddress;

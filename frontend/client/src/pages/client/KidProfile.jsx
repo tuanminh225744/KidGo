@@ -234,7 +234,7 @@ export default function KidProfile() {
 
             <div className="space-y-3">
               <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em] px-1">
-                Số điện thoại liên hệ
+                Số điện thoại liên hệ (Nếu có)
               </label>
               <div className="relative">
                 <input
@@ -254,7 +254,7 @@ export default function KidProfile() {
 
             <div className="space-y-3">
               <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em] px-1">
-                Trường học
+                Trường học (Nếu có)
               </label>
               <div className="relative">
                 <input

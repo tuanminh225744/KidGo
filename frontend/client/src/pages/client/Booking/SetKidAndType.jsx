@@ -37,7 +37,7 @@ export default function SetKidAndType() {
           <span className="text-sm font-bold">Huỷ</span>
         </button>
         <h1 className="text-2xl font-bold text-primary">Đặt xe</h1>
-        <span className="text-sm font-bold text-on-surface-variant">1/4</span>
+        <span className="text-sm font-bold text-on-surface-variant mx-4">1/4</span>
       </header>
 
       {/* Progress Bar */}
@@ -129,7 +129,7 @@ export default function SetKidAndType() {
 
       <div className="fixed bottom-22 left-0 right-0 p-5 bg-white shadow-[0px_-4px_20px_0px_rgba(79,70,200,0.06)] z-30 max-w-[430px] mx-auto">
         <button
-          onClick={() => navigate('/booking/location', { state: { kidId: selectedKid, tripType } })}
+          onClick={() => navigate('/client/booking/location', { state: { kidId: selectedKid, tripType } })}
           disabled={!selectedKid}
           className="w-full bg-primary-container text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >

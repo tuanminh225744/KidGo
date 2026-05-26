@@ -79,7 +79,7 @@ export default function Home() {
   };
 
   const loadAlerts = async () => {
-    const result = await getParentAlerts({ status: "active" });
+    const result = await getParentAlerts({ status: "open" });
     if (result.success) {
       setAlerts(result.data?.alerts || result.data || []);
     }

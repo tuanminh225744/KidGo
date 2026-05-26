@@ -82,9 +82,9 @@ export const getKidSecurityQuestion = async (kidId) => {
     throw new NotFoundError("Không tìm thấy hồ sơ kid.");
   }
 
-  if (!kid.securityQuestion) {
-    throw new NotFoundError("Kid này chưa thiết lập security question.");
-  }
+  // if (!kid.securityQuestion) {
+  //   throw new NotFoundError("Kid này chưa thiết lập security question.");
+  // }
 
   return kid;
 };
@@ -97,7 +97,7 @@ export const verifySecurityAnswer = async (kidId, answer) => {
   }
 
   if (!kid.securityAnswer) {
-    throw new AppError("Kid này chưa thiết lập security answer.", 400);
+    throw new NotFoundError("Kid này chưa thiết lập security answer.");
   }
 
   return bcrypt.compare(answer.toLowerCase().trim(), kid.securityAnswer);

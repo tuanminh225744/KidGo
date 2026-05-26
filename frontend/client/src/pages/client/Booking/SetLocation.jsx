@@ -67,7 +67,7 @@ export default function SetLocation() {
           <span className="text-sm font-bold">Huỷ</span>
         </button>
         <h1 className="text-2xl font-bold text-primary">Đặt xe</h1>
-        <span className="text-sm font-bold text-on-surface-variant">2/4</span>
+        <span className="text-sm font-bold text-on-surface-variant mx-4">2/4</span>
       </header>
 
       {/* Progress Bar */}
@@ -199,7 +199,7 @@ export default function SetLocation() {
         <button
           onClick={() => {
             if (!startPoint || !endPoint) return;
-            navigate('/booking/datetime', {
+            navigate('/client/booking/datetime', {
               state: {
                 kidId,
                 tripType,

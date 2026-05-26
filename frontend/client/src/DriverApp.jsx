@@ -16,8 +16,8 @@ import Register from "./pages/driver/Register.jsx";
 
 export default function DriverApp() {
   return (
-    <>
-      <div className="max-w-[430px] flex-1 overflow-y-auto relative pb-20">
+    <div className="max-w-[430px] mx-auto w-full h-screen bg-surface relative flex flex-col shadow-2xl overflow-hidden border-x border-gray-200">
+      <div className="flex-1 overflow-y-auto scroll-hide pb-20">
         <Routes>
           <Route path="/" element={<Navigate to="home" replace />} />
           <Route path="login" element={<Login />} />
@@ -38,6 +38,6 @@ export default function DriverApp() {
         </Routes>
       </div>
       <BottomNav />
-    </>
+    </div>
   );
 }

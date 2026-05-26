@@ -12,8 +12,8 @@ import BottomNav from "./pages/client/BottomNav.jsx";
 
 export default function ClientApp() {
   return (
-    <>
-      <div className="max-w-[430px] flex-1 overflow-y-auto">
+    <div className="max-w-[430px] mx-auto w-full h-screen bg-surface relative flex flex-col shadow-2xl overflow-hidden border-x border-gray-200">
+      <div className="flex-1 overflow-y-auto scroll-hide pb-20">
         <Routes>
           <Route path="/" element={<HomeView />} />
           <Route path="home" element={<HomeView />} />
@@ -25,8 +25,7 @@ export default function ClientApp() {
           <Route path="tracking" element={<Tracking />} />
         </Routes>
       </div>
-
       <BottomNav />
-    </>
+    </div>
   );
 }

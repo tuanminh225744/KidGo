@@ -150,7 +150,7 @@ export default function SetDateTime() {
     <div className="flex-1 flex flex-col bg-surface min-h-screen">
       <header className="px-5 py-4 flex justify-between items-center sticky top-0 bg-white z-20">
         <button
-          onClick={() => navigate("/booking/location")}
+          onClick={() => navigate("/client/booking/location")}
           className="flex items-center gap-1 text-on-surface-variant p-2 rounded-xl hover:bg-surface-container-low transition-colors"
         >
           <X size={20} />
@@ -158,11 +158,8 @@ export default function SetDateTime() {
         </button>
         <div className="text-center">
           <h1 className="text-2xl font-bold text-primary">Đặt xe</h1>
-          <p className="text-[10px] font-bold text-on-surface-variant">
-            Bước 3 trên 4
-          </p>
         </div>
-        <span className="text-sm font-bold text-primary">3/4</span>
+        <span className="text-sm font-bold text-primary mx-4">3/4</span>
       </header>
 
       <div className="px-5 mt-2">

@@ -6,7 +6,7 @@ import AdminApp from "./AdminApp.jsx";
 
 function App() {
   return (
-    <div className="mx-auto min-h-screen relative bg-surface flex flex-col shadow-2xl overflow-hidden">
+    <div className="min-h-screen bg-gray-100 flex flex-col font-sans">
       <Routes>
         {/* Redirect root to client home or login */}
         <Route path="/" element={<Navigate to="/client/login" replace />} />

@@ -52,7 +52,7 @@ export default function OTP() {
         <div className="w-10" />
       </header>
 
-      <main className="px-6 pt-10 flex-1 flex flex-col items-center">
+      <main className="px-4 pt-10 flex-1 flex flex-col items-center">
         <div className="mb-12 flex flex-col items-center">
           <div className="w-24 h-24 bg-primary-container text-white rounded-full flex items-center justify-center shadow-2xl mb-8 relative">
             <ShieldCheck size={48} fill="currentColor" stroke="none" />
@@ -121,7 +121,7 @@ export default function OTP() {
             });
             useAuthStore.getState().setUser(result.user);
             clearPendingEmail();
-            navigate("/client/kid-profile");
+            navigate("/client/home");
           }}
           disabled={loading}
           className="w-full max-w-sm bg-primary-container text-white py-4 rounded-2xl font-bold text-lg shadow-xl shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"

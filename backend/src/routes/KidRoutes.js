@@ -50,7 +50,7 @@ router.put(
 
 router.get(
   "/:kidId/security-question",
-  authorize("driver"),
+  authorize("driver", "parent"),
   validateKidIdParam,
   validate,
   getKidSecurityQuestion,

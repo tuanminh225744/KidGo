@@ -41,14 +41,14 @@ export default function SelectDriver() {
     <div className="flex-1 flex flex-col bg-surface min-h-screen">
       <header className="px-5 py-4 flex justify-between items-center sticky top-0 bg-white z-20">
         <button
-          onClick={() => navigate("/booking/datetime")}
+          onClick={() => navigate("/client/booking/datetime")}
           className="flex items-center gap-1 text-on-surface-variant p-2 rounded-xl hover:bg-surface-container-low transition-colors"
         >
           <X size={20} />
           <span className="text-sm font-bold">Huỷ</span>
         </button>
         <h1 className="text-2xl font-bold text-primary">Đặt xe</h1>
-        <span className="text-sm font-bold text-on-surface-variant">4/4</span>
+        <span className="text-sm font-bold text-on-surface-variant mx-4">4/4</span>
       </header>
 
       {/* Progress Bar */}
