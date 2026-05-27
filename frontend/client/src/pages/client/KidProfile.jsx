@@ -8,6 +8,9 @@ import {
   ShieldCheck,
   Save,
   ChevronDown,
+  Shield,
+  ImagePlus,
+  MessageCircleQuestion,
 } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
@@ -15,7 +18,6 @@ import {
   getKidById,
   createKid,
   updateKid,
-  setupSecurityQuestion,
   getKidSecurityQuestion,
   uploadKidAvatar,
 } from "../../services/kid.service.js";
@@ -34,6 +36,11 @@ export default function KidProfile() {
   });
   const [securityQuestion, setSecurityQuestion] = useState("");
   const [securityAnswer, setSecurityAnswer] = useState("");
+  const [securityOptions, setSecurityOptions] = useState({
+    otp: false,
+    pickupPhoto: false,
+    securityQuestion: false,
+  });
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
@@ -60,13 +67,18 @@ export default function KidProfile() {
         notes: kid.notes || "",
         avatar: kid.avatar || "",
       });
+      setSecurityOptions({
+        otp: !!kid.securitySettings?.otp,
+        pickupPhoto: !!kid.securitySettings?.pickupPhoto,
+        securityQuestion: !!kid.securitySettings?.securityQuestion,
+      });
     }
   };
 
   const loadSecurityQuestion = async () => {
     const result = await getKidSecurityQuestion(kidId);
     if (result.success) {
-      setSecurityQuestion(result.securityQuestion || "");
+      setSecurityQuestion(result.data?.securityQuestion || result.securityQuestion || "");
     }
   };
 
@@ -97,7 +109,30 @@ export default function KidProfile() {
       return;
     }
 
+    if (
+      !securityOptions.otp &&
+      !securityOptions.pickupPhoto &&
+      !securityOptions.securityQuestion
+    ) {
+      setError("Vui lòng chọn ít nhất 1 phương thức bảo mật");
+      setLoading(false);
+      return;
+    }
+
+    if (securityOptions.securityQuestion) {
+      if (!securityQuestion.trim() || !securityAnswer.trim()) {
+        setError("Vui lòng nhập đầy đủ câu hỏi và đáp án bảo mật");
+        setLoading(false);
+        return;
+      }
+    }
+
     const payload = { ...formData };
+    payload.securitySettings = securityOptions;
+    if (securityOptions.securityQuestion) {
+      payload.securityQuestion = securityQuestion;
+      payload.securityAnswer = securityAnswer;
+    }
     Object.keys(payload).forEach((key) => {
       if (payload[key] === "") {
         delete payload[key];
@@ -118,19 +153,6 @@ export default function KidProfile() {
     }
 
     const savedKidId = result.data?._id || result._id || kidId;
-
-    if (securityQuestion && securityAnswer && savedKidId) {
-      const securityResult = await setupSecurityQuestion(
-        savedKidId,
-        securityQuestion,
-        securityAnswer,
-      );
-      if (!securityResult.success) {
-        setError(securityResult.message || "Không thể lưu câu hỏi bảo mật");
-        setLoading(false);
-        return;
-      }
-    }
 
     if (avatarFile && savedKidId) {
       const uploadResult = await uploadKidAvatar(savedKidId, avatarFile);
@@ -299,46 +321,95 @@ export default function KidProfile() {
             />
             <h2 className="text-lg font-bold text-on-surface">Bảo mật hồ sơ</h2>
           </div>
-          <div className="bg-white p-6 rounded-[32px] soft-shadow space-y-8 border border-outline-variant/10">
-            <div className="space-y-3">
-              <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em] px-1">
-                Câu hỏi bảo mật
-              </label>
-              <div className="relative">
-                <select
-                  value={securityQuestion}
-                  onChange={(e) => setSecurityQuestion(e.target.value)}
-                  className="w-full appearance-none bg-surface-container-low border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-primary-container transition-all pr-12"
-                >
-                  <option value="">Chọn câu hỏi bảo mật</option>
-                  <option value="Biệt danh của bé là gì?">
-                    Biệt danh của bé là gì?
-                  </option>
-                  <option value="Thú cưng đầu tiên của bé tên gì?">
-                    Thú cưng đầu tiên của bé tên gì?
-                  </option>
-                  <option value="Màu sắc yêu thích của bé?">
-                    Màu sắc yêu thích của bé?
-                  </option>
-                </select>
-                <ChevronDown
-                  size={20}
-                  className="absolute right-5 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none"
+          <div className="bg-white p-6 rounded-[32px] soft-shadow space-y-6 border border-outline-variant/10">
+            <p className="text-sm text-on-surface-variant font-medium">
+              Chọn ít nhất 1 phương thức bảo mật để sử dụng khi xác nhận đón trả.
+            </p>
+
+            <button
+              type="button"
+              onClick={() => setSecurityOptions((prev) => ({ ...prev, otp: !prev.otp }))}
+              className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${securityOptions.otp ? "border-primary-container bg-[#EEF2FF]" : "border-outline-variant/20 bg-surface-container-low"}`}
+            >
+              <div className="flex items-center gap-3 text-left">
+                <div className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+                  <Shield className="text-primary" size={20} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-on-surface">Mã OTP</h3>
+                  <p className="text-xs text-on-surface-variant">Xác nhận đón trả bằng mã một lần</p>
+                </div>
+              </div>
+              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${securityOptions.otp ? "border-primary-container" : "border-outline-variant"}`}>
+                {securityOptions.otp && <div className="w-3 h-3 rounded-full bg-primary-container" />}
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSecurityOptions((prev) => ({ ...prev, pickupPhoto: !prev.pickupPhoto }))}
+              className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${securityOptions.pickupPhoto ? "border-primary-container bg-[#EEF2FF]" : "border-outline-variant/20 bg-surface-container-low"}`}
+            >
+              <div className="flex items-center gap-3 text-left">
+                <div className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+                  <ImagePlus className="text-primary" size={20} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-on-surface">Ảnh đón trả</h3>
+                  <p className="text-xs text-on-surface-variant">Yêu cầu ảnh xác nhận khi đón/trả</p>
+                </div>
+              </div>
+              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${securityOptions.pickupPhoto ? "border-primary-container" : "border-outline-variant"}`}>
+                {securityOptions.pickupPhoto && <div className="w-3 h-3 rounded-full bg-primary-container" />}
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setSecurityOptions((prev) => ({ ...prev, securityQuestion: !prev.securityQuestion }))}
+              className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${securityOptions.securityQuestion ? "border-primary-container bg-[#EEF2FF]" : "border-outline-variant/20 bg-surface-container-low"}`}
+            >
+              <div className="flex items-center gap-3 text-left">
+                <div className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center shadow-sm">
+                  <MessageCircleQuestion className="text-primary" size={20} />
+                </div>
+                <div>
+                  <h3 className="font-bold text-on-surface">Câu hỏi bảo mật</h3>
+                  <p className="text-xs text-on-surface-variant">Dùng câu hỏi và đáp án bí mật</p>
+                </div>
+              </div>
+              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${securityOptions.securityQuestion ? "border-primary-container" : "border-outline-variant"}`}>
+                {securityOptions.securityQuestion && <div className="w-3 h-3 rounded-full bg-primary-container" />}
+              </div>
+            </button>
+
+            {securityOptions.securityQuestion && (
+              <div className="space-y-3 pt-2">
+                <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em] px-1">
+                  Câu hỏi bảo mật
+                </label>
+                <div className="relative">
+                  <select
+                    value={securityQuestion}
+                    onChange={(e) => setSecurityQuestion(e.target.value)}
+                    className="w-full appearance-none bg-surface-container-low border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-primary-container transition-all pr-12"
+                  >
+                    <option value="">Chọn câu hỏi bảo mật</option>
+                    <option value="Biệt danh của bé là gì?">Biệt danh của bé là gì?</option>
+                    <option value="Thú cưng đầu tiên của bé tên gì?">Thú cưng đầu tiên của bé tên gì?</option>
+                    <option value="Màu sắc yêu thích của bé?">Màu sắc yêu thích của bé?</option>
+                  </select>
+                  <ChevronDown size={20} className="absolute right-5 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none" />
+                </div>
+                <input
+                  type="text"
+                  value={securityAnswer}
+                  onChange={(e) => setSecurityAnswer(e.target.value)}
+                  placeholder="Câu trả lời của bạn"
+                  className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-primary-container transition-all"
                 />
               </div>
-            </div>
-            <div className="space-y-3">
-              <label className="text-[10px] font-bold text-on-surface-variant uppercase tracking-[0.2em] px-1">
-                Đáp án bảo mật
-              </label>
-              <input
-                type="text"
-                value={securityAnswer}
-                onChange={(e) => setSecurityAnswer(e.target.value)}
-                placeholder="Câu trả lời của bạn"
-                className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-primary-container transition-all"
-              />
-            </div>
+            )}
           </div>
         </section>
         <div className="max-w-[430px] mx-auto z-30">

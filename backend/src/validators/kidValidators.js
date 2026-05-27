@@ -43,6 +43,55 @@ export const validateCreateKid = [
     .isString()
     .withMessage("notes phải là chuỗi văn bản")
     .trim(),
+
+  body("securitySettings")
+    .optional()
+    .isObject()
+    .withMessage("securitySettings phải là object"),
+
+  body("securitySettings.otp")
+    .optional()
+    .isBoolean()
+    .withMessage("securitySettings.otp phải là boolean"),
+
+  body("securitySettings.pickupPhoto")
+    .optional()
+    .isBoolean()
+    .withMessage("securitySettings.pickupPhoto phải là boolean"),
+
+  body("securitySettings.securityQuestion")
+    .optional()
+    .isBoolean()
+    .withMessage("securitySettings.securityQuestion phải là boolean"),
+
+  body("securityQuestion")
+    .optional()
+    .isString()
+    .withMessage("securityQuestion phải là chuỗi văn bản")
+    .trim(),
+
+  body("securityAnswer")
+    .optional()
+    .isString()
+    .withMessage("securityAnswer phải là chuỗi văn bản")
+    .trim(),
+
+  body().custom((value) => {
+    const settings = value.securitySettings || {};
+    const hasOtp = settings.otp === true;
+    const hasPickupPhoto = settings.pickupPhoto === true;
+    const hasSecurityQuestion = settings.securityQuestion === true;
+
+    if (!hasOtp && !hasPickupPhoto && !hasSecurityQuestion) {
+      throw new Error("Phải chọn ít nhất 1 phương thức bảo mật.");
+    }
+
+    if (hasSecurityQuestion && (!value.securityQuestion || !value.securityAnswer)) {
+      throw new Error("Khi chọn câu hỏi bảo mật, cần nhập đầy đủ câu hỏi và đáp án.");
+    }
+
+    return true;
+  }),
 ];
 
 export const validateUpdateKid = [
@@ -95,12 +144,58 @@ export const validateUpdateKid = [
     .withMessage("notes phải là chuỗi văn bản")
     .trim(),
 
+  body("securitySettings")
+    .optional()
+    .isObject()
+    .withMessage("securitySettings phải là object"),
+
+  body("securitySettings.otp")
+    .optional()
+    .isBoolean()
+    .withMessage("securitySettings.otp phải là boolean"),
+
+  body("securitySettings.pickupPhoto")
+    .optional()
+    .isBoolean()
+    .withMessage("securitySettings.pickupPhoto phải là boolean"),
+
+  body("securitySettings.securityQuestion")
+    .optional()
+    .isBoolean()
+    .withMessage("securitySettings.securityQuestion phải là boolean"),
+
+  body("securityQuestion")
+    .optional()
+    .isString()
+    .withMessage("securityQuestion phải là chuỗi văn bản")
+    .trim(),
+
+  body("securityAnswer")
+    .optional()
+    .isString()
+    .withMessage("securityAnswer phải là chuỗi văn bản")
+    .trim(),
+
   body().custom((value) => {
-    const allowedFields = ["fullName", "dateOfBirth", "avatar", "phone", "school", "notes"];
+    const allowedFields = ["fullName", "dateOfBirth", "avatar", "phone", "school", "notes", "securitySettings", "securityQuestion", "securityAnswer"];
     const hasUpdateField = allowedFields.some((field) => value[field] !== undefined);
 
     if (!hasUpdateField) {
       throw new Error("Phải cung cấp ít nhất một trường để cập nhật.");
+    }
+
+    const settings = value.securitySettings || {};
+    const hasSecuritySettings =
+      settings.otp === true ||
+      settings.pickupPhoto === true ||
+      settings.securityQuestion === true;
+
+    if (value.securitySettings && !hasSecuritySettings) {
+      throw new Error("Phải chọn ít nhất 1 phương thức bảo mật.");
+    }
+
+    if (settings.securityQuestion === true && (!value.securityQuestion || !value.securityAnswer)) {
+      throw new Error("Khi chọn câu hỏi bảo mật, cần nhập đầy đủ câu hỏi và đáp án.");
     }
 
     return true;
@@ -125,6 +220,62 @@ export const validateSetupSecurityQuestion = [
     .isString()
     .withMessage("securityAnswer phải là chuỗi văn bản")
     .trim(),
+];
+
+export const validateSetupKidSecurity = [
+  ...validateKidIdParam,
+
+  body("securitySettings")
+    .notEmpty()
+    .withMessage("securitySettings là bắt buộc")
+    .bail()
+    .isObject()
+    .withMessage("securitySettings phải là object"),
+
+  body("securitySettings.otp")
+    .optional()
+    .isBoolean()
+    .withMessage("securitySettings.otp phải là boolean"),
+
+  body("securitySettings.pickupPhoto")
+    .optional()
+    .isBoolean()
+    .withMessage("securitySettings.pickupPhoto phải là boolean"),
+
+  body("securitySettings.securityQuestion")
+    .optional()
+    .isBoolean()
+    .withMessage("securitySettings.securityQuestion phải là boolean"),
+
+  body("securityQuestion")
+    .optional()
+    .isString()
+    .withMessage("securityQuestion phải là chuỗi văn bản")
+    .trim(),
+
+  body("securityAnswer")
+    .optional()
+    .isString()
+    .withMessage("securityAnswer phải là chuỗi văn bản")
+    .trim(),
+
+  body().custom((value) => {
+    const settings = value.securitySettings || {};
+    const hasSecuritySettings =
+      settings.otp === true ||
+      settings.pickupPhoto === true ||
+      settings.securityQuestion === true;
+
+    if (!hasSecuritySettings) {
+      throw new Error("Phải chọn ít nhất 1 phương thức bảo mật.");
+    }
+
+    if (settings.securityQuestion === true && (!value.securityQuestion || !value.securityAnswer)) {
+      throw new Error("Khi chọn câu hỏi bảo mật, cần nhập đầy đủ câu hỏi và đáp án.");
+    }
+
+    return true;
+  }),
 ];
 
 export const validateVerifySecurityAnswer = [

@@ -23,6 +23,7 @@ axiosInstance.interceptors.request.use(
 
 axiosInstance.interceptors.response.use(
   (response) => response.data,
+
   async (error) => {
     const originalRequest = error.config;
 
@@ -32,46 +33,43 @@ axiosInstance.interceptors.response.use(
       !originalRequest._retry
     ) {
       originalRequest._retry = true;
-      const refreshToken = localStorage.getItem("refreshToken");
 
-      if (refreshToken) {
-        try {
-          const response = await axios.post(
-            `${baseURL}/auth/refresh`,
-            { refreshToken },
-            {
-              headers: {
-                "Content-Type": "application/json",
-              },
-            },
-          );
+      try {
+        const refreshToken = localStorage.getItem("refreshToken");
 
-          const { accessToken, refreshToken: newRefreshToken } = response.data;
-          localStorage.setItem("accessToken", accessToken);
-          localStorage.setItem("refreshToken", newRefreshToken);
-
-          if (originalRequest.headers) {
-            originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-          }
-
-          return axiosInstance(originalRequest);
-        } catch (refreshError) {
-          localStorage.removeItem("accessToken");
-          localStorage.removeItem("refreshToken");
-          window.location.href = "/login";
+        if (!refreshToken) {
+          throw new Error("No refresh token");
         }
+
+        const response = await axios.post(`${baseURL}/auth/refresh`, {
+          refreshToken,
+        });
+
+        console.log("REFRESH RESPONSE:", response.data);
+
+        const { accessToken, refreshToken: newRefreshToken } =
+          response.data.data || response.data;
+
+        localStorage.setItem("accessToken", accessToken);
+        localStorage.setItem("refreshToken", newRefreshToken);
+
+        originalRequest.headers = {
+          ...originalRequest.headers,
+          Authorization: `Bearer ${accessToken}`,
+        };
+
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+
+        window.location.href = "/client/login";
+
+        return Promise.reject(refreshError);
       }
     }
 
-    return {
-      success: false,
-      message:
-        error.response?.data?.message ||
-        error.response?.data?.error ||
-        error.message ||
-        "Đã có lỗi xảy ra khi gọi API",
-      errors: error.response?.data?.errors,
-    };
+    return Promise.reject(error);
   },
 );
 

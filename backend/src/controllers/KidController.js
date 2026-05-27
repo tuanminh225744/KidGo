@@ -37,9 +37,27 @@ export const getKids = async (req, res, next) => {
 // POST /api/v1/kids
 export const createKid = async (req, res, next) => {
   try {
-    const kid = await kidService.createKid({
-      ...req.body,
+    const { securitySettings = {}, securityQuestion, securityAnswer, ...restBody } = req.body;
+    const kidPayload = {
+      ...restBody,
       parentId: req.user.id,
+      securitySettings: {
+        otp: !!securitySettings.otp,
+        pickupPhoto: !!securitySettings.pickupPhoto,
+        securityQuestion: !!securitySettings.securityQuestion,
+      },
+    };
+
+    if (kidPayload.securitySettings.securityQuestion) {
+      kidPayload.securityQuestion = securityQuestion;
+      kidPayload.securityAnswer = securityAnswer;
+    } else {
+      kidPayload.securityQuestion = undefined;
+      kidPayload.securityAnswer = undefined;
+    }
+
+    const kid = await kidService.createKid({
+      ...kidPayload,
     });
 
     res.status(201).json({
@@ -70,7 +88,25 @@ export const getKidDetail = async (req, res, next) => {
 export const updateKidDetail = async (req, res, next) => {
   try {
     await ensureParentOwnsKid(req.params.kidId, req.user.id);
-    const updatedKid = await kidService.updateKid(req.params.kidId, req.body);
+    const { securitySettings = {}, securityQuestion, securityAnswer, ...restBody } = req.body;
+    const updatePayload = {
+      ...restBody,
+      securitySettings: {
+        otp: !!securitySettings.otp,
+        pickupPhoto: !!securitySettings.pickupPhoto,
+        securityQuestion: !!securitySettings.securityQuestion,
+      },
+    };
+
+    if (updatePayload.securitySettings.securityQuestion) {
+      updatePayload.securityQuestion = securityQuestion;
+      updatePayload.securityAnswer = securityAnswer;
+    } else {
+      updatePayload.securityQuestion = undefined;
+      updatePayload.securityAnswer = undefined;
+    }
+
+    const updatedKid = await kidService.updateKid(req.params.kidId, updatePayload);
 
     res.status(200).json({
       success: true,

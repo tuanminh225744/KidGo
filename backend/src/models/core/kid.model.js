@@ -11,6 +11,11 @@ const KidSchema = new Schema(
     school:      { type: String },
     notes:       { type: String },
     isActive:    { type: Boolean, default: true },
+    securitySettings: {
+      otp: { type: Boolean, default: false },
+      pickupPhoto: { type: Boolean, default: false },
+      securityQuestion: { type: Boolean, default: false },
+    },
     securityQuestion: { type: String },
     securityAnswer:   { type: String }, // Store hashed answer
   },
