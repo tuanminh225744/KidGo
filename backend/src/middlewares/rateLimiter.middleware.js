@@ -55,4 +55,4 @@ export const authLimiter = rateLimiter(15 * 60 * 1000, 5); // 5 requests per 15 
 /**
  * Rate Limiter cho API endpoints (thường hơn)
  */
-export const apiLimiter = rateLimiter(15 * 60 * 1000, 100); // 100 requests per 15 minutes
+export const apiLimiter = rateLimiter(60 * 1000, 10000); // 100 requests per 15 minutes

@@ -48,7 +48,9 @@ export default function SelectDriver() {
           <span className="text-sm font-bold">Huỷ</span>
         </button>
         <h1 className="text-2xl font-bold text-primary">Đặt xe</h1>
-        <span className="text-sm font-bold text-on-surface-variant mx-4">4/4</span>
+        <span className="text-sm font-bold text-on-surface-variant mx-4">
+          4/4
+        </span>
       </header>
 
       {/* Progress Bar */}
@@ -157,17 +159,21 @@ export default function SelectDriver() {
 
       <footer className="fixed bottom-20 left-0 right-0 p-5 pb-8 bg-white shadow-[0px_-4px_20px_0px_rgba(79,70,200,0.06)] z-30 max-w-[430px] mx-auto space-y-4">
         <button
-          onClick={() => navigate("/booking/confirm", {
-            state: { ...previousState, selectedDriverId }
-          })}
+          onClick={() =>
+            navigate("/client/booking/confirm", {
+              state: { ...previousState, selectedDriverId },
+            })
+          }
           className="w-full h-14 bg-primary-container text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl shadow-primary/20 active:scale-[0.98] transition-all"
         >
           Tiếp tục <ArrowRight size={20} />
         </button>
         <button
-          onClick={() => navigate("/booking/confirm", {
-            state: { ...previousState, selectedDriverId: null }
-          })}
+          onClick={() =>
+            navigate("/client/booking/confirm", {
+              state: { ...previousState, selectedDriverId: null },
+            })
+          }
           className="w-full text-center text-primary font-bold text-sm hover:underline underline-offset-4"
         >
           Bỏ qua, tự ghép

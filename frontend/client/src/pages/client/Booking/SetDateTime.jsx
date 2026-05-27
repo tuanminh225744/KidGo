@@ -26,8 +26,15 @@ const formatDateInput = (date) => {
 export default function SetDateTime() {
   const navigate = useNavigate();
   const location = useLocation();
-  const { kidId, tripType, startPoint, endPoint, pickupText, dropoffText, routeInfo } =
-    location.state || {};
+  const {
+    kidId,
+    tripType,
+    startPoint,
+    endPoint,
+    pickupText,
+    dropoffText,
+    routeInfo,
+  } = location.state || {};
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [hour, setHour] = useState(7);
@@ -110,7 +117,7 @@ export default function SetDateTime() {
     const finalDateTime = new Date(selectedDate);
     finalDateTime.setHours(hour, minute, 0, 0);
 
-    navigate("/booking/driver", {
+    navigate("/client/booking/driver", {
       state: {
         kidId,
         tripType: localTripType,
@@ -132,7 +139,7 @@ export default function SetDateTime() {
 
   const handleBookNow = () => {
     const now = new Date();
-    navigate("/booking/driver", {
+    navigate("/client/booking/driver", {
       state: {
         kidId,
         tripType: "one-time",
