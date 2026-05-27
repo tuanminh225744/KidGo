@@ -183,12 +183,16 @@ export const registerDriver = async (payload) => {
         throw new Error("Email hoặc số điện thoại đã tồn tại");
       }
 
-      const duplicateDriver = await Driver.findOne({ licenseNumber }).session(session);
+      const duplicateDriver = await Driver.findOne({ licenseNumber }).session(
+        session,
+      );
       if (duplicateDriver) {
         throw new Error("Số GPLX đã tồn tại");
       }
 
-      const duplicateVehicle = await Vehicle.findOne({ licensePlate }).session(session);
+      const duplicateVehicle = await Vehicle.findOne({ licensePlate }).session(
+        session,
+      );
       if (duplicateVehicle) {
         throw new Error("Biển số xe đã tồn tại");
       }
@@ -229,7 +233,9 @@ export const registerDriver = async (payload) => {
         model,
         color,
         seatCount: seatCount ? Number(seatCount) : undefined,
-        inspectionExpiry: inspectionExpiry ? new Date(inspectionExpiry) : undefined,
+        inspectionExpiry: inspectionExpiry
+          ? new Date(inspectionExpiry)
+          : undefined,
       };
 
       const [newVehicle] = await Vehicle.create([vehicleData], { session });
@@ -252,7 +258,10 @@ export const registerDriver = async (payload) => {
     return result;
   } catch (error) {
     console.error("Lỗi khi đăng ký tài xế:", error);
-    return { success: false, message: error.message || "Đăng ký tài xế không thành công" };
+    return {
+      success: false,
+      message: error.message || "Đăng ký tài xế không thành công",
+    };
   } finally {
     session.endSession();
   }
@@ -287,6 +296,25 @@ export const login = async (email, password) => {
         message:
           "Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản lý.",
       };
+    }
+
+    // Driver accounts must also have an active driver profile
+    if (user.role === "driver") {
+      const driver = await Driver.findOne({ user: user._id }).select("status");
+
+      if (!driver) {
+        return {
+          success: false,
+          message: "Không tìm thấy hồ sơ tài xế. Vui lòng liên hệ quản lý.",
+        };
+      }
+
+      if (driver.status !== "active") {
+        return {
+          success: false,
+          message: "Tài khoản tài xế chưa được kích hoạt hoặc đã bị từ chối.",
+        };
+      }
     }
 
     const { accessToken, refreshToken } = generateTokens(user._id);

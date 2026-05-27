@@ -9,16 +9,20 @@ import {
   Car,
   Tag,
   Palette,
-  CheckCircle,
 } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { registerDriver } from "../../services/auth.service";
+import {
+  registerDriver,
+  savePendingEmail,
+  sendOtp,
+} from "../../services/auth.service.js";
 
 export default function Register() {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [formData, setFormData] = useState({
     email: "",
     phone: "",
@@ -46,6 +50,7 @@ export default function Register() {
 
   const handleSubmitStep2 = async (e) => {
     e.preventDefault();
+    setError("");
     setLoading(true);
     try {
       const payload = {
@@ -59,9 +64,19 @@ export default function Register() {
         throw new Error(response?.message || "Đăng ký tài xế không thành công");
       }
 
-      setStep(3);
+      const email = formData.email.trim();
+      savePendingEmail(email);
+
+      const otpResult = await sendOtp(email);
+      if (!otpResult?.success) {
+        throw new Error(
+          otpResult?.message || "Không thể gửi mã xác thực. Vui lòng thử lại.",
+        );
+      }
+
+      navigate("/driver/otp");
     } catch (error) {
-      alert(error.message || "Đăng ký tài xế không thành công");
+      setError(error.message || "Đăng ký tài xế không thành công");
     } finally {
       setLoading(false);
     }
@@ -105,7 +120,10 @@ export default function Register() {
                     Họ và tên
                   </label>
                   <div className="relative">
-                    <User className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={18} />
+                    <User
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-outline"
+                      size={18}
+                    />
                     <input
                       required
                       name="fullName"
@@ -123,7 +141,10 @@ export default function Register() {
                     Email
                   </label>
                   <div className="relative">
-                    <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={18} />
+                    <Mail
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-outline"
+                      size={18}
+                    />
                     <input
                       required
                       type="email"
@@ -142,7 +163,10 @@ export default function Register() {
                     Số điện thoại
                   </label>
                   <div className="relative">
-                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={18} />
+                    <Phone
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-outline"
+                      size={18}
+                    />
                     <input
                       required
                       type="tel"
@@ -161,7 +185,10 @@ export default function Register() {
                     Mật khẩu
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={18} />
+                    <Lock
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-outline"
+                      size={18}
+                    />
                     <input
                       required
                       type="password"
@@ -180,7 +207,10 @@ export default function Register() {
                     Số GPLX
                   </label>
                   <div className="relative">
-                    <CreditCard className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={18} />
+                    <CreditCard
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-outline"
+                      size={18}
+                    />
                     <input
                       required
                       name="licenseNumber"
@@ -198,7 +228,10 @@ export default function Register() {
                     Ngày hết hạn GPLX
                   </label>
                   <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={18} />
+                    <Calendar
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-outline"
+                      size={18}
+                    />
                     <input
                       required
                       type="date"
@@ -218,7 +251,7 @@ export default function Register() {
                 </button>
               </form>
             </div>
-            
+
             <div className="mt-8 text-center">
               <p className="text-sm text-on-surface-variant">
                 Bạn đã có tài khoản?
@@ -252,7 +285,10 @@ export default function Register() {
                     Biển số xe
                   </label>
                   <div className="relative">
-                    <Car className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={18} />
+                    <Car
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-outline"
+                      size={18}
+                    />
                     <input
                       required
                       name="licensePlate"
@@ -270,7 +306,10 @@ export default function Register() {
                     Hãng xe
                   </label>
                   <div className="relative">
-                    <Tag className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={18} />
+                    <Tag
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-outline"
+                      size={18}
+                    />
                     <input
                       required
                       name="brand"
@@ -288,7 +327,10 @@ export default function Register() {
                     Mẫu xe
                   </label>
                   <div className="relative">
-                    <Car className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={18} />
+                    <Car
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-outline"
+                      size={18}
+                    />
                     <input
                       required
                       name="model"
@@ -307,7 +349,10 @@ export default function Register() {
                       Màu sắc
                     </label>
                     <div className="relative">
-                      <Palette className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={18} />
+                      <Palette
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-outline"
+                        size={18}
+                      />
                       <input
                         required
                         name="color"
@@ -323,7 +368,10 @@ export default function Register() {
                       Số chỗ
                     </label>
                     <div className="relative">
-                      <User className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={18} />
+                      <User
+                        className="absolute left-4 top-1/2 -translate-y-1/2 text-outline"
+                        size={18}
+                      />
                       <input
                         required
                         type="number"
@@ -343,7 +391,10 @@ export default function Register() {
                     Hạn đăng kiểm
                   </label>
                   <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-outline" size={18} />
+                    <Calendar
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-outline"
+                      size={18}
+                    />
                     <input
                       required
                       type="date"
@@ -362,12 +413,17 @@ export default function Register() {
                 >
                   {loading ? "Đang gửi thông tin..." : "Gửi đăng ký"}
                 </button>
+                {error && (
+                  <div className="text-sm text-error font-semibold mt-2">
+                    {error}
+                  </div>
+                )}
               </form>
             </div>
           </div>
         )}
 
-        {step === 3 && (
+        {/* {step === 3 && (
           <div className="flex-1 flex flex-col items-center justify-center animate-in zoom-in-95 duration-500">
             <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
               <CheckCircle className="text-green-600 w-12 h-12" />
@@ -376,7 +432,8 @@ export default function Register() {
               Đăng ký thành công!
             </h2>
             <p className="text-on-surface-variant text-center max-w-xs mb-8 leading-relaxed">
-              Thông tin của bạn đã được gửi cho admin duyệt. Vui lòng chờ bộ phận hỗ trợ liên hệ sớm nhất.
+              Thông tin của bạn đã được gửi cho admin duyệt. Vui lòng chờ bộ
+              phận hỗ trợ liên hệ sớm nhất.
             </p>
             <button
               onClick={() => navigate("/driver/login")}
@@ -385,7 +442,7 @@ export default function Register() {
               Về trang đăng nhập
             </button>
           </div>
-        )}
+        )} */}
       </main>
     </div>
   );

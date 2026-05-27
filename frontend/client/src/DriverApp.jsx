@@ -13,6 +13,8 @@ import { DropOffScreen } from "./pages/driver/DropOffScreen.jsx";
 import { SummaryScreen } from "./pages/driver/SummaryScreen.jsx";
 import Login from "./pages/driver/Login.jsx";
 import Register from "./pages/driver/Register.jsx";
+import OTP from "./pages/driver/OTP.jsx";
+import SuccessfullyRegistered from "./pages/driver/SuccessfullyRegistered.jsx";
 
 export default function DriverApp() {
   return (
@@ -22,6 +24,8 @@ export default function DriverApp() {
           <Route path="/" element={<Navigate to="home" replace />} />
           <Route path="login" element={<Login />} />
           <Route path="register" element={<Register />} />
+          <Route path="otp" element={<OTP />} />
+          <Route path="registered" element={<SuccessfullyRegistered />} />
           <Route path="home" element={<HomeScreen />} />
           <Route path="schedule" element={<ScheduleView />} />
           <Route path="history" element={<HistoryView />} />
