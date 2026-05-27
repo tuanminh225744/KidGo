@@ -1,7 +1,16 @@
-import { X, Route as RouteIcon, MapPin, ArrowRight, ArrowUpDown, History, Home as HomeIcon } from 'lucide-react';
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import MapRouting from '../../../components/MapRouting';
+import {
+  X,
+  Route as RouteIcon,
+  MapPin,
+  ArrowRight,
+  ArrowUpDown,
+  ArrowLeft,
+  History,
+  Home as HomeIcon,
+} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import MapRouting from "../../../components/MapRouting";
 
 export default function SetLocation() {
   const navigate = useNavigate();
@@ -10,7 +19,10 @@ export default function SetLocation() {
 
   const [startPoint, setStartPoint] = useState(null);
   const [endPoint, setEndPoint] = useState(null);
-  const [routeInfo, setRouteInfo] = useState({ distance: null, duration: null });
+  const [routeInfo, setRouteInfo] = useState({
+    distance: null,
+    duration: null,
+  });
 
   const [pickupText, setPickupText] = useState("");
   const [dropoffText, setDropoffText] = useState("");
@@ -25,7 +37,9 @@ export default function SetLocation() {
         return;
       }
       try {
-        const res = await fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=vn&limit=5`);
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}&countrycodes=vn&limit=5`,
+        );
         const data = await res.json();
         isPickup ? setPickupSuggestions(data) : setDropoffSuggestions(data);
       } catch (err) {
@@ -34,8 +48,8 @@ export default function SetLocation() {
     };
 
     const timer = setTimeout(() => {
-      if (activeField === 'pickup') fetchNominatim(pickupText, true);
-      if (activeField === 'dropoff') fetchNominatim(dropoffText, false);
+      if (activeField === "pickup") fetchNominatim(pickupText, true);
+      if (activeField === "dropoff") fetchNominatim(dropoffText, false);
     }, 500);
 
     return () => clearTimeout(timer);
@@ -55,6 +69,55 @@ export default function SetLocation() {
     setActiveField(null);
   };
 
+  const reverseGeocode = async ({ lat, lng }) => {
+    const googleApiKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
+
+    if (googleApiKey) {
+      const googleUrl = `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${googleApiKey}`;
+      const res = await fetch(googleUrl);
+      const data = await res.json();
+      const address = data?.results?.[0]?.formatted_address;
+      if (address) return address;
+    }
+
+    const nominatimUrl = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`;
+    const res = await fetch(nominatimUrl, {
+      headers: {
+        Accept: "application/json",
+      },
+    });
+    const data = await res.json();
+    return data?.display_name || `${lat}, ${lng}`;
+  };
+
+  const handleMapPick = async (latlng) => {
+    const targetField = activeField || "pickup";
+    const coords = { lat: latlng.lat, lng: latlng.lng };
+    const address = await reverseGeocode(coords);
+
+    if (targetField === "pickup") {
+      setStartPoint(coords);
+      setPickupText(address);
+      setPickupSuggestions([]);
+    } else {
+      setEndPoint(coords);
+      setDropoffText(address);
+      setDropoffSuggestions([]);
+    }
+  };
+
+  const handleSwapLocations = () => {
+    setStartPoint(endPoint);
+    setEndPoint(startPoint);
+
+    setPickupText(dropoffText);
+    setDropoffText(pickupText);
+
+    setPickupSuggestions([]);
+    setDropoffSuggestions([]);
+    setActiveField(null);
+  };
+
   const handleRouteInfo = (info) => {
     setRouteInfo(info);
   };
@@ -62,12 +125,17 @@ export default function SetLocation() {
   return (
     <div className="flex-1 flex flex-col bg-surface min-h-screen">
       <header className="px-5 py-4 flex justify-between items-center sticky top-0 bg-white z-20">
-        <button onClick={() => navigate('/booking')} className="flex items-center gap-1 text-on-surface-variant p-2 rounded-xl hover:bg-surface-container-low transition-colors">
-          <X size={20} />
-          <span className="text-sm font-bold">Huỷ</span>
+        <button
+          onClick={() => navigate("/client/booking")}
+          className="flex items-center gap-1 text-on-surface-variant p-2 rounded-xl hover:bg-surface-container-low transition-colors"
+        >
+          <ArrowLeft size={20} />
+          <span className="text-sm font-bold">Quay lại</span>
         </button>
         <h1 className="text-2xl font-bold text-primary">Đặt xe</h1>
-        <span className="text-sm font-bold text-on-surface-variant mx-4">2/4</span>
+        <span className="text-sm font-bold text-on-surface-variant mx-8">
+          2/4
+        </span>
       </header>
 
       {/* Progress Bar */}
@@ -77,8 +145,10 @@ export default function SetLocation() {
         </div>
       </div>
 
-      <main className="px-5 pt-8 pb-52">
-        <h2 className="text-3xl font-extrabold text-on-background mb-6 tracking-tight">Đi đâu?</h2>
+      <main className="px-5 pt-8 pb-30">
+        <h2 className="text-3xl font-extrabold text-on-background mb-6 tracking-tight">
+          Đi đâu?
+        </h2>
 
         {/* Map Placeholder */}
         <section className="relative w-full h-64 map-bg rounded-3xl overflow-hidden border border-outline-variant/30 mb-4 soft-shadow z-0">
@@ -86,7 +156,8 @@ export default function SetLocation() {
             startPoint={startPoint}
             endPoint={endPoint}
             onRouteInfo={handleRouteInfo}
-            readOnly={true}
+            onMapClick={handleMapPick}
+            readOnly={false}
           />
         </section>
 
@@ -115,22 +186,28 @@ export default function SetLocation() {
             </div>
             <div className="flex-1 space-y-8">
               <div className="relative">
-                <label className="text-[10px] font-bold text-outline uppercase absolute -top-5 left-0">Điểm đón</label>
+                <label className="text-[10px] font-bold text-outline uppercase absolute -top-5 left-0">
+                  Điểm đón
+                </label>
                 <input
                   type="text"
                   value={pickupText}
                   onChange={(e) => {
                     setPickupText(e.target.value);
-                    setActiveField('pickup');
+                    setActiveField("pickup");
                   }}
-                  onFocus={() => setActiveField('pickup')}
+                  onFocus={() => setActiveField("pickup")}
                   placeholder="Nhập địa chỉ đón..."
                   className="w-full bg-transparent border-b border-outline-variant py-1 focus:border-primary outline-none text-sm font-bold"
                 />
-                {activeField === 'pickup' && pickupSuggestions.length > 0 && (
+                {activeField === "pickup" && pickupSuggestions.length > 0 && (
                   <ul className="absolute top-full left-0 right-0 bg-white border border-outline-variant/20 shadow-lg rounded-xl mt-1 z-50 max-h-48 overflow-y-auto">
-                    {pickupSuggestions.map(s => (
-                      <li key={s.place_id} onClick={() => handleSelectSuggestion(s, true)} className="p-3 border-b border-outline-variant/10 text-xs hover:bg-surface-container-low cursor-pointer line-clamp-2 text-on-surface">
+                    {pickupSuggestions.map((s) => (
+                      <li
+                        key={s.place_id}
+                        onClick={() => handleSelectSuggestion(s, true)}
+                        className="p-3 border-b border-outline-variant/10 text-xs hover:bg-surface-container-low cursor-pointer line-clamp-2 text-on-surface"
+                      >
                         {s.display_name}
                       </li>
                     ))}
@@ -138,22 +215,28 @@ export default function SetLocation() {
                 )}
               </div>
               <div className="relative">
-                <label className="text-[10px] font-bold text-outline uppercase absolute -top-5 left-0">Điểm trả</label>
+                <label className="text-[10px] font-bold text-outline uppercase absolute -top-5 left-0">
+                  Điểm trả
+                </label>
                 <input
                   type="text"
                   value={dropoffText}
                   onChange={(e) => {
                     setDropoffText(e.target.value);
-                    setActiveField('dropoff');
+                    setActiveField("dropoff");
                   }}
-                  onFocus={() => setActiveField('dropoff')}
+                  onFocus={() => setActiveField("dropoff")}
                   placeholder="Nhập địa chỉ trả..."
                   className="w-full bg-transparent border-b border-outline-variant py-1 focus:border-primary outline-none text-sm font-medium"
                 />
-                {activeField === 'dropoff' && dropoffSuggestions.length > 0 && (
+                {activeField === "dropoff" && dropoffSuggestions.length > 0 && (
                   <ul className="absolute top-full left-0 right-0 bg-white border border-outline-variant/20 shadow-lg rounded-xl mt-1 z-50 max-h-48 overflow-y-auto">
-                    {dropoffSuggestions.map(s => (
-                      <li key={s.place_id} onClick={() => handleSelectSuggestion(s, false)} className="p-3 border-b border-outline-variant/10 text-xs hover:bg-surface-container-low cursor-pointer line-clamp-2 text-on-surface">
+                    {dropoffSuggestions.map((s) => (
+                      <li
+                        key={s.place_id}
+                        onClick={() => handleSelectSuggestion(s, false)}
+                        className="p-3 border-b border-outline-variant/10 text-xs hover:bg-surface-container-low cursor-pointer line-clamp-2 text-on-surface"
+                      >
                         {s.display_name}
                       </li>
                     ))}
@@ -161,7 +244,11 @@ export default function SetLocation() {
                 )}
               </div>
             </div>
-            <button className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-surface-container-low rounded-full flex items-center justify-center text-primary active:scale-90 transition-transform">
+            <button
+              type="button"
+              onClick={handleSwapLocations}
+              className="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-surface-container-low rounded-full flex items-center justify-center text-primary active:scale-90 transition-transform"
+            >
               <ArrowUpDown size={20} strokeWidth={3} />
             </button>
           </div>
@@ -199,7 +286,7 @@ export default function SetLocation() {
         <button
           onClick={() => {
             if (!startPoint || !endPoint) return;
-            navigate('/client/booking/datetime', {
+            navigate("/client/booking/datetime", {
               state: {
                 kidId,
                 tripType,
@@ -207,8 +294,8 @@ export default function SetLocation() {
                 endPoint,
                 pickupText,
                 dropoffText,
-                routeInfo
-              }
+                routeInfo,
+              },
             });
           }}
           disabled={!startPoint || !endPoint}

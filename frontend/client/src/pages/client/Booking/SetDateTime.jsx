@@ -1,6 +1,7 @@
 import {
   X,
   ArrowRight,
+  ArrowLeft,
   CalendarCheck,
   ChevronUp,
   ChevronDown,
@@ -160,13 +161,13 @@ export default function SetDateTime() {
           onClick={() => navigate("/client/booking/location")}
           className="flex items-center gap-1 text-on-surface-variant p-2 rounded-xl hover:bg-surface-container-low transition-colors"
         >
-          <X size={20} />
-          <span className="text-sm font-bold">Huỷ</span>
+          <ArrowLeft size={20} />
+          <span className="text-sm font-bold">Quay lại</span>
         </button>
         <div className="text-center">
           <h1 className="text-2xl font-bold text-primary">Đặt xe</h1>
         </div>
-        <span className="text-sm font-bold text-primary mx-4">3/4</span>
+        <span className="text-sm font-bold text-primary mx-8">3/4</span>
       </header>
 
       <div className="px-5 mt-2">

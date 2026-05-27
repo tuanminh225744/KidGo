@@ -45,7 +45,7 @@ axiosInstance.interceptors.response.use(
           refreshToken,
         });
 
-        console.log("REFRESH RESPONSE:", response.data);
+        // console.log("REFRESH RESPONSE:", response.data);
 
         const { accessToken, refreshToken: newRefreshToken } =
           response.data.data || response.data;

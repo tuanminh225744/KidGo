@@ -143,7 +143,7 @@ export default function ConfirmBooking() {
           onClick={() => navigate("/client/booking/driver")}
           className="p-2 rounded-full hover:bg-surface-container-low active:scale-90 transition-transform"
         >
-          <X size={24} />
+          <ArrowLeft size={24} />
         </button>
         <div className="text-center">
           <h1 className="text-2xl font-bold text-primary">Xác nhận</h1>

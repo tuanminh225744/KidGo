@@ -1,4 +1,12 @@
-import { X, Check, Star, Shield, ArrowRight, Bot } from "lucide-react";
+import {
+  X,
+  Check,
+  Star,
+  Shield,
+  ArrowRight,
+  ArrowLeft,
+  Bot,
+} from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { getPreferredDrivers } from "../../../services/preferredDriver.service";
@@ -44,11 +52,11 @@ export default function SelectDriver() {
           onClick={() => navigate("/client/booking/datetime")}
           className="flex items-center gap-1 text-on-surface-variant p-2 rounded-xl hover:bg-surface-container-low transition-colors"
         >
-          <X size={20} />
-          <span className="text-sm font-bold">Huỷ</span>
+          <ArrowLeft size={20} />
+          <span className="text-sm font-bold">Quay lại</span>
         </button>
         <h1 className="text-2xl font-bold text-primary">Đặt xe</h1>
-        <span className="text-sm font-bold text-on-surface-variant mx-4">
+        <span className="text-sm font-bold text-on-surface-variant mx-8">
           4/4
         </span>
       </header>
@@ -65,9 +73,6 @@ export default function SelectDriver() {
           <h2 className="text-2xl font-bold text-on-surface tracking-tight">
             Chọn tài xế
           </h2>
-          <p className="text-on-surface-variant text-sm mt-1">
-            Tuỳ chọn — hệ thống sẽ tự ghép nếu bỏ qua
-          </p>
         </div>
 
         {/* Auto Match Card */}
@@ -100,9 +105,6 @@ export default function SelectDriver() {
             <h3 className="font-bold text-on-surface">
               Tài xế ưu tiên của bạn
             </h3>
-            <button className="text-primary font-bold text-xs">
-              Xem tất cả
-            </button>
           </div>
           <div className="flex gap-4 overflow-x-auto scroll-hide -mx-5 px-5 py-2">
             {drivers.map((driver) => (
@@ -140,7 +142,7 @@ export default function SelectDriver() {
         </section>
 
         {/* Search by Number */}
-        <section>
+        {/* <section>
           <h3 className="font-bold text-on-surface mb-4 px-1">
             Tìm tài xế theo số điện thoại
           </h3>
@@ -154,7 +156,7 @@ export default function SelectDriver() {
               Tìm
             </button>
           </div>
-        </section>
+        </section> */}
       </main>
 
       <footer className="fixed bottom-20 left-0 right-0 p-5 pb-8 bg-white shadow-[0px_-4px_20px_0px_rgba(79,70,200,0.06)] z-30 max-w-[430px] mx-auto space-y-4">
@@ -168,7 +170,7 @@ export default function SelectDriver() {
         >
           Tiếp tục <ArrowRight size={20} />
         </button>
-        <button
+        {/* <button
           onClick={() =>
             navigate("/client/booking/confirm", {
               state: { ...previousState, selectedDriverId: null },
@@ -177,7 +179,7 @@ export default function SelectDriver() {
           className="w-full text-center text-primary font-bold text-sm hover:underline underline-offset-4"
         >
           Bỏ qua, tự ghép
-        </button>
+        </button> */}
       </footer>
     </div>
   );
