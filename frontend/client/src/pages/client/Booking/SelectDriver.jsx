@@ -8,13 +8,13 @@ import {
   Bot,
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { getPreferredDrivers } from "../../../services/preferredDriver.service";
+import { useBookingStore } from "../../../store/useBookingStore.js";
 
 export default function SelectDriver() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const previousState = location.state || {};
+  const { setBookingData } = useBookingStore();
 
   const [drivers, setDrivers] = useState([]);
   const [selectedDriverId, setSelectedDriverId] = useState(null);
@@ -161,11 +161,10 @@ export default function SelectDriver() {
 
       <footer className="fixed bottom-20 left-0 right-0 p-5 pb-8 bg-white shadow-[0px_-4px_20px_0px_rgba(79,70,200,0.06)] z-30 max-w-[430px] mx-auto space-y-4">
         <button
-          onClick={() =>
-            navigate("/client/booking/confirm", {
-              state: { ...previousState, selectedDriverId },
-            })
-          }
+          onClick={() => {
+            setBookingData({ selectedDriverId });
+            navigate("/client/booking/confirm");
+          }}
           className="w-full h-14 bg-primary-container text-white rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl shadow-primary/20 active:scale-[0.98] transition-all"
         >
           Tiếp tục <ArrowRight size={20} />

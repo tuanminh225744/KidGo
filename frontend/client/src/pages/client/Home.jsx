@@ -205,7 +205,7 @@ export default function Home() {
                     </span>
                   </div>
                   <button
-                    onClick={() => navigate("/tracking")}
+                    onClick={() => navigate("client/tracking")}
                     className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-primary shadow-sm"
                   >
                     <Phone size={18} fill="currentColor" />
@@ -233,7 +233,7 @@ export default function Home() {
 
                 <div className="grid grid-cols-2 gap-3 mt-4">
                   <button
-                    onClick={() => navigate("/tracking")}
+                    onClick={() => navigate("client/tracking")}
                     className="bg-primary-container text-white rounded-xl py-3 flex items-center justify-center gap-2 font-bold active:scale-95 transition-transform"
                   >
                     <Map size={18} /> Xem bản đồ

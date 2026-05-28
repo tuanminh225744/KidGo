@@ -7,7 +7,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 import React, { useState, useMemo } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { useBookingStore } from "../../../store/useBookingStore.js";
 
 const WEEK_DAYS = [
   { key: "mon", label: "T2" },
@@ -26,7 +27,6 @@ const formatDateInput = (date) => {
 
 export default function SetDateTime() {
   const navigate = useNavigate();
-  const location = useLocation();
   const {
     kidId,
     tripType,
@@ -35,7 +35,8 @@ export default function SetDateTime() {
     pickupText,
     dropoffText,
     routeInfo,
-  } = location.state || {};
+    setBookingData,
+  } = useBookingStore();
 
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [hour, setHour] = useState(7);
@@ -114,44 +115,46 @@ export default function SetDateTime() {
     setRecurringEndDate(value);
   };
 
+  const isContinueDisabled =
+    localTripType === "recurring" && selectedWeekDays.length === 0;
+
   const handleContinue = () => {
     const finalDateTime = new Date(selectedDate);
     finalDateTime.setHours(hour, minute, 0, 0);
 
-    navigate("/client/booking/driver", {
-      state: {
-        kidId,
-        tripType: localTripType,
-        startPoint,
-        endPoint,
-        pickupText,
-        dropoffText,
-        routeInfo,
-        bookingDateTime: finalDateTime.toISOString(),
-        recurringDays:
-          localTripType === "recurring" ? selectedWeekDays : undefined,
-        recurringStartDate:
-          localTripType === "recurring" ? recurringStartDate : undefined,
-        recurringEndDate:
-          localTripType === "recurring" ? recurringEndDate : undefined,
-      },
+    setBookingData({
+      kidId,
+      tripType: localTripType,
+      startPoint,
+      endPoint,
+      pickupText,
+      dropoffText,
+      routeInfo,
+      bookingDateTime: finalDateTime.toISOString(),
+      recurringDays: localTripType === "recurring" ? selectedWeekDays : [],
+      recurringStartDate:
+        localTripType === "recurring" ? recurringStartDate : null,
+      recurringEndDate: localTripType === "recurring" ? recurringEndDate : null,
     });
+    navigate("/client/booking/driver");
   };
 
   const handleBookNow = () => {
     const now = new Date();
-    navigate("/client/booking/driver", {
-      state: {
-        kidId,
-        tripType: "one-time",
-        startPoint,
-        endPoint,
-        pickupText,
-        dropoffText,
-        routeInfo,
-        bookingDateTime: now.toISOString(),
-      },
+    setBookingData({
+      kidId,
+      tripType: "one-time",
+      startPoint,
+      endPoint,
+      pickupText,
+      dropoffText,
+      routeInfo,
+      bookingDateTime: now.toISOString(),
+      recurringDays: [],
+      recurringStartDate: null,
+      recurringEndDate: null,
     });
+    navigate("/client/booking/driver");
   };
 
   return (
@@ -365,7 +368,9 @@ export default function SetDateTime() {
         </button>
         <button
           onClick={handleContinue}
-          className="w-full bg-primary-container text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl shadow-primary/20 active:scale-[0.98] transition-all"
+          disabled={isContinueDisabled}
+          className={`w-full py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 transition-all
+          ${isContinueDisabled ? "bg-gray-300 text-gray-500 cursor-not-allowed" : "bg-primary-container text-white shadow-xl shadow-primary/20 active:scale-[0.98]"}`}
         >
           Tiếp tục <ArrowRight size={20} />
         </button>

@@ -10,9 +10,11 @@ import {
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getKidsByParent } from "../../../services/kid.service.js";
+import { useBookingStore } from "../../../store/useBookingStore.js";
 
 export default function SetKidAndType() {
   const navigate = useNavigate();
+  const setBookingData = useBookingStore((state) => state.setBookingData);
   const [kids, setKids] = useState([]);
   const [selectedKid, setSelectedKid] = useState("");
   const [tripType, setTripType] = useState("one-time");
@@ -166,11 +168,10 @@ export default function SetKidAndType() {
 
       <div className="fixed bottom-22 left-0 right-0 p-5 bg-white shadow-[0px_-4px_20px_0px_rgba(79,70,200,0.06)] z-30 max-w-[430px] mx-auto">
         <button
-          onClick={() =>
-            navigate("/client/booking/location", {
-              state: { kidId: selectedKid, tripType },
-            })
-          }
+          onClick={() => {
+            setBookingData({ kidId: selectedKid, tripType });
+            navigate("/client/booking/location");
+          }}
           disabled={!selectedKid}
           className="w-full bg-primary-container text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >

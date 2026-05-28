@@ -9,23 +9,34 @@ import {
   Home as HomeIcon,
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import MapRouting from "../../../components/MapRouting";
+import { useBookingStore } from "../../../store/useBookingStore.js";
 
 export default function SetLocation() {
   const navigate = useNavigate();
-  const location = useLocation();
-  const { kidId, tripType } = location.state || {};
+  const {
+    kidId,
+    tripType,
+    startPoint: storedStartPoint,
+    endPoint: storedEndPoint,
+    pickupText: storedPickupText,
+    dropoffText: storedDropoffText,
+    routeInfo: storedRouteInfo,
+    setBookingData,
+  } = useBookingStore();
 
-  const [startPoint, setStartPoint] = useState(null);
-  const [endPoint, setEndPoint] = useState(null);
-  const [routeInfo, setRouteInfo] = useState({
-    distance: null,
-    duration: null,
-  });
+  const [startPoint, setStartPoint] = useState(storedStartPoint);
+  const [endPoint, setEndPoint] = useState(storedEndPoint);
+  const [routeInfo, setRouteInfo] = useState(
+    storedRouteInfo || {
+      distance: null,
+      duration: null,
+    },
+  );
 
-  const [pickupText, setPickupText] = useState("");
-  const [dropoffText, setDropoffText] = useState("");
+  const [pickupText, setPickupText] = useState(storedPickupText || "");
+  const [dropoffText, setDropoffText] = useState(storedDropoffText || "");
   const [pickupSuggestions, setPickupSuggestions] = useState([]);
   const [dropoffSuggestions, setDropoffSuggestions] = useState([]);
   const [activeField, setActiveField] = useState(null);
@@ -61,10 +72,18 @@ export default function SetLocation() {
       setStartPoint(location);
       setPickupText(place.display_name);
       setPickupSuggestions([]);
+      setBookingData({
+        startPoint: location,
+        pickupText: place.display_name,
+      });
     } else {
       setEndPoint(location);
       setDropoffText(place.display_name);
       setDropoffSuggestions([]);
+      setBookingData({
+        endPoint: location,
+        dropoffText: place.display_name,
+      });
     }
     setActiveField(null);
   };
@@ -99,10 +118,12 @@ export default function SetLocation() {
       setStartPoint(coords);
       setPickupText(address);
       setPickupSuggestions([]);
+      setBookingData({ startPoint: coords, pickupText: address });
     } else {
       setEndPoint(coords);
       setDropoffText(address);
       setDropoffSuggestions([]);
+      setBookingData({ endPoint: coords, dropoffText: address });
     }
   };
 
@@ -112,6 +133,12 @@ export default function SetLocation() {
 
     setPickupText(dropoffText);
     setDropoffText(pickupText);
+    setBookingData({
+      startPoint: endPoint,
+      endPoint: startPoint,
+      pickupText: dropoffText,
+      dropoffText: pickupText,
+    });
 
     setPickupSuggestions([]);
     setDropoffSuggestions([]);
@@ -120,6 +147,24 @@ export default function SetLocation() {
 
   const handleRouteInfo = (info) => {
     setRouteInfo(info);
+    setBookingData({ routeInfo: info });
+  };
+
+  const formatDuration = (minutes) => {
+    if (!minutes || minutes <= 0) return "0 phút";
+
+    const hours = Math.floor(minutes / 60);
+    const mins = minutes % 60;
+
+    if (hours > 0 && mins > 0) {
+      return `${hours} giờ ${mins} phút`;
+    }
+
+    if (hours > 0) {
+      return `${hours} giờ`;
+    }
+
+    return `${mins} phút`;
   };
 
   return (
@@ -165,7 +210,7 @@ export default function SetLocation() {
           <RouteIcon size={16} className="text-outline" />
           <span className="text-[10px] font-bold text-on-surface-variant uppercase tracking-wider">
             {routeInfo.duration && routeInfo.distance
-              ? `Lộ trình dự kiến: ~${routeInfo.duration} phút · ${routeInfo.distance} km`
+              ? `Lộ trình dự kiến: ~${formatDuration(routeInfo.duration)} · ${routeInfo.distance} km`
               : "Vui lòng chọn điểm đón và điểm trả"}
           </span>
         </div>
@@ -286,17 +331,16 @@ export default function SetLocation() {
         <button
           onClick={() => {
             if (!startPoint || !endPoint) return;
-            navigate("/client/booking/datetime", {
-              state: {
-                kidId,
-                tripType,
-                startPoint,
-                endPoint,
-                pickupText,
-                dropoffText,
-                routeInfo,
-              },
+            setBookingData({
+              kidId,
+              tripType,
+              startPoint,
+              endPoint,
+              pickupText,
+              dropoffText,
+              routeInfo,
             });
+            navigate("/client/booking/datetime");
           }}
           disabled={!startPoint || !endPoint}
           className="w-full bg-primary-container text-white py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-xl shadow-primary/20 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"

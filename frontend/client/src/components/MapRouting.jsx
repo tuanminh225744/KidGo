@@ -80,7 +80,7 @@ const MapRouting = ({
   onMapClick,
   className = "w-full h-full z-0",
   readOnly = false,
-  currentLocation
+  currentLocation,
 }) => {
   const [route, setRoute] = useState(null);
   const [map, setMap] = useState(null);
@@ -104,6 +104,37 @@ const MapRouting = ({
       map.flyTo([endPoint.lat, endPoint.lng], 15);
     }
   }, [map, endPoint]);
+
+  const calculateTravelTime = (distanceInMeters) => {
+    const currentHour = new Date().getHours();
+
+    let averageSpeed = 35; // km/h mặc định
+
+    // Giờ cao điểm sáng + chiều
+    if (
+      (currentHour >= 7 && currentHour <= 9) ||
+      (currentHour >= 17 && currentHour <= 19)
+    ) {
+      averageSpeed = 18;
+    }
+
+    // Buổi trưa
+    else if (currentHour >= 11 && currentHour <= 13) {
+      averageSpeed = 28;
+    }
+
+    // Ban đêm
+    else if (currentHour >= 22 || currentHour <= 5) {
+      averageSpeed = 45;
+    }
+
+    const distanceKm = distanceInMeters / 1000;
+
+    // giờ
+    const durationHours = distanceKm / averageSpeed;
+
+    return durationHours;
+  };
 
   const calculateRoute = async (start, end) => {
     try {
@@ -130,7 +161,7 @@ const MapRouting = ({
             Authorization: apiKey,
             "Content-Type": "application/json",
           },
-        }
+        },
       );
 
       if (response.data.routes && response.data.routes.length > 0) {
@@ -138,13 +169,13 @@ const MapRouting = ({
         const geometry = routeData.geometry;
 
         const distance = routeData.summary?.distance;
-        const duration = routeData.summary?.duration;
+        const duration = calculateTravelTime(distance);
 
         const decodedPath = decodePolyline(geometry);
         setRoute(decodedPath);
 
         const distanceKm = (distance / 1000).toFixed(2);
-        const durationMinutes = Math.round(duration / 60);
+        const durationMinutes = Math.round(duration * 60);
 
         if (onRouteInfo) {
           onRouteInfo({ distance: distanceKm, duration: durationMinutes });
@@ -189,7 +220,7 @@ const MapRouting = ({
       zoomControl={false}
     >
       <TileLayer
-        attribution='&copy; OpenStreetMap'
+        attribution="&copy; OpenStreetMap"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
       />
 
@@ -215,7 +246,10 @@ const MapRouting = ({
       )}
 
       {startPoint && (
-        <Marker position={[startPoint.lat, startPoint.lng]} icon={startMarkerIcon}>
+        <Marker
+          position={[startPoint.lat, startPoint.lng]}
+          icon={startMarkerIcon}
+        >
           <Popup>Điểm đón</Popup>
         </Marker>
       )}
