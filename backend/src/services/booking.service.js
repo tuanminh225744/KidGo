@@ -3,6 +3,7 @@ import Trip from "../models/operational/trip.model.js";
 import Route from "../models/operational/route.model.js";
 import Driver from "../models/core/driver.model.js";
 import Vehicle from "../models/core/vehicle.model.js";
+import Notification from "../models/support/notification.model.js";
 import mongoose from "mongoose";
 import { getIo } from "../sockets/socketManager.js";
 import { getNearbyDrivers } from "./driver.service.js";
@@ -18,6 +19,43 @@ const clearBookingTimer = (bookingId) => {
     activeBookingTimers[bookingId].forEach((timer) => clearTimeout(timer));
     delete activeBookingTimers[bookingId];
   }
+};
+
+const sendParentBookingNotification = async (booking, title, body, type) => {
+  const notification = new Notification({
+    recipientId: booking.parentId,
+    recipientType: "parent",
+    type,
+    title,
+    body,
+    channel: "push",
+    refId: booking._id,
+  });
+  await notification.save();
+  return notification;
+};
+
+const findAndAssignNearbyDriver = async (booking) => {
+  const route = await Route.findById(booking.routeId);
+  if (!route?.pickupCoords?.coordinates) return null;
+
+  const [lng, lat] = route.pickupCoords.coordinates;
+  const nearby = await getNearbyDrivers(lat, lng, 10, "km");
+  const freeDriverIds = await filterFreeDrivers(nearby);
+  if (freeDriverIds.length === 0) return null;
+
+  const driverId = freeDriverIds[0];
+  booking.assignedDriverId = driverId;
+  booking.status = "matched";
+  await booking.save();
+
+  const io = getIo();
+  io.of("/driver").to(driverId).emit("booking_assigned", {
+    message: "Bạn có một yêu cầu đón mới từ hệ thống.",
+    bookingId: booking._id,
+  });
+
+  return driverId;
 };
 
 /**
@@ -116,8 +154,18 @@ export const createBooking = async (bookingData) => {
     await booking.save();
 
     const io = getIo();
+    await sendParentBookingNotification(
+      booking,
+      "Yêu cầu đón xe đã được tạo",
+      "Hệ thống đã ghi nhận lịch đặt xe của bạn và đang tìm tài xế phù hợp.",
+      "booking_created",
+    );
 
     if (booking.preferredDriverId) {
+      booking.assignedDriverId = booking.preferredDriverId;
+      booking.status = "matched";
+      await booking.save();
+
       // Push đích danh cho tài xế VIP
       io.of("/driver")
         .to(booking.preferredDriverId.toString())
@@ -132,17 +180,28 @@ export const createBooking = async (bookingData) => {
         setTimeout(() => triggerTimeoutCancel(booking._id), 300 * 1000),
       ];
     } else {
-      // Lấy tọa độ điểm đón từ Route để tiến hành dô sóng
-      const route = await Route.findById(booking.routeId);
-      if (!route || !route.pickupCoords || !route.pickupCoords.coordinates) {
-        throw new Error(
-          "Không đủ tọa độ để khởi động Rada dò tìm cuốc (Route ID thiếu/sai).",
+      const matchedDriverId = await findAndAssignNearbyDriver(booking);
+      if (matchedDriverId) {
+        await sendParentBookingNotification(
+          booking,
+          "Đã tìm thấy tài xế",
+          "Hệ thống đã ghép được tài xế cho chuyến xe của bạn.",
+          "booking_matched",
         );
-      }
+        clearBookingTimer(booking._id);
+      } else {
+        // Lấy tọa độ điểm đón từ Route để tiến hành dô sóng
+        const route = await Route.findById(booking.routeId);
+        if (!route || !route.pickupCoords || !route.pickupCoords.coordinates) {
+          throw new Error(
+            "Không đủ tọa độ để khởi động Rada dò tìm cuốc (Route ID thiếu/sai).",
+          );
+        }
 
-      const [lng, lat] = route.pickupCoords.coordinates;
-      // Tiến hành mở máy dò
-      await startGenericMatchingCycle(booking._id, lat, lng);
+        const [lng, lat] = route.pickupCoords.coordinates;
+        // Tiến hành mở máy dò
+        await startGenericMatchingCycle(booking._id, lat, lng);
+      }
     }
 
     return booking;
