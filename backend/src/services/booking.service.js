@@ -256,7 +256,7 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
       kidId: booking.kidId,
       parentId: booking.parentId,
       vehicleId: vehicle ? vehicle._id : new mongoose.Types.ObjectId(), // Dùng mock ID nếu test data chưa có xe
-      status: "scheduled",
+      status: "picking_up",
       plannedRoute: route
         ? {
             pickupCoords: route.pickupCoords,

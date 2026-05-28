@@ -37,8 +37,6 @@ export const createSubscription = async (req, res, next) => {
 
     if (plan === "monthly") {
       endDate.setMonth(endDate.getMonth() + 1);
-    } else if (plan === "quarterly") {
-      endDate.setMonth(endDate.getMonth() + 3);
     } else if (plan === "yearly") {
       endDate.setFullYear(endDate.getFullYear() + 1);
     }

@@ -47,7 +47,6 @@ export const getBookingRequests = async (req, res, next) => {
 export const acceptBooking = async (req, res, next) => {
   try {
     const driverService = await import("../services/driver.service.js");
-    const bookingService = await import("../services/booking.service.js");
     const Booking = require("../models/operational/booking.model.js").default;
 
     const driverId = (await driverService.getDriverByUserId(req.user.id))._id;
@@ -65,15 +64,15 @@ export const acceptBooking = async (req, res, next) => {
       throw new AuthorizationError("Bạn không có quyền chấp nhận booking này.");
     }
 
-    // Accept booking
-    booking.status = "confirmed";
-    booking.assignedDriverId = driverId;
-    await booking.save();
+    const updatedBooking = await bookingService.driverAcceptBooking(
+      booking._id,
+      driverId,
+    );
 
     res.status(200).json({
       success: true,
       message: "Chấp nhận chuyến thành công.",
-      data: booking,
+      data: updatedBooking,
     });
   } catch (error) {
     next(error);
@@ -87,31 +86,12 @@ export const acceptBooking = async (req, res, next) => {
 export const rejectBooking = async (req, res, next) => {
   try {
     const driverService = await import("../services/driver.service.js");
-    const Booking = require("../models/operational/booking.model.js").default;
-    const Driver = require("../models/core/driver.model.js").default;
 
     const driverId = (await driverService.getDriverByUserId(req.user.id))._id;
-
-    const booking = await Booking.findById(req.params.bookingId);
-    if (!booking) {
-      throw new AppError("Không tìm thấy booking.", 404);
-    }
-
-    // Verify driver is assigned or preferred
-    if (
-      booking.assignedDriverId?.toString() !== driverId.toString() &&
-      booking.preferredDriverId?.toString() !== driverId.toString()
-    ) {
-      throw new AuthorizationError("Bạn không có quyền từ chối booking này.");
-    }
-
-    // Reject booking
-    booking.status = "cancelled";
-    booking.assignedDriverId = null;
-    await booking.save();
-
-    // Set driver status back to free
-    await Driver.findByIdAndUpdate(driverId, { rideStatus: "free" });
+    const booking = await bookingService.driverCancelBooking(
+      req.params.bookingId,
+      driverId,
+    );
 
     res.status(200).json({
       success: true,

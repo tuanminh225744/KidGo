@@ -1,45 +1,67 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 const { Schema, model, models } = mongoose;
 
 // Embedded sub-schema cho plannedRoute
 const PlannedRouteSchema = new Schema(
   {
-    pickupAddress:     { type: String },
-    pickupCoords:      { type: { type: String, default: 'Point' }, coordinates: [Number] },
-    dropoffAddress:    { type: String },
-    dropoffCoords:     { type: { type: String, default: 'Point' }, coordinates: [Number] },
-    waypoints:         { type: Array, default: [] },
+    pickupAddress: { type: String },
+    pickupCoords: {
+      type: { type: String, default: "Point" },
+      coordinates: [Number],
+    },
+    dropoffAddress: { type: String },
+    dropoffCoords: {
+      type: { type: String, default: "Point" },
+      coordinates: [Number],
+    },
+    waypoints: { type: Array, default: [] },
     estimatedDuration: { type: Number },
     estimatedDistance: { type: Number },
   },
-  { _id: false }
+  { _id: false },
+);
+
+const VerificationFieldSchema = new Schema(
+  {
+    required: { type: Boolean, default: false },
+    status: {
+      type: String,
+      enum: ["pending", "passed", "failed", "not_required"],
+      default: "not_required",
+      index: true,
+    },
+    data: { type: Schema.Types.Mixed, default: null },
+    verifiedAt: { type: Date, default: null },
+  },
+  { _id: false },
 );
 
 const TripSchema = new Schema(
   {
-    bookingId:            { type: Schema.Types.ObjectId, ref: 'Booking', required: true },
-    driverId:             { type: Schema.Types.ObjectId, ref: 'Driver',  required: true },
-    kidId:                { type: Schema.Types.ObjectId, ref: 'Kid',     required: true },
-    parentId:             { type: Schema.Types.ObjectId, ref: 'User',    required: true },
-    vehicleId:            { type: Schema.Types.ObjectId, ref: 'Vehicle', required: true },
-    status:               {
+    bookingId: { type: Schema.Types.ObjectId, ref: "Booking", required: true },
+    driverId: { type: Schema.Types.ObjectId, ref: "Driver", required: true },
+    kidId: { type: Schema.Types.ObjectId, ref: "Kid", required: true },
+    parentId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    vehicleId: { type: Schema.Types.ObjectId, ref: "Vehicle", required: true },
+    status: {
       type: String,
-      enum: ['scheduled', 'picking_up', 'in_progress', 'completed', 'cancelled'],
-      default: 'scheduled',
+      enum: ["scheduled", "picking_up", "in_progress", "completed", "cancelled"],
+      default: "scheduled",
       index: true,
     },
-    plannedRoute:         { type: PlannedRouteSchema },
-    actualRoute:          { type: Array, default: [] }, // GeoJSON Point[]
-    scheduledPickupTime:  { type: Date },
-    actualPickupTime:     { type: Date },
+    plannedRoute: { type: PlannedRouteSchema },
+    actualRoute: { type: Array, default: [] }, // GeoJSON Point[]
+    scheduledPickupTime: { type: Date },
+    actualPickupTime: { type: Date },
     scheduledDropoffTime: { type: Date },
-    actualDropoffTime:    { type: Date },
-    pickupPhoto:          { type: String },
-    dropoffPhoto:         { type: String },
-    otpVerified:          { type: Boolean, default: false },
-    distance:             { type: Number }, // km thực tế
+    actualDropoffTime: { type: Date },
+    otp: { type: VerificationFieldSchema, default: () => ({}) },
+    pickupPhoto: { type: VerificationFieldSchema, default: () => ({}) },
+    dropoffPhoto: { type: VerificationFieldSchema, default: () => ({}) },
+    securityQuestion: { type: VerificationFieldSchema, default: () => ({}) },
+    distance: { type: Number }, // km thực tế
   },
-  { timestamps: { createdAt: true, updatedAt: false } }
+  { timestamps: { createdAt: true, updatedAt: false } },
 );
 
-export default models.Trip || model('Trip', TripSchema);
+export default models.Trip || model("Trip", TripSchema);

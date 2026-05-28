@@ -96,10 +96,14 @@ export const startTrip = async (req, res, next) => {
 export const confirmPickup = async (req, res, next) => {
   try {
     const { tripId } = req.params;
-    const { otp } = req.body;
-    if (!otp) return next(new AppError("Vui lòng nhập mã OTP.", 400));
+    const { otp, method, photo, answer, data } = req.body;
 
-    const trip = await driverPickupKid(tripId, otp);
+    const trip = await driverPickupKid(tripId, otp, {
+      method,
+      photo,
+      answer,
+      data,
+    });
     res.status(200).json({ success: true, message: "Đã xác nhận đón trẻ thành công.", data: trip });
   } catch (error) {
     next(error);

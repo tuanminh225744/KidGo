@@ -1,11 +1,21 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 const { Schema, model, models } = mongoose;
 
 const SubscriptionSchema = new Schema(
   {
-    parentId: { type: Schema.Types.ObjectId, ref: 'User', required: true, index: true },
-    plan: { type: String, enum: ['monthly', 'quarterly', 'yearly'], required: true },
-    status: { type: String, enum: ['active', 'expired', 'cancelled'], default: 'active', index: true },
+    parentId: {
+      type: Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
+    plan: { type: String, enum: ["monthly", "yearly"], required: true },
+    status: {
+      type: String,
+      enum: ["active", "expired", "cancelled"],
+      default: "active",
+      index: true,
+    },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
     tripsPerMonth: { type: Number, required: true },
@@ -13,7 +23,7 @@ const SubscriptionSchema = new Schema(
     price: { type: Number, required: true }, // VND
     autoRenew: { type: Boolean, default: false },
   },
-  { timestamps: { createdAt: true, updatedAt: false } }
+  { timestamps: { createdAt: true, updatedAt: false } },
 );
 
-export default models.Subscription || model('Subscription', SubscriptionSchema);
+export default models.Subscription || model("Subscription", SubscriptionSchema);

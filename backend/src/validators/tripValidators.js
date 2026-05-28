@@ -4,9 +4,7 @@ import { body, param, query } from "express-validator";
  * Validator cho tripId param
  */
 export const validateTripIdParam = [
-  param("tripId")
-    .isMongoId()
-    .withMessage("tripId không hợp lệ."),
+  param("tripId").isMongoId().withMessage("tripId không hợp lệ."),
 ];
 
 /**
@@ -37,13 +35,22 @@ export const validateGpsTick = [
  * Validator cho confirm pickup (OTP)
  */
 export const validateConfirmPickup = [
+  body("method")
+    .optional()
+    .isIn(["otp", "photo", "security_question"])
+    .withMessage("method không hợp lệ."),
   body("otp")
-    .notEmpty()
-    .withMessage("Vui lòng nhập mã OTP.")
+    .optional()
     .isLength({ min: 6, max: 6 })
     .withMessage("Mã OTP phải gồm đúng 6 chữ số.")
     .isNumeric()
     .withMessage("Mã OTP chỉ bao gồm chữ số."),
+  body().custom((_, { req }) => {
+    if (!req.body.method && !req.body.otp && !req.body.photo && !req.body.answer) {
+      throw new Error("Vui lòng cung cấp dữ liệu xác minh.");
+    }
+    return true;
+  }),
 ];
 
 /**
@@ -52,7 +59,7 @@ export const validateConfirmPickup = [
 export const validateTripsQuery = [
   query("status")
     .optional()
-    .isIn(["scheduled", "picking_up", "in_progress", "completed", "cancelled"])
+    .isIn(["picking_up", "in_progress", "completed", "cancelled"])
     .withMessage("status không hợp lệ."),
   query("page")
     .optional()

@@ -1,5 +1,6 @@
 import Trip from "../models/operational/trip.model.js";
 import Driver from "../models/core/driver.model.js";
+import Kid from "../models/core/kid.model.js";
 import LocationLog from "../models/safetyAndLogs/locationLog.model.js";
 import * as turf from "@turf/turf";
 import { getIo } from "../sockets/socketManager.js";
@@ -16,6 +17,10 @@ export const driverStartPickup = async (tripId) => {
     const trip = await Trip.findById(tripId);
     if (!trip) throw new Error("Hành trình không tồn tại.");
 
+    if (!["scheduled", "picking_up"].includes(trip.status)) {
+      throw new Error(`Không thể bắt đầu đón ở trạng thái ${trip.status}.`);
+    }
+
     trip.status = "picking_up";
     await trip.save();
 
@@ -23,9 +28,41 @@ export const driverStartPickup = async (tripId) => {
       rideStatus: "driving_to_pickup",
     });
 
-    // Tạo mã OTP dùng 1 lần (6 số ngẫu nhiên) để xác thực bé nhóc lên xe
-    const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
-    await redisClient.setex(`trip_otp:${trip._id}`, 7200, otpCode); // Timeout bốc hơi sau 2 giờ
+    const kid = await Kid.findById(trip.kidId).select("securitySettings");
+
+    trip.otp = {
+      required: !!kid?.securitySettings?.otp,
+      status: kid?.securitySettings?.otp ? "pending" : "not_required",
+      data: null,
+      verifiedAt: null,
+    };
+    trip.pickupPhoto = {
+      required: !!kid?.securitySettings?.photo,
+      status: kid?.securitySettings?.photo ? "pending" : "not_required",
+      data: null,
+      verifiedAt: null,
+    };
+    trip.dropoffPhoto = {
+      required: !!kid?.securitySettings?.photo,
+      status: kid?.securitySettings?.photo ? "pending" : "not_required",
+      data: null,
+      verifiedAt: null,
+    };
+    trip.securityQuestion = {
+      required: !!kid?.securitySettings?.securityQuestion,
+      status: kid?.securitySettings?.securityQuestion ? "pending" : "not_required",
+      data: null,
+      verifiedAt: null,
+    };
+
+    const otpCode = trip.otp.required
+      ? Math.floor(100000 + Math.random() * 900000).toString()
+      : null;
+    if (otpCode) {
+      await redisClient.setex(`trip_otp:${trip._id}`, 7200, otpCode);
+    }
+
+    await trip.save();
 
     const io = getIo();
 
@@ -38,13 +75,15 @@ export const driverStartPickup = async (tripId) => {
     });
 
     // Bắn Socket 2: Bàn giao chìa khóa OTP cho Mẹ
-    io.of("/parent").to(trip.parentId.toString()).emit("trip_otp_created", {
-      title: "Mã PIN đón con",
-      otp: otpCode,
-      message:
-        "Khi tài xế chui ra mở cửa, vui lòng đọc hoặc Chat gửi MÃ PIN NÀY cho bác tài để chứng minh đón đúng mã bé.",
-      tripId: trip._id,
-    });
+    if (otpCode) {
+      io.of("/parent").to(trip.parentId.toString()).emit("trip_otp_created", {
+        title: "Mã PIN đón con",
+        otp: otpCode,
+        message:
+          "Khi tài xế chui ra mở cửa, vui lòng đọc hoặc Chat gửi MÃ PIN NÀY cho bác tài để chứng minh đón đúng mã bé.",
+        tripId: trip._id,
+      });
+    }
 
     return trip;
   } catch (error) {
@@ -55,25 +94,56 @@ export const driverStartPickup = async (tripId) => {
 /**
  * 2. Tài xế tới gặp mặt Bé & Nhập khớp Mã OTP
  */
-export const driverPickupKid = async (tripId, enteredOtp) => {
+export const driverPickupKid = async (tripId, enteredOtp, verificationPayload = {}) => {
   try {
     const trip = await Trip.findById(tripId);
     if (!trip) throw new Error("Hành trình không tồn tại.");
 
-    // Kiểm tra độ trong sạch của OTP
-    const storedOtp = await redisClient.get(`trip_otp:${trip._id}`);
-    if (!storedOtp || storedOtp !== enteredOtp.toString()) {
-      throw new Error(
-        "Mã OTP Phụ huynh cung cấp không chính xác hoặc chuyến xe này đã hết hạn OTP.",
-      );
+    if (trip.otp?.required) {
+      const storedOtp = await redisClient.get(`trip_otp:${trip._id}`);
+      if (!storedOtp || storedOtp !== enteredOtp.toString()) {
+        throw new Error(
+          "Mã OTP Phụ huynh cung cấp không chính xác hoặc chuyến xe này đã hết hạn OTP.",
+        );
+      }
+      await redisClient.del(`trip_otp:${trip._id}`);
     }
 
-    // Nhập đúng -> Tiêu hủy OTP ngay lập tức
-    await redisClient.del(`trip_otp:${trip._id}`);
+    if (trip.otp?.required) {
+      trip.otp = {
+        ...trip.otp.toObject?.(),
+        status: "passed",
+        data: { otpVerified: true },
+        verifiedAt: new Date(),
+      };
+    }
+
+    if (verificationPayload.method === "photo" && trip.pickupPhoto?.required) {
+      trip.pickupPhoto = {
+        ...trip.pickupPhoto.toObject?.(),
+        status: "passed",
+        data: { photo: verificationPayload.photo || null },
+        verifiedAt: new Date(),
+      };
+    }
+
+    if (
+      verificationPayload.method === "security_question" &&
+      trip.securityQuestion?.required
+    ) {
+      trip.securityQuestion = {
+        ...trip.securityQuestion.toObject?.(),
+        status: "passed",
+        data: {
+          answer: verificationPayload.answer || null,
+          extra: verificationPayload.data || null,
+        },
+        verifiedAt: new Date(),
+      };
+    }
 
     trip.status = "in_progress";
     trip.actualPickupTime = new Date();
-    trip.otpVerified = true;
     await trip.save();
 
     // Nâng cấp trạng thái ông xế lên "Đang bon bon trên cầu"

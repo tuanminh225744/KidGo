@@ -83,7 +83,7 @@ Table Route {
 Table Subscription {
   _id           ObjectId [pk]
   parentId      ObjectId [ref: > User._id, not null]
-  plan          string   [not null]   // 'monthly' | 'quarterly' | 'yearly'
+  plan          string   [not null]   // 'monthly' | 'yearly'
   status        string                // 'active' | 'expired' | 'cancelled'
   startDate     datetime [not null]
   endDate       datetime [not null]
@@ -129,7 +129,7 @@ Table Trip {
   kidId                ObjectId [ref: > Kid._id, not null]
   parentId             ObjectId [ref: > User._id, not null]
   vehicleId            ObjectId [ref: > Vehicle._id, not null]
-  status               string   // 'scheduled' | 'picking_up' | 'in_progress' | 'completed' | 'cancelled'
+  status               string   // 'picking_up' | 'in_progress' | 'completed' | 'cancelled'
   plannedRoute         PlannedRoute // Embedded sub-schema
   // actualRoute đã loại bỏ — dùng LocationLog làm Single Source of Truth
   scheduledPickupTime  datetime

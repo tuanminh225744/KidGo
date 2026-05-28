@@ -11,8 +11,8 @@ export const validateCreateSubscription = [
     .notEmpty()
     .withMessage("plan là bắt buộc")
     .bail()
-    .isIn(["monthly", "quarterly", "yearly"])
-    .withMessage("plan phải là: monthly, quarterly, hoặc yearly"),
+    .isIn(["monthly", "yearly"])
+    .withMessage("plan phải là: monthly hoặc yearly"),
 
   body("tripsPerMonth")
     .notEmpty()

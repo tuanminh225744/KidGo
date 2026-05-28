@@ -41,7 +41,7 @@ export const generateTripOtp = async (tripId) => {
 
 /**
  * Xác thực mã OTP mà tài xế nhập vào so với trên mạng Redis.
- * Nếu thành công sẽ set otpVerified trên MongoDB = true
+ * Nếu thành công sẽ set trip.otp.status = passed
  * @param {string} tripId
  * @param {string} inputOtp
  * @returns {Promise<Object>} Trạng thái xác thực
@@ -61,10 +61,18 @@ export const verifyTripOtp = async (tripId, inputOtp) => {
     const isMatch = await bcrypt.compare(inputOtp.toString(), storedHashedOtp);
 
     if (isMatch) {
-      // Đánh dấu DB status logic
       await Trip.findByIdAndUpdate(
         tripId,
-        { otpVerified: true },
+        {
+          $set: {
+            otp: {
+              required: true,
+              status: "passed",
+              data: { otpVerified: true },
+              verifiedAt: new Date(),
+            },
+          },
+        },
         { returnDocument: "after" },
       );
 

@@ -68,9 +68,19 @@ export const uploadConfirmationPhoto = async (req, res, next) => {
 
     // Cập nhật trường ảnh trên Trip luôn
     if (type === "pickup") {
-      trip.pickupPhoto = photoUrl;
+      trip.pickupPhoto = {
+        required: trip.pickupPhoto?.required ?? false,
+        status: "passed",
+        data: { photoUrl },
+        verifiedAt: new Date(),
+      };
     } else {
-      trip.dropoffPhoto = photoUrl;
+      trip.dropoffPhoto = {
+        required: trip.dropoffPhoto?.required ?? false,
+        status: "passed",
+        data: { photoUrl },
+        verifiedAt: new Date(),
+      };
     }
     await trip.save();
 
