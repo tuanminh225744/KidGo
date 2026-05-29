@@ -8,7 +8,14 @@ import {
 } from "lucide-react";
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import { useBookingStore } from "../../../store/useBookingStore.js";
+import {
+  calculateTripPricing,
+  countRecurringTrips,
+  planLabels,
+} from "../../../utils/bookingPricing.js";
 
 const WEEK_DAYS = [
   { key: "mon", label: "T2" },
@@ -23,6 +30,18 @@ const WEEK_DAYS = [
 const formatDateInput = (date) => {
   const d = new Date(date);
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+};
+
+const parseDateValue = (value) => {
+  if (!value) return null;
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? null : date;
+};
+
+const formatDisplayDate = (value) => {
+  const date = parseDateValue(value);
+  if (!date) return "";
+  return date.toLocaleDateString("vi-VN");
 };
 
 export default function SetDateTime() {
@@ -49,6 +68,34 @@ export default function SetDateTime() {
   const [recurringEndDate, setRecurringEndDate] = useState(
     formatDateInput(new Date(Date.now() + 7 * 24 * 60 * 60 * 1000)),
   );
+
+  const getPackageEndDate = (startDate, plan) => {
+    if (!startDate || plan === "one-time") return recurringEndDate;
+
+    const start = new Date(startDate);
+    if (Number.isNaN(start.getTime())) return recurringEndDate;
+
+    const end = new Date(start);
+    if (plan === "monthly") {
+      end.setMonth(end.getMonth() + 1);
+    } else if (plan === "yearly") {
+      end.setFullYear(end.getFullYear() + 1);
+    }
+
+    return formatDateInput(end);
+  };
+
+  const setPlanType = (plan) => {
+    setLocalTripType(plan);
+    if (plan === "monthly") {
+      const start = recurringStartDate || formatDateInput(new Date());
+      setRecurringEndDate(getPackageEndDate(start, "monthly"));
+    }
+    if (plan === "yearly") {
+      const start = recurringStartDate || formatDateInput(new Date());
+      setRecurringEndDate(getPackageEndDate(start, "yearly"));
+    }
+  };
 
   const days = useMemo(() => {
     const list = [];
@@ -106,35 +153,95 @@ export default function SetDateTime() {
 
   const handleStartDateChange = (value) => {
     setRecurringStartDate(value);
+    if (localTripType === "monthly") {
+      setRecurringEndDate(getPackageEndDate(value, "monthly"));
+      return;
+    }
+    if (localTripType === "yearly") {
+      setRecurringEndDate(getPackageEndDate(value, "yearly"));
+      return;
+    }
+
     if (new Date(value) > new Date(recurringEndDate)) {
       setRecurringEndDate(value);
     }
   };
 
   const handleEndDateChange = (value) => {
-    setRecurringEndDate(value);
+    if (localTripType === "one-time") {
+      setRecurringEndDate(value);
+    }
   };
 
   const isContinueDisabled =
-    localTripType === "recurring" && selectedWeekDays.length === 0;
+    localTripType !== "one-time" &&
+    (selectedWeekDays.length === 0 || !recurringStartDate);
+
+  const packageTripCount = useMemo(
+    () =>
+      localTripType === "one-time"
+        ? 1
+        : countRecurringTrips(
+            recurringStartDate,
+            recurringEndDate,
+            selectedWeekDays,
+            { mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6, sun: 0 },
+          ),
+    [localTripType, recurringStartDate, recurringEndDate, selectedWeekDays],
+  );
+
+  const pricing = useMemo(
+    () =>
+      calculateTripPricing({
+        tripType: localTripType,
+        routeInfo,
+        recurringTripCount: packageTripCount,
+      }),
+    [localTripType, routeInfo, packageTripCount],
+  );
 
   const handleContinue = () => {
-    const finalDateTime = new Date(selectedDate);
+    const baseDate =
+      localTripType === "one-time"
+        ? selectedDate
+        : new Date(recurringStartDate);
+    const finalDateTime = new Date(baseDate);
     finalDateTime.setHours(hour, minute, 0, 0);
+
+    const nextRecurringEndDate =
+      localTripType === "monthly"
+        ? new Date(
+            new Date(recurringStartDate).setMonth(
+              new Date(recurringStartDate).getMonth() + 1,
+            ),
+          )
+            .toISOString()
+            .slice(0, 10)
+        : localTripType === "yearly"
+          ? new Date(
+              new Date(recurringStartDate).setFullYear(
+                new Date(recurringStartDate).getFullYear() + 1,
+              ),
+            )
+              .toISOString()
+              .slice(0, 10)
+          : recurringEndDate;
 
     setBookingData({
       kidId,
       tripType: localTripType,
+      bookingPlan: localTripType,
       startPoint,
       endPoint,
       pickupText,
       dropoffText,
       routeInfo,
       bookingDateTime: finalDateTime.toISOString(),
-      recurringDays: localTripType === "recurring" ? selectedWeekDays : [],
+      recurringDays: localTripType === "one-time" ? [] : selectedWeekDays,
       recurringStartDate:
-        localTripType === "recurring" ? recurringStartDate : null,
-      recurringEndDate: localTripType === "recurring" ? recurringEndDate : null,
+        localTripType === "one-time" ? null : recurringStartDate,
+      recurringEndDate:
+        localTripType === "one-time" ? null : nextRecurringEndDate,
     });
     navigate("/client/booking/driver");
   };
@@ -144,6 +251,7 @@ export default function SetDateTime() {
     setBookingData({
       kidId,
       tripType: "one-time",
+      bookingPlan: "one-time",
       startPoint,
       endPoint,
       pickupText,
@@ -186,16 +294,22 @@ export default function SetDateTime() {
 
         <div className="flex p-1 bg-surface-container rounded-2xl">
           <button
-            onClick={() => setLocalTripType("one-time")}
+            onClick={() => setPlanType("one-time")}
             className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${localTripType === "one-time" ? "bg-white text-primary shadow-sm" : "text-on-surface-variant hover:bg-surface-container-low"}`}
           >
             Một lần
           </button>
           <button
-            onClick={() => setLocalTripType("recurring")}
-            className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${localTripType === "recurring" ? "bg-white text-primary shadow-sm" : "text-on-surface-variant hover:bg-surface-container-low"}`}
+            onClick={() => setPlanType("monthly")}
+            className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${localTripType === "monthly" ? "bg-white text-primary shadow-sm" : "text-on-surface-variant hover:bg-surface-container-low"}`}
           >
-            Định kỳ
+            Theo tháng
+          </button>
+          <button
+            onClick={() => setPlanType("yearly")}
+            className={`flex-1 py-3 text-sm font-bold rounded-xl transition-all ${localTripType === "yearly" ? "bg-white text-primary shadow-sm" : "text-on-surface-variant hover:bg-surface-container-low"}`}
+          >
+            Theo năm
           </button>
         </div>
 
@@ -251,22 +365,36 @@ export default function SetDateTime() {
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <label className="block text-sm font-bold text-on-surface-variant">
                 Ngày bắt đầu
-                <input
-                  type="date"
-                  value={recurringStartDate}
-                  onChange={(e) => handleStartDateChange(e.target.value)}
+                <DatePicker
+                  selected={parseDateValue(recurringStartDate)}
+                  onChange={(date) =>
+                    handleStartDateChange(formatDateInput(date))
+                  }
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="Chọn ngày bắt đầu"
+                  wrapperClassName="w-full"
                   className="mt-2 w-full rounded-3xl border border-outline px-4 py-3 text-sm text-on-surface"
                 />
               </label>
               <label className="block text-sm font-bold text-on-surface-variant">
                 Ngày kết thúc
-                <input
-                  type="date"
-                  min={recurringStartDate}
-                  value={recurringEndDate}
-                  onChange={(e) => handleEndDateChange(e.target.value)}
-                  className="mt-2 w-full rounded-3xl border border-outline px-4 py-3 text-sm text-on-surface"
+                <DatePicker
+                  selected={parseDateValue(recurringEndDate)}
+                  onChange={(date) =>
+                    handleEndDateChange(formatDateInput(date))
+                  }
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="Ngày kết thúc"
+                  disabled={localTripType !== "one-time"}
+                  readOnly={localTripType !== "one-time"}
+                  wrapperClassName="w-full"
+                  className={`mt-2 w-full rounded-3xl border px-4 py-3 text-sm text-on-surface ${localTripType !== "one-time" ? "bg-surface-container-low text-on-surface-variant cursor-not-allowed" : "border-outline"}`}
                 />
+                {localTripType !== "one-time" && (
+                  <p className="mt-2 text-xs font-medium text-on-surface-variant">
+                    Ngày kết thúc được tự động tính theo ngày bắt đầu.
+                  </p>
+                )}
               </label>
             </div>
           </section>
@@ -351,12 +479,56 @@ export default function SetDateTime() {
                   {String(minute).padStart(2, "0")}
                 </p>
                 <p className="text-sm text-on-surface-variant">
-                  Từ {recurringStartDate} đến {recurringEndDate}
+                  Từ {formatDisplayDate(recurringStartDate)} đến{" "}
+                  {formatDisplayDate(recurringEndDate)}
                 </p>
               </div>
             )}
           </div>
         </div>
+
+        {/* <section className="rounded-[24px] border border-outline-variant/10 bg-white p-5 soft-shadow">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-[10px] font-bold uppercase tracking-widest text-on-surface-variant">
+                Giá dự kiến
+              </p>
+              <p className="text-lg font-extrabold text-on-surface">
+                {planLabels[localTripType]}
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="text-sm font-bold text-on-surface-variant">
+                1 chuyến
+              </p>
+              <p className="text-xl font-extrabold text-primary">
+                {pricing.baseTripPrice.toLocaleString("vi-VN")}đ
+              </p>
+            </div>
+          </div>
+          {localTripType !== "one-time" && (
+            <div className="mt-4 grid gap-3 rounded-2xl bg-surface-container-low p-4 text-sm">
+              <div className="flex items-center justify-between">
+                <span className="text-on-surface-variant">Số chuyến</span>
+                <span className="font-bold text-on-surface">
+                  {pricing.trips} chuyến
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-on-surface-variant">Giảm giá</span>
+                <span className="font-bold text-green-600">
+                  {(pricing.discountRate * 100).toFixed(0)}%
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-on-surface-variant">Tổng sau giảm</span>
+                <span className="font-extrabold text-primary">
+                  {pricing.totalPrice.toLocaleString("vi-VN")}đ
+                </span>
+              </div>
+            </div>
+          )}
+        </section> */}
       </main>
 
       <div className="fixed bottom-22 left-0 right-0 p-5 bg-white shadow-[0px_-4px_20px_0px_rgba(79,70,200,0.06)] z-30 max-w-[430px] mx-auto space-y-3">

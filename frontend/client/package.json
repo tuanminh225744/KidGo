@@ -19,6 +19,7 @@
     "motion": "^12.38.0",
     "openrouteservice-js": "^0.4.1",
     "react": "^19.2.4",
+    "react-datepicker": "^9.1.0",
     "react-dom": "^19.2.4",
     "react-leaflet": "^5.0.0",
     "react-redux": "^9.2.0",

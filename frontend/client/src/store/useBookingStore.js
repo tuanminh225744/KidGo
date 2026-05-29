@@ -16,6 +16,7 @@ const initialState = {
   recurringDays: [],
   recurringStartDate: null,
   recurringEndDate: null,
+  bookingPlan: "one-time",
   selectedDriverId: null,
 };
 

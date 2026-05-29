@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import {
   getKidById,
   createKid,
@@ -48,6 +50,12 @@ export default function KidProfile() {
   const [avatarPreview, setAvatarPreview] = useState(null);
   const fileInputRef = useRef(null);
 
+  const parseDateValue = (value) => {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+
   useEffect(() => {
     if (kidId) {
       loadKidData();
@@ -61,7 +69,7 @@ export default function KidProfile() {
       const kid = result.data || result;
       setFormData({
         fullName: kid.fullName || "",
-        dateOfBirth: kid.dateOfBirth ? kid.dateOfBirth.split("T")[0] : "",
+        dateOfBirth: kid.dateOfBirth ? new Date(kid.dateOfBirth) : null,
         phone: kid.phone || "",
         school: kid.school || "",
         notes: kid.notes || "",
@@ -78,16 +86,15 @@ export default function KidProfile() {
   const loadSecurityQuestion = async () => {
     const result = await getKidSecurityQuestion(kidId);
     if (result.success) {
-      setSecurityQuestion(result.data?.securityQuestion || result.securityQuestion || "");
+      setSecurityQuestion(
+        result.data?.securityQuestion || result.securityQuestion || "",
+      );
     }
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleFileChange = (e) => {
@@ -128,6 +135,9 @@ export default function KidProfile() {
     }
 
     const payload = { ...formData };
+    if (payload.dateOfBirth instanceof Date) {
+      payload.dateOfBirth = payload.dateOfBirth.toISOString();
+    }
     payload.securitySettings = securityOptions;
     if (securityOptions.securityQuestion) {
       payload.securityQuestion = securityQuestion;
@@ -172,7 +182,7 @@ export default function KidProfile() {
     <div className="flex-1 flex flex-col bg-surface min-h-screen">
       <header className="px-5 py-4 flex justify-between items-center sticky top-0 bg-white z-20 shadow-sm">
         <button
-          onClick={() => navigate('/client/home')}
+          onClick={() => navigate("/client/home")}
           className="flex items-center justify-center p-2 rounded-full hover:bg-surface-container-low active:scale-90 transition-transform"
         >
           <ArrowLeft size={24} className="text-primary" />
@@ -187,7 +197,11 @@ export default function KidProfile() {
           <div className="relative group">
             <div className="w-32 h-32 rounded-full bg-surface-container-high flex items-center justify-center border-4 border-white shadow-xl overflow-hidden ring-4 ring-primary/5">
               <img
-                src={avatarPreview || formData.avatar || "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg"}
+                src={
+                  avatarPreview ||
+                  formData.avatar ||
+                  "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg"
+                }
                 alt="Kid avatar"
                 className="w-full h-full object-cover"
               />
@@ -240,11 +254,14 @@ export default function KidProfile() {
                 Ngày sinh
               </label>
               <div className="relative">
-                <input
-                  type="date"
-                  name="dateOfBirth"
-                  value={formData.dateOfBirth}
-                  onChange={handleInputChange}
+                <DatePicker
+                  selected={parseDateValue(formData.dateOfBirth)}
+                  onChange={(date) =>
+                    setFormData((prev) => ({ ...prev, dateOfBirth: date }))
+                  }
+                  dateFormat="dd/MM/yyyy"
+                  placeholderText="Chọn ngày sinh"
+                  wrapperClassName="w-full"
                   className="w-full bg-surface-container-low border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-primary-container transition-all"
                 />
                 <Calendar
@@ -323,12 +340,15 @@ export default function KidProfile() {
           </div>
           <div className="bg-white p-6 rounded-[32px] soft-shadow space-y-6 border border-outline-variant/10">
             <p className="text-sm text-on-surface-variant font-medium">
-              Chọn ít nhất 1 phương thức bảo mật để sử dụng khi xác nhận đón trả.
+              Chọn ít nhất 1 phương thức bảo mật để sử dụng khi xác nhận đón
+              trả.
             </p>
 
             <button
               type="button"
-              onClick={() => setSecurityOptions((prev) => ({ ...prev, otp: !prev.otp }))}
+              onClick={() =>
+                setSecurityOptions((prev) => ({ ...prev, otp: !prev.otp }))
+              }
               className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${securityOptions.otp ? "border-primary-container bg-[#EEF2FF]" : "border-outline-variant/20 bg-surface-container-low"}`}
             >
               <div className="flex items-center gap-3 text-left">
@@ -337,17 +357,28 @@ export default function KidProfile() {
                 </div>
                 <div>
                   <h3 className="font-bold text-on-surface">Mã OTP</h3>
-                  <p className="text-xs text-on-surface-variant">Xác nhận đón trả bằng mã một lần</p>
+                  <p className="text-xs text-on-surface-variant">
+                    Xác nhận đón trả bằng mã một lần
+                  </p>
                 </div>
               </div>
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${securityOptions.otp ? "border-primary-container" : "border-outline-variant"}`}>
-                {securityOptions.otp && <div className="w-3 h-3 rounded-full bg-primary-container" />}
+              <div
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${securityOptions.otp ? "border-primary-container" : "border-outline-variant"}`}
+              >
+                {securityOptions.otp && (
+                  <div className="w-3 h-3 rounded-full bg-primary-container" />
+                )}
               </div>
             </button>
 
             <button
               type="button"
-              onClick={() => setSecurityOptions((prev) => ({ ...prev, pickupPhoto: !prev.pickupPhoto }))}
+              onClick={() =>
+                setSecurityOptions((prev) => ({
+                  ...prev,
+                  pickupPhoto: !prev.pickupPhoto,
+                }))
+              }
               className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${securityOptions.pickupPhoto ? "border-primary-container bg-[#EEF2FF]" : "border-outline-variant/20 bg-surface-container-low"}`}
             >
               <div className="flex items-center gap-3 text-left">
@@ -356,17 +387,28 @@ export default function KidProfile() {
                 </div>
                 <div>
                   <h3 className="font-bold text-on-surface">Ảnh đón trả</h3>
-                  <p className="text-xs text-on-surface-variant">Yêu cầu ảnh xác nhận khi đón/trả</p>
+                  <p className="text-xs text-on-surface-variant">
+                    Yêu cầu ảnh xác nhận khi đón/trả
+                  </p>
                 </div>
               </div>
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${securityOptions.pickupPhoto ? "border-primary-container" : "border-outline-variant"}`}>
-                {securityOptions.pickupPhoto && <div className="w-3 h-3 rounded-full bg-primary-container" />}
+              <div
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${securityOptions.pickupPhoto ? "border-primary-container" : "border-outline-variant"}`}
+              >
+                {securityOptions.pickupPhoto && (
+                  <div className="w-3 h-3 rounded-full bg-primary-container" />
+                )}
               </div>
             </button>
 
             <button
               type="button"
-              onClick={() => setSecurityOptions((prev) => ({ ...prev, securityQuestion: !prev.securityQuestion }))}
+              onClick={() =>
+                setSecurityOptions((prev) => ({
+                  ...prev,
+                  securityQuestion: !prev.securityQuestion,
+                }))
+              }
               className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${securityOptions.securityQuestion ? "border-primary-container bg-[#EEF2FF]" : "border-outline-variant/20 bg-surface-container-low"}`}
             >
               <div className="flex items-center gap-3 text-left">
@@ -375,11 +417,17 @@ export default function KidProfile() {
                 </div>
                 <div>
                   <h3 className="font-bold text-on-surface">Câu hỏi bảo mật</h3>
-                  <p className="text-xs text-on-surface-variant">Dùng câu hỏi và đáp án bí mật</p>
+                  <p className="text-xs text-on-surface-variant">
+                    Dùng câu hỏi và đáp án bí mật
+                  </p>
                 </div>
               </div>
-              <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${securityOptions.securityQuestion ? "border-primary-container" : "border-outline-variant"}`}>
-                {securityOptions.securityQuestion && <div className="w-3 h-3 rounded-full bg-primary-container" />}
+              <div
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${securityOptions.securityQuestion ? "border-primary-container" : "border-outline-variant"}`}
+              >
+                {securityOptions.securityQuestion && (
+                  <div className="w-3 h-3 rounded-full bg-primary-container" />
+                )}
               </div>
             </button>
 
@@ -395,11 +443,20 @@ export default function KidProfile() {
                     className="w-full appearance-none bg-surface-container-low border-none rounded-2xl py-4 px-5 text-sm font-bold focus:ring-2 focus:ring-primary-container transition-all pr-12"
                   >
                     <option value="">Chọn câu hỏi bảo mật</option>
-                    <option value="Biệt danh của bé là gì?">Biệt danh của bé là gì?</option>
-                    <option value="Thú cưng đầu tiên của bé tên gì?">Thú cưng đầu tiên của bé tên gì?</option>
-                    <option value="Màu sắc yêu thích của bé?">Màu sắc yêu thích của bé?</option>
+                    <option value="Biệt danh của bé là gì?">
+                      Biệt danh của bé là gì?
+                    </option>
+                    <option value="Thú cưng đầu tiên của bé tên gì?">
+                      Thú cưng đầu tiên của bé tên gì?
+                    </option>
+                    <option value="Màu sắc yêu thích của bé?">
+                      Màu sắc yêu thích của bé?
+                    </option>
                   </select>
-                  <ChevronDown size={20} className="absolute right-5 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none" />
+                  <ChevronDown
+                    size={20}
+                    className="absolute right-5 top-1/2 -translate-y-1/2 text-outline-variant pointer-events-none"
+                  />
                 </div>
                 <input
                   type="text"
@@ -434,7 +491,6 @@ export default function KidProfile() {
       </main>
 
       {/* Button */}
-
     </div>
   );
 }

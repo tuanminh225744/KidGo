@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 import {
   registerDriver,
   savePendingEmail,
@@ -38,6 +40,12 @@ export default function Register() {
     inspectionExpiry: "",
   });
 
+  const parseDateValue = (value) => {
+    if (!value) return null;
+    const date = new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+  };
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
@@ -57,6 +65,12 @@ export default function Register() {
         ...formData,
         seatCount: Number(formData.seatCount),
       };
+      if (payload.licenseExpiry instanceof Date) {
+        payload.licenseExpiry = payload.licenseExpiry.toISOString();
+      }
+      if (payload.inspectionExpiry instanceof Date) {
+        payload.inspectionExpiry = payload.inspectionExpiry.toISOString();
+      }
 
       const response = await registerDriver(payload);
 
@@ -232,12 +246,17 @@ export default function Register() {
                       className="absolute left-4 top-1/2 -translate-y-1/2 text-outline"
                       size={18}
                     />
-                    <input
-                      required
-                      type="date"
-                      name="licenseExpiry"
-                      value={formData.licenseExpiry}
-                      onChange={handleChange}
+                    <DatePicker
+                      selected={parseDateValue(formData.licenseExpiry)}
+                      onChange={(date) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          licenseExpiry: date,
+                        }))
+                      }
+                      dateFormat="dd/MM/yyyy"
+                      placeholderText="Chọn ngày hết hạn"
+                      wrapperClassName="w-full"
                       className="w-full bg-surface-container-low border-none rounded-2xl py-3.5 pl-12 pr-4 focus:ring-2 focus:ring-green-500 outline-none transition-all font-medium text-on-surface"
                     />
                   </div>
@@ -395,12 +414,17 @@ export default function Register() {
                       className="absolute left-4 top-1/2 -translate-y-1/2 text-outline"
                       size={18}
                     />
-                    <input
-                      required
-                      type="date"
-                      name="inspectionExpiry"
-                      value={formData.inspectionExpiry}
-                      onChange={handleChange}
+                    <DatePicker
+                      selected={parseDateValue(formData.inspectionExpiry)}
+                      onChange={(date) =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          inspectionExpiry: date,
+                        }))
+                      }
+                      dateFormat="dd/MM/yyyy"
+                      placeholderText="Chọn hạn đăng kiểm"
+                      wrapperClassName="w-full"
                       className="w-full bg-surface-container-low border-none rounded-2xl py-3.5 pl-12 pr-4 focus:ring-2 focus:ring-green-500 outline-none transition-all font-medium text-on-surface"
                     />
                   </div>

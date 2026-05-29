@@ -19,6 +19,10 @@ import {
   createTripSchedule,
 } from "../../../services/booking.service.js";
 import { useBookingStore } from "../../../store/useBookingStore.js";
+import {
+  calculateTripPricing,
+  countRecurringTrips,
+} from "../../../utils/bookingPricing.js";
 
 const WEEK_DAYS = [
   { key: "mon", label: "T2", full: "Thứ 2" },
@@ -49,45 +53,6 @@ const formatTime = (value) => {
     hour: "2-digit",
     minute: "2-digit",
   });
-};
-
-const countRecurringTrips = (startDate, endDate, recurringDays) => {
-  if (
-    !startDate ||
-    !endDate ||
-    !Array.isArray(recurringDays) ||
-    recurringDays.length === 0
-  ) {
-    return 0;
-  }
-
-  const start = new Date(startDate);
-  const end = new Date(endDate);
-  if (
-    Number.isNaN(start.getTime()) ||
-    Number.isNaN(end.getTime()) ||
-    start > end
-  ) {
-    return 0;
-  }
-
-  const selectedDays = new Set(
-    recurringDays
-      .map((day) => DAY_MAP[day])
-      .filter((value) => value !== undefined),
-  );
-
-  let trips = 0;
-  const cursor = new Date(start);
-  cursor.setHours(0, 0, 0, 0);
-  end.setHours(0, 0, 0, 0);
-
-  while (cursor <= end) {
-    if (selectedDays.has(cursor.getDay())) trips += 1;
-    cursor.setDate(cursor.getDate() + 1);
-  }
-
-  return trips;
 };
 
 export default function ConfirmBooking() {
@@ -128,8 +93,23 @@ export default function ConfirmBooking() {
 
   const recurringTripCount = useMemo(
     () =>
-      countRecurringTrips(recurringStartDate, recurringEndDate, recurringDays),
+      countRecurringTrips(
+        recurringStartDate,
+        recurringEndDate,
+        recurringDays,
+        DAY_MAP,
+      ),
     [recurringStartDate, recurringEndDate, recurringDays],
+  );
+
+  const pricing = useMemo(
+    () =>
+      calculateTripPricing({
+        tripType,
+        routeInfo,
+        recurringTripCount,
+      }),
+    [tripType, routeInfo, recurringTripCount],
   );
 
   const scheduledTimeLabel = bookingDateTime
@@ -270,14 +250,14 @@ export default function ConfirmBooking() {
                   {kid?.fullName || "Đang tải..."}
                 </h3>
                 <p className="text-xs font-semibold text-on-surface-variant">
-                  {tripType === "recurring"
-                    ? "Chuyến định kỳ"
-                    : "Chuyến một lần"}
+                  {tripType === "one-time"
+                    ? "Chuyến một lần"
+                    : "Chuyến định kỳ"}
                 </p>
               </div>
             </div>
             <span className="rounded-full bg-orange-50 px-4 py-1 text-xs font-bold text-orange-600 ring-1 ring-orange-100">
-              {tripType === "recurring" ? "Định kỳ" : "Một lần"}
+              {tripType === "one-time" ? "Một lần" : "Định kỳ"}
             </span>
           </div>
 
@@ -340,7 +320,7 @@ export default function ConfirmBooking() {
             </div>
           </div>
 
-          {tripType === "recurring" && (
+          {tripType !== "one-time" && (
             <div className="mt-5 rounded-[28px] border border-dashed border-primary/25 bg-surface-container-low p-4">
               <div className="mb-4 flex items-center gap-2">
                 <Calendar size={18} className="text-primary" />
@@ -420,14 +400,46 @@ export default function ConfirmBooking() {
               Tổng dự kiến
             </span>
             <span className="text-3xl font-extrabold text-primary">
-              {Math.max(
-                (Number(routeInfo?.distance) || 0) * 10000,
-                20000,
-              ).toLocaleString("vi-VN")}
+              {pricing.totalPrice.toLocaleString("vi-VN")}
               đ
             </span>
           </div>
           {/* <div className="pointer-events-none absolute -right-4 -bottom-4 h-24 w-24 rounded-full bg-primary/5" /> */}
+        </div>
+
+        <div className="rounded-3xl bg-white p-5 soft-shadow">
+          <div className="flex items-center justify-between text-sm">
+            <span className="text-on-surface-variant">Giá 1 chuyến</span>
+            <span className="font-bold text-on-surface">
+              {pricing.baseTripPrice.toLocaleString("vi-VN")}đ
+            </span>
+          </div>
+          {tripType !== "one-time" && (
+            <>
+              <div className="mt-3 flex items-center justify-between text-sm">
+                <span className="text-on-surface-variant">Tổng trước giảm</span>
+                <span className="font-bold text-on-surface">
+                  {(pricing.baseTripPrice * pricing.trips).toLocaleString(
+                    "vi-VN",
+                  )}đ
+                </span>
+              </div>
+              <div className="mt-3 flex items-center justify-between text-sm">
+                <span className="text-on-surface-variant">Giảm giá</span>
+                <span className="font-bold text-green-600">
+                  -{pricing.discountAmount.toLocaleString("vi-VN")}đ
+                </span>
+              </div>
+            </>
+          )}
+          <div className="mt-4 flex items-center justify-between border-t border-outline-variant/20 pt-4">
+            <span className="text-sm font-bold uppercase tracking-widest text-on-surface-variant">
+              Thanh toán dự kiến
+            </span>
+            <span className="text-2xl font-extrabold text-primary">
+              {pricing.totalPrice.toLocaleString("vi-VN")}đ
+            </span>
+          </div>
         </div>
       </main>
 
