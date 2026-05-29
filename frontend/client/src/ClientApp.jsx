@@ -9,6 +9,7 @@ import KidProfile from "./pages/client/KidProfile.jsx";
 import ClientProfile from "./pages/client/ClientProfile.jsx";
 import Booking from "./pages/client/Booking";
 import Tracking from "./pages/client/Tracking.jsx";
+import Schedules from "./pages/client/Schedules.jsx";
 import BottomNav from "./pages/client/BottomNav.jsx";
 
 export default function ClientApp() {
@@ -25,6 +26,7 @@ export default function ClientApp() {
           <Route path="profile" element={<ClientProfile />} />
           <Route path="booking/*" element={<Booking />} />
           <Route path="tracking" element={<Tracking />} />
+          <Route path="schedules" element={<Schedules />} />
         </Routes>
       </div>
       <BottomNav />

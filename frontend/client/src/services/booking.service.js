@@ -27,3 +27,7 @@ export const createTripSchedule = async (scheduleData) => {
 export const getTripSchedules = async () => {
   return api.get("/bookings/schedules");
 };
+
+export const getTripSchedulesByDate = async (date) => {
+  return api.get("/bookings/schedules", { params: { date } });
+};

@@ -55,6 +55,11 @@ const formatTime = (value) => {
   });
 };
 
+const formatDateInput = (value) => {
+  const date = new Date(value);
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
+};
+
 export default function ConfirmBooking() {
   const navigate = useNavigate();
   const [showSuccess, setShowSuccess] = useState(false);
@@ -144,6 +149,16 @@ export default function ConfirmBooking() {
     return `${mins} phút`;
   };
 
+  const isWithinTwentyMinutes = (scheduledValue) => {
+    if (!scheduledValue) return false;
+
+    const scheduledTime = new Date(scheduledValue).getTime();
+    const now = Date.now();
+    const diffMinutes = Math.abs((scheduledTime - now) / (1000 * 60));
+
+    return diffMinutes <= 20;
+  };
+
   const handleConfirm = async () => {
     if (!startPoint || !endPoint || !kidId) {
       alert("Thiếu thông tin đặt xe. Vui lòng thử lại.");
@@ -171,37 +186,50 @@ export default function ConfirmBooking() {
         throw new Error(routeRes.message || "Lỗi tạo lộ trình");
       const routeId = routeRes.data._id;
 
-      if (tripType === "one-time") {
+      const d = new Date(bookingDateTime);
+      const pickupTime = `${String(d.getHours()).padStart(2, "0")}:${String(
+        d.getMinutes(),
+      ).padStart(2, "0")}`;
+
+      const schedulePayload =
+        tripType === "one-time"
+          ? {
+              kidId,
+              routeId,
+              repeatDays: [],
+              pickupTime,
+              startDate: formatDateInput(bookingDateTime),
+              endDate: formatDateInput(bookingDateTime),
+              preferredDriverId: selectedDriverId || undefined,
+            }
+          : {
+              kidId,
+              routeId,
+              repeatDays: (recurringDays || [])
+                .map((day) => DAY_MAP[day])
+                .filter((day) => day !== undefined),
+              pickupTime,
+              startDate: recurringStartDate,
+              endDate: recurringEndDate,
+              preferredDriverId: selectedDriverId || undefined,
+            };
+
+      const schedRes = await createTripSchedule(schedulePayload);
+      if (!schedRes.success)
+        throw new Error(schedRes.message || "Lỗi tạo lịch trình");
+      console.log("res", schedRes);
+
+      if (tripType === "one-time" && isWithinTwentyMinutes(bookingDateTime)) {
         const bookRes = await createBooking({
           kidId,
           routeId,
           scheduledTime: bookingDateTime,
           preferredDriverId: selectedDriverId || undefined,
+          scheduleId: schedRes.data?._id || null,
         });
+
         if (!bookRes.success)
           throw new Error(bookRes.message || "Lỗi tạo booking");
-      } else {
-        const repeatDays = (recurringDays || [])
-          .map((day) => DAY_MAP[day])
-          .filter((day) => day !== undefined);
-
-        const d = new Date(bookingDateTime);
-        const pickupTime = `${String(d.getHours()).padStart(2, "0")}:${String(
-          d.getMinutes(),
-        ).padStart(2, "0")}`;
-
-        const schedRes = await createTripSchedule({
-          kidId,
-          routeId,
-          repeatDays,
-          pickupTime,
-          startDate: recurringStartDate,
-          endDate: recurringEndDate,
-          preferredDriverId: selectedDriverId || undefined,
-        });
-
-        if (!schedRes.success)
-          throw new Error(schedRes.message || "Lỗi tạo lịch định kỳ");
       }
 
       setShowSuccess(true);
@@ -394,18 +422,17 @@ export default function ConfirmBooking() {
           </p>
         </div> */}
 
-        <div className="relative overflow-hidden rounded-3xl border-2 border-dashed border-outline-variant bg-surface-container-low p-6">
+        {/* <div className="relative overflow-hidden rounded-3xl border-2 border-dashed border-outline-variant bg-surface-container-low p-6">
           <div className="relative z-10 flex items-center justify-between">
             <span className="text-sm font-bold uppercase tracking-widest text-on-surface-variant">
               Tổng dự kiến
             </span>
             <span className="text-3xl font-extrabold text-primary">
-              {pricing.totalPrice.toLocaleString("vi-VN")}
-              đ
+              {pricing.totalPrice.toLocaleString("vi-VN")}đ
             </span>
           </div>
-          {/* <div className="pointer-events-none absolute -right-4 -bottom-4 h-24 w-24 rounded-full bg-primary/5" /> */}
-        </div>
+          <div className="pointer-events-none absolute -right-4 -bottom-4 h-24 w-24 rounded-full bg-primary/5" />
+        </div> */}
 
         <div className="rounded-3xl bg-white p-5 soft-shadow">
           <div className="flex items-center justify-between text-sm">
@@ -421,7 +448,8 @@ export default function ConfirmBooking() {
                 <span className="font-bold text-on-surface">
                   {(pricing.baseTripPrice * pricing.trips).toLocaleString(
                     "vi-VN",
-                  )}đ
+                  )}
+                  đ
                 </span>
               </div>
               <div className="mt-3 flex items-center justify-between text-sm">
@@ -483,20 +511,21 @@ export default function ConfirmBooking() {
                 Đặt xe thành công!
               </h2>
               <p className="mb-10 text-sm font-medium leading-relaxed text-on-surface-variant">
-                Hệ thống đang tìm tài xế phù hợp cho bé{" "}
-                {kid?.fullName || "của bạn"}
-                <span className="animate-pulse">...</span>
+                {tripType === "one-time" &&
+                isWithinTwentyMinutes(bookingDateTime)
+                  ? `Hệ thống đã tạo booking ngay cho bé ${kid?.fullName || "của bạn"}.`
+                  : `Hệ thống đã lưu lịch trình cho bé ${kid?.fullName || "của bạn"} và sẽ tự động tạo booking khi gần đến giờ đón.`}
               </p>
 
               <div className="w-full space-y-4">
                 <button
-                  onClick={() => navigate("client/tracking")}
+                  onClick={() => navigate("/client/tracking")}
                   className="h-14 w-full rounded-2xl bg-primary-container text-lg font-bold text-white transition-all hover:brightness-110 active:scale-95"
                 >
                   Theo dõi chuyến đi
                 </button>
                 <button
-                  onClick={() => navigate("/")}
+                  onClick={() => navigate("/client/home")}
                   className="h-14 w-full rounded-2xl bg-surface-container-high text-lg font-bold text-on-surface transition-colors hover:bg-outline-variant active:scale-95"
                 >
                   Về trang chủ

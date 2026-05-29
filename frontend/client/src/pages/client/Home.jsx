@@ -18,6 +18,7 @@ import { getCurrentProfile } from "../../services/user.service.js";
 import { getActiveTripsList } from "../../services/trip.service.js";
 import { getUnreadCount } from "../../services/notification.service.js";
 import { getParentAlerts } from "../../services/alert.service.js";
+import { getTripSchedulesByDate } from "../../services/booking.service.js";
 import { useAuthStore } from "../../store/useAuthStore.js";
 
 export default function Home() {
@@ -27,6 +28,7 @@ export default function Home() {
   const [unreadCount, setUnreadCount] = useState(0);
   const [activeTrips, setActiveTrips] = useState([]);
   const [alerts, setAlerts] = useState([]);
+  const [todaySchedules, setTodaySchedules] = useState([]);
   const [loading, setLoading] = useState(true);
   const { user, setUser } = useAuthStore();
   const displayProfile = profile || user;
@@ -43,6 +45,7 @@ export default function Home() {
       loadUnreadCount(),
       loadActiveTrips(),
       loadAlerts(),
+      loadTodaySchedules(),
     ]);
     setLoading(false);
   };
@@ -85,6 +88,30 @@ export default function Home() {
       setAlerts(result.data?.alerts || result.data || []);
     }
   };
+
+  const loadTodaySchedules = async () => {
+    const today = new Date();
+    const dateParam = [
+      today.getFullYear(),
+      String(today.getMonth() + 1).padStart(2, "0"),
+      String(today.getDate()).padStart(2, "0"),
+    ].join("-");
+    const result = await getTripSchedulesByDate(dateParam);
+    if (result.success) {
+      setTodaySchedules(result.data || []);
+    } else {
+      setTodaySchedules([]);
+    }
+  };
+
+  const formatPickupTime = (pickupTime) => pickupTime || "--:--";
+
+  const formatScheduleDate = (date) =>
+    new Intl.DateTimeFormat("vi-VN", {
+      weekday: "short",
+      day: "2-digit",
+      month: "2-digit",
+    }).format(new Date(date));
 
   return (
     <div className="flex-1 flex flex-col pb-24">
@@ -205,7 +232,7 @@ export default function Home() {
                     </span>
                   </div>
                   <button
-                    onClick={() => navigate("client/tracking")}
+                    onClick={() => navigate("/client/tracking")}
                     className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-primary shadow-sm"
                   >
                     <Phone size={18} fill="currentColor" />
@@ -233,7 +260,7 @@ export default function Home() {
 
                 <div className="grid grid-cols-2 gap-3 mt-4">
                   <button
-                    onClick={() => navigate("client/tracking")}
+                    onClick={() => navigate("/client/tracking")}
                     className="bg-primary-container text-white rounded-xl py-3 flex items-center justify-center gap-2 font-bold active:scale-95 transition-transform"
                   >
                     <Map size={18} /> Xem bản đồ
@@ -339,17 +366,58 @@ export default function Home() {
             <h2 className="text-lg font-bold text-on-background">
               Lịch trình hôm nay
             </h2>
-            <button className="text-primary font-bold text-sm hover:underline">
+            <button
+              onClick={() => navigate("/client/schedules")}
+              className="text-primary font-bold text-sm hover:underline"
+            >
               Xem chi tiết
             </button>
           </div>
-          <div className="bg-secondary-container rounded-3xl p-5 text-white flex flex-col justify-between h-36 shadow-lg shadow-secondary/20 active:scale-95 transition-transform cursor-pointer w-full">
-            <CalendarDays size={32} strokeWidth={1.5} />
-            <div>
-              <h3 className="font-bold text-lg">Hôm nay</h3>
-              <p className="text-white/80 text-sm">Chưa có lịch trình nào</p>
+          {todaySchedules.length === 0 ? (
+            <div className="bg-secondary-container rounded-3xl p-5 text-white flex flex-col justify-between h-36 shadow-lg shadow-secondary/20 w-full">
+              <CalendarDays size={32} strokeWidth={1.5} />
+              <div>
+                <h3 className="font-bold text-lg">Hôm nay</h3>
+                <p className="text-white/80 text-sm">
+                  Chưa có lịch trình nào cho hôm nay
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-3">
+              {todaySchedules.slice(0, 3).map((schedule) => (
+                <button
+                  key={schedule._id}
+                  onClick={() => navigate("/client/schedules")}
+                  className="w-full bg-secondary-container text-white rounded-3xl p-4 shadow-lg shadow-secondary/20 active:scale-[0.99] transition-transform text-left"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.18em] text-white/70 font-semibold">
+                        {schedule.startDate
+                          ? formatScheduleDate(schedule.startDate)
+                          : "Hôm nay"}
+                      </p>
+                      <h3 className="font-bold text-lg mt-1">
+                        {schedule.kidId?.fullName || "Bé của bạn"}
+                      </h3>
+                      <p className="text-white/80 text-sm mt-1">
+                        {schedule.routeId?.name || "Tuyến chưa có tên"}
+                      </p>
+                    </div>
+                    <div className="text-right">
+                      <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/15 text-white font-black">
+                        {formatPickupTime(schedule.pickupTime)}
+                      </div>
+                      <p className="text-[11px] text-white/70 mt-2">
+                        Đón lúc
+                      </p>
+                    </div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Trip History */}

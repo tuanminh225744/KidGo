@@ -6,20 +6,28 @@ export default function BottomNav() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  const hideNav = ["/client/login", "/client/register", "/client/otp"].includes(location.pathname);
+  const hideNav = ["/client/login", "/client/register", "/client/otp"].includes(
+    location.pathname,
+  );
 
   if (hideNav) return null;
+
+  const isActive = (path) =>
+    location.pathname === path || location.pathname.startsWith(`${path}/`);
 
   return (
     <nav className="absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-md border-t border-outline-variant/30 flex justify-around py-3 px-6 z-50 rounded-t-3xl shadow-lg">
       <button
         onClick={() => navigate("/client/home")}
-        className={`flex flex-col items-center gap-1 ${location.pathname.includes("/client/home") || location.pathname === "/client" ? "text-primary" : "text-on-surface-variant"}`}
+        className={`flex flex-col items-center gap-1 ${isActive("/client/home") || location.pathname === "/client" ? "text-primary" : "text-on-surface-variant"}`}
       >
         <Home size={24} />
         <span className="text-[10px] font-bold">Trang chủ</span>
       </button>
-      <button className="flex flex-col items-center gap-1 text-on-surface-variant">
+      <button
+        onClick={() => navigate("/client/schedules")}
+        className={`flex flex-col items-center gap-1 ${isActive("/client/schedules") ? "text-primary" : "text-on-surface-variant"}`}
+      >
         <Calendar size={24} />
         <span className="text-[10px] font-bold">Lịch trình</span>
       </button>

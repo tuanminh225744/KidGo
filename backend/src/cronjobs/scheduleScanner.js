@@ -11,7 +11,7 @@ export const startScheduleScanner = () => {
   const LEAD_TIME_MINUTES = 20;
 
   // Chu kỳ: Cứ mỗi 1 phút hàm này lại tự động kích hoạt ngầm
-  const task = cron.schedule("* * * * *", async () => {
+  const task = cron.schedule("*/30 * * * * *", async () => {
     try {
       // Bước 1: Suy ra thời điểm cần đón theo độ trễ
       const targetMoment = new Date(Date.now() + LEAD_TIME_MINUTES * 60 * 1000);

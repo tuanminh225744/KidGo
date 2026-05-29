@@ -21,6 +21,11 @@ export const validateCreateBooking = [
     .isMongoId()
     .withMessage("routeId phải là định dạng ObjectID hợp lệ"),
 
+  body("scheduleId")
+    .optional({ nullable: true })
+    .isMongoId()
+    .withMessage("scheduleId phải là định dạng ObjectID hợp lệ"),
+
   body("scheduledTime")
     .notEmpty()
     .withMessage("scheduledTime là bắt buộc")

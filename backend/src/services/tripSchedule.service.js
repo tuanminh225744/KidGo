@@ -109,3 +109,44 @@ export const getSchedulesByParent = async (parentId) => {
     throw new Error(`Lỗi lấy danh sách lịch trình: ${error.message}`);
   }
 };
+
+/**
+ * Lấy danh sách lịch trình theo ngày cụ thể của phụ huynh
+ */
+export const getSchedulesByParentAndDate = async (parentId, date) => {
+  try {
+    const targetDate = String(date);
+
+    if (!targetDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      throw new Error("Ngày lọc không hợp lệ.");
+    }
+
+    const startOfDay = new Date(`${targetDate}T00:00:00.000Z`);
+    const endOfDay = new Date(`${targetDate}T23:59:59.999Z`);
+    const dayOfWeek = startOfDay.getUTCDay();
+
+    const schedules = await TripSchedule.find({
+      parentId,
+      isActive: true,
+      $and: [
+        { startDate: { $lte: endOfDay } },
+        { $or: [{ endDate: null }, { endDate: { $gte: startOfDay } }] },
+        {
+          $or: [
+            { repeatDays: dayOfWeek },
+            { repeatDays: [] },
+            { repeatDays: { $size: 0 } },
+          ],
+        },
+      ],
+    })
+      .populate("kidId", "fullName avatar")
+      .populate("routeId", "name pickupAddress dropoffAddress")
+      .populate("preferredDriverId", "user")
+      .sort({ pickupTime: 1, createdAt: -1 });
+
+    return schedules;
+  } catch (error) {
+    throw new Error(`Lỗi lấy lịch trình theo ngày: ${error.message}`);
+  }
+};

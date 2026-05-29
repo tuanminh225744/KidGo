@@ -29,12 +29,19 @@ export const getBookings = async (req, res, next) => {
  */
 export const createBooking = async (req, res, next) => {
   try {
-    const { kidId, routeId, scheduledTime, preferredDriverId } = req.body;
+    const {
+      kidId,
+      routeId,
+      scheduleId,
+      scheduledTime,
+      preferredDriverId,
+    } = req.body;
 
     const bookingData = {
       parentId: req.user.id,
       kidId,
       routeId,
+      scheduleId: scheduleId || null,
       scheduledTime,
       preferredDriverId: preferredDriverId || null,
       type: "one_time",

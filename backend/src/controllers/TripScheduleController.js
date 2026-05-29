@@ -7,9 +7,10 @@ import { AppError, AuthorizationError } from "../utils/AppError.js";
  */
 export const getSchedules = async (req, res, next) => {
   try {
-    const schedules = await tripScheduleService.getSchedulesByParent(
-      req.user.id,
-    );
+    const { date } = req.query;
+    const schedules = date
+      ? await tripScheduleService.getSchedulesByParentAndDate(req.user.id, date)
+      : await tripScheduleService.getSchedulesByParent(req.user.id);
 
     res.status(200).json({
       success: true,
