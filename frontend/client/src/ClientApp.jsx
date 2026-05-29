@@ -10,6 +10,7 @@ import ClientProfile from "./pages/client/ClientProfile.jsx";
 import Booking from "./pages/client/Booking";
 import Tracking from "./pages/client/Tracking.jsx";
 import Schedules from "./pages/client/Schedules.jsx";
+import Notifications from "./pages/client/Notifications.jsx";
 import BottomNav from "./pages/client/BottomNav.jsx";
 
 export default function ClientApp() {
@@ -27,6 +28,7 @@ export default function ClientApp() {
           <Route path="booking/*" element={<Booking />} />
           <Route path="tracking" element={<Tracking />} />
           <Route path="schedules" element={<Schedules />} />
+          <Route path="notifications" element={<Notifications />} />
         </Routes>
       </div>
       <BottomNav />

@@ -39,7 +39,10 @@ export default function BottomNav() {
           <Car size={32} />
         </button>
       </div>
-      <button className="flex flex-col items-center gap-1 text-on-surface-variant">
+      <button
+        onClick={() => navigate("/client/notifications")}
+        className="flex flex-col items-center gap-1 text-on-surface-variant"
+      >
         <Bell size={24} />
         <span className="text-[10px] font-bold">Thông báo</span>
       </button>
