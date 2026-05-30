@@ -86,9 +86,22 @@ export const acceptBooking = async (req, res, next) => {
 export const rejectBooking = async (req, res, next) => {
   try {
     const driverService = await import("../services/driver.service.js");
+    const Booking = require("../models/operational/booking.model.js").default;
 
     const driverId = (await driverService.getDriverByUserId(req.user.id))._id;
-    const booking = await bookingService.driverCancelBooking(
+    const booking = await Booking.findById(req.params.bookingId);
+    if (!booking) {
+      throw new AppError("Không tìm thấy booking.", 404);
+    }
+
+    if (
+      booking.assignedDriverId?.toString() !== driverId.toString() &&
+      booking.preferredDriverId?.toString() !== driverId.toString()
+    ) {
+      throw new AuthorizationError("Bạn không có quyền từ chối booking này.");
+    }
+
+    const updatedBooking = await bookingService.driverCancelBooking(
       req.params.bookingId,
       driverId,
     );
@@ -96,7 +109,7 @@ export const rejectBooking = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Từ chối chuyến thành công.",
-      data: booking,
+      data: updatedBooking,
     });
   } catch (error) {
     next(error);

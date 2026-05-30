@@ -35,6 +35,14 @@ const sendParentBookingNotification = async (booking, title, body, type) => {
   return notification;
 };
 
+const isDriverRelatedToBooking = (booking, driverId) => {
+  const driverIdStr = driverId?.toString();
+  return (
+    booking?.assignedDriverId?.toString() === driverIdStr ||
+    booking?.preferredDriverId?.toString() === driverIdStr
+  );
+};
+
 const findAndAssignNearbyDriver = async (booking) => {
   const route = await Route.findById(booking.routeId);
   if (!route?.pickupCoords?.coordinates) return null;
@@ -154,12 +162,6 @@ export const createBooking = async (bookingData) => {
     await booking.save();
 
     const io = getIo();
-    await sendParentBookingNotification(
-      booking,
-      "Yêu cầu đón xe đã được tạo",
-      "Hệ thống đã ghi nhận lịch đặt xe của bạn và đang tìm tài xế phù hợp.",
-      "booking_created",
-    );
 
     if (booking.preferredDriverId) {
       booking.assignedDriverId = booking.preferredDriverId;
@@ -181,15 +183,7 @@ export const createBooking = async (bookingData) => {
       ];
     } else {
       const matchedDriverId = await findAndAssignNearbyDriver(booking);
-      if (matchedDriverId) {
-        await sendParentBookingNotification(
-          booking,
-          "Đã tìm thấy tài xế",
-          "Hệ thống đã ghép được tài xế cho chuyến xe của bạn.",
-          "booking_matched",
-        );
-        clearBookingTimer(booking._id);
-      } else {
+      if (!matchedDriverId) {
         // Lấy tọa độ điểm đón từ Route để tiến hành dô sóng
         const route = await Route.findById(booking.routeId);
         if (!route || !route.pickupCoords || !route.pickupCoords.coordinates) {
@@ -287,7 +281,10 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
   try {
     const booking = await Booking.findById(bookingId);
     if (!booking) throw new Error("Không có booking này.");
-    if (booking.status !== "pending")
+    if (!isDriverRelatedToBooking(booking, driverId)) {
+      throw new Error("Bạn không có quyền nhận booking này.");
+    }
+    if (!["pending", "matched"].includes(booking.status))
       throw new Error(
         `Cuốc xe đang ${booking.status}. Bàn tay của bạn chậm quá rồi!`,
       );
@@ -336,6 +333,13 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
         bookingId: booking._id,
       });
 
+    await sendParentBookingNotification(
+      booking,
+      "Tài xế đã xác nhận chuyến",
+      "Đã có tài xế xác nhận nhận chuyến của bạn. Bạn có thể theo dõi hành trình của bé ngay bây giờ.",
+      "booking_confirmed",
+    );
+
     return booking;
   } catch (error) {
     throw new Error(`Lỗi tài xế nhận chuyến: ${error.message}`);
@@ -346,6 +350,9 @@ export const driverCancelBooking = async (bookingId, driverId) => {
   try {
     const booking = await Booking.findById(bookingId);
     if (!booking) throw new Error("Không thể hủy lệnh đón không tồn tại.");
+    if (!isDriverRelatedToBooking(booking, driverId)) {
+      throw new Error("Bạn không có quyền hủy booking này.");
+    }
 
     booking.status = "cancelled";
     booking.assignedDriverId = null;
@@ -366,6 +373,13 @@ export const driverCancelBooking = async (bookingId, driverId) => {
           "Tài xế có thể đã gặp trục trặc và vừa hủy lệnh đón bé. Vui lòng thao tác book một chuyến mới ngay nhé!",
         bookingId: booking._id,
       });
+
+    await sendParentBookingNotification(
+      booking,
+      "Tài xế đã từ chối chuyến",
+      "Tài xế được chỉ định đã từ chối chuyến. Vui lòng tạo một booking mới hoặc chờ hệ thống ghép tài xế khác.",
+      "booking_rejected",
+    );
 
     return booking;
   } catch (error) {
