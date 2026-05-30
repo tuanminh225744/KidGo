@@ -8,7 +8,12 @@ import {
   setAuthTokens,
   verifyOtp,
 } from "../../services/auth.service.js";
+import {
+  getDriverProfile,
+  getDriverVehicles,
+} from "../../services/driver.service.js";
 import { useAuthStore } from "../../store/useAuthStore.js";
+import { useDriverStore } from "../../store/useDriverStore.js";
 
 export default function OTP() {
   const navigate = useNavigate();
@@ -66,6 +71,24 @@ export default function OTP() {
       refreshToken: result.refreshToken,
     });
     useAuthStore.getState().setUser(result.user);
+    if (result?.user?.role === "driver") {
+      try {
+        const [profileRes, vehiclesRes] = await Promise.all([
+          getDriverProfile(),
+          getDriverVehicles(),
+        ]);
+
+        useDriverStore.getState().setDriverData({
+          driverInfo: profileRes?.data ?? null,
+          vehicles: vehiclesRes?.data ?? [],
+          activeVehicle:
+            vehiclesRes?.data?.find?.((vehicle) => vehicle?.isActive) ?? null,
+        });
+      } catch (driverErr) {
+        console.error("Failed to load driver session data:", driverErr);
+        useDriverStore.getState().clearDriverData();
+      }
+    }
     clearPendingEmail();
     navigate("/driver/registered");
   };
@@ -93,8 +116,8 @@ export default function OTP() {
             Nhập mã xác thực
           </h2>
           <p className="text-on-surface-variant text-center max-w-xs leading-relaxed">
-            Mã OTP đã được gửi đến email của bạn. Vui lòng nhập mã gồm 6 chữ
-            số để tiếp tục.
+            Mã OTP đã được gửi đến email của bạn. Vui lòng nhập mã gồm 6 chữ số
+            để tiếp tục.
           </p>
         </div>
 

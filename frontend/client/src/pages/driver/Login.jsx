@@ -2,7 +2,12 @@ import { Mail, Lock, LogIn, ChevronRight } from "lucide-react";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { loginUser, setAuthTokens } from "../../services/auth.service.js";
+import {
+  getDriverProfile,
+  getDriverVehicles,
+} from "../../services/driver.service.js";
 import { useAuthStore } from "../../store/useAuthStore.js";
+import { useDriverStore } from "../../store/useDriverStore.js";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -37,6 +42,22 @@ export default function Login() {
       });
 
       useAuthStore.getState().setUser(result.user);
+      try {
+        const [profileRes, vehiclesRes] = await Promise.all([
+          getDriverProfile(),
+          getDriverVehicles(),
+        ]);
+
+        useDriverStore.getState().setDriverData({
+          driverInfo: profileRes?.data ?? null,
+          vehicles: vehiclesRes?.data ?? [],
+          activeVehicle:
+            vehiclesRes?.data?.find?.((vehicle) => vehicle?.isActive) ?? null,
+        });
+      } catch (driverErr) {
+        console.error("Failed to load driver session data:", driverErr);
+        useDriverStore.getState().clearDriverData();
+      }
 
       navigate("/driver/home");
     } catch (err) {
