@@ -1,10 +1,19 @@
 import { useEffect, useRef, useState } from "react";
-import { MapContainer, Marker, TileLayer, CircleMarker, useMap } from "react-leaflet";
+import {
+  MapContainer,
+  Marker,
+  TileLayer,
+  CircleMarker,
+  useMap,
+} from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./DriverLiveMap.css";
 import { useAuthStore } from "../store/useAuthStore.js";
-import { connectDriverSocket, disconnectDriverSocket } from "../socket/driverSocket.js";
+import {
+  connectDriverSocket,
+  disconnectDriverSocket,
+} from "../socket/driverSocket.js";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -39,7 +48,7 @@ const DriverLiveMap = ({ className = "" }) => {
   const watchIdRef = useRef(null);
   const positionRef = useRef(null);
   const user = useAuthStore((state) => state.user);
-  const driverId = user?.driverId || user?._id || user?.id || "";
+  const driverId = user?.driverId || null;
 
   useEffect(() => {
     positionRef.current = position;

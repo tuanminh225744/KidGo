@@ -2,6 +2,7 @@ import React from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/admin/Login.jsx";
 import DriverApproval from "./pages/admin/DriverApproval.jsx";
+import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 export default function AdminApp() {
   return (
@@ -10,8 +11,20 @@ export default function AdminApp() {
         <Routes>
           <Route path="/" element={<Navigate to="login" replace />} />
           <Route path="login" element={<Login />} />
-          <Route path="home" element={<Navigate to="/admin/driver-approval" replace />} />
-          <Route path="driver-approval" element={<DriverApproval />} />
+          <Route
+            element={
+              <ProtectedRoute
+                allowedRoles={["admin"]}
+                loginPath="/admin/login"
+              />
+            }
+          >
+            <Route
+              path="home"
+              element={<Navigate to="/admin/driver-approval" replace />}
+            />
+            <Route path="driver-approval" element={<DriverApproval />} />
+          </Route>
         </Routes>
       </div>
     </>
