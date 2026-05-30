@@ -195,7 +195,10 @@ const getAlertMessage = (type, metadata = {}) => {
 /**
  * Lấy danh sách alert của phụ huynh (có filter + phân trang)
  */
-export const getParentAlerts = async (parentId, { status, type, page = 1, limit = 20 } = {}) => {
+export const getParentAlerts = async (
+  parentId,
+  { status, type, page = 1, limit = 20 } = {},
+) => {
   const query = { parentId };
   if (status) query.status = status;
   if (type) query.type = type;

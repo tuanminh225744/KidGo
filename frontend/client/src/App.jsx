@@ -9,7 +9,7 @@ function App() {
     <div className="min-h-screen bg-gray-100 flex flex-col font-sans">
       <Routes>
         {/* Redirect root to client home or login */}
-        <Route path="/" element={<Navigate to="/client/login" replace />} />
+        <Route path="/" element={<Navigate to="/driver/login" replace />} />
 
         {/* Client Routes */}
         <Route path="/client/*" element={<ClientApp />} />

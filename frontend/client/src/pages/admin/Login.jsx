@@ -26,7 +26,7 @@ export default function Login() {
       }
 
       if (result?.user?.role !== "admin") {
-        setError("Bạn không có quyền truy cập vào trang quản trị");
+        setError("Đăng nhập thất bại. Sai email hoặc mật khẩu!");
         setLoading(false);
         return;
       }
@@ -40,7 +40,11 @@ export default function Login() {
 
       navigate("/admin/home");
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Đăng nhập thất bại. Vui lòng thử lại.");
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Đăng nhập thất bại. Vui lòng thử lại.",
+      );
     } finally {
       setLoading(false);
     }
@@ -49,7 +53,6 @@ export default function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 md:p-8">
       <div className="w-full max-w-5xl bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row">
-
         {/* Left Side - Branding / Decorative */}
         <div className="md:w-1/2 bg-blue-600 p-10 flex flex-col justify-between relative overflow-hidden hidden md:flex text-white">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-800 opacity-90" />
@@ -58,9 +61,13 @@ export default function Login() {
 
           <div className="relative z-10 flex items-center gap-3">
             <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg">
-              <span className="text-blue-600 font-extrabold text-2xl tracking-tighter">KG</span>
+              <span className="text-blue-600 font-extrabold text-2xl tracking-tighter">
+                KG
+              </span>
             </div>
-            <span className="font-bold text-2xl tracking-wide">KidGo Admin</span>
+            <span className="font-bold text-2xl tracking-wide">
+              KidGo Admin
+            </span>
           </div>
 
           <div className="relative z-10 space-y-6 max-w-sm mt-20">
@@ -68,7 +75,8 @@ export default function Login() {
               Quản lý hệ thống <br /> thông minh.
             </h1>
             <p className="text-blue-100 text-lg">
-              Nền tảng dành riêng cho Quản trị viên để kiểm soát, phê duyệt và giám sát hoạt động của toàn bộ hệ thống KidGo.
+              Nền tảng dành riêng cho Quản trị viên để kiểm soát, phê duyệt và
+              giám sát hoạt động của toàn bộ hệ thống KidGo.
             </p>
           </div>
 
@@ -82,20 +90,31 @@ export default function Login() {
         <div className="md:w-1/2 p-8 md:p-14 lg:p-20 flex flex-col justify-center relative">
           <div className="md:hidden flex justify-center mb-8">
             <div className="w-20 h-20 bg-blue-600 rounded-3xl flex items-center justify-center shadow-xl">
-              <span className="text-white text-3xl font-extrabold tracking-tighter">KG</span>
+              <span className="text-white text-3xl font-extrabold tracking-tighter">
+                KG
+              </span>
             </div>
           </div>
 
           <div className="text-center md:text-left mb-10">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">Đăng nhập Admin</h2>
-            <p className="text-gray-500">Vui lòng nhập thông tin xác thực để tiếp tục.</p>
+            <h2 className="text-3xl font-bold text-gray-900 mb-2">
+              Đăng nhập Admin
+            </h2>
+            <p className="text-gray-500">
+              Vui lòng nhập thông tin xác thực để tiếp tục.
+            </p>
           </div>
 
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700">Email hoặc Tài khoản</label>
+              <label className="text-sm font-bold text-gray-700">
+                Email hoặc Tài khoản
+              </label>
               <div className="relative group">
-                <Mail className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors" size={20} />
+                <Mail
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"
+                  size={20}
+                />
                 <input
                   type="email"
                   value={email}
@@ -107,9 +126,14 @@ export default function Login() {
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-700">Mật khẩu</label>
+              <label className="text-sm font-bold text-gray-700">
+                Mật khẩu
+              </label>
               <div className="relative group">
-                <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors" size={20} />
+                <Lock
+                  className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 group-focus-within:text-blue-600 transition-colors"
+                  size={20}
+                />
                 <input
                   type="password"
                   value={password}
@@ -132,7 +156,8 @@ export default function Login() {
               disabled={loading}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-4 rounded-2xl font-bold text-lg shadow-lg shadow-blue-600/20 mt-4 flex items-center justify-center gap-2 active:scale-[0.98] transition-all disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Đang xử lý..." : "Đăng nhập hệ thống"} <LogIn size={20} />
+              {loading ? "Đang xử lý..." : "Đăng nhập hệ thống"}{" "}
+              <LogIn size={20} />
             </button>
           </form>
 

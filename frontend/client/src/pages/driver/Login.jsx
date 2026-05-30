@@ -26,7 +26,7 @@ export default function Login() {
       }
 
       if (result?.user?.role !== "driver") {
-        setError("Tài khoản không có quyền truy cập");
+        setError("Đăng nhập thất bại. Sai email hoặc mật khẩu!");
         setLoading(false);
         return;
       }
@@ -40,7 +40,11 @@ export default function Login() {
 
       navigate("/driver/home");
     } catch (err) {
-      setError(err.response?.data?.message || err.message || "Đăng nhập thất bại. Vui lòng thử lại.");
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Đăng nhập thất bại. Vui lòng thử lại.",
+      );
     } finally {
       setLoading(false);
     }
@@ -58,9 +62,7 @@ export default function Login() {
           </div>
         </div>
         <h1 className="text-4xl font-extrabold text-green-600 mb-2">Kid Go</h1>
-        <p className="text-on-surface-variant font-medium">
-          Dành cho Tài xế
-        </p>
+        <p className="text-on-surface-variant font-medium">Dành cho Tài xế</p>
       </div>
 
       <div className="bg-white rounded-3xl p-6 soft-shadow border border-outline-variant/30 mt-8">

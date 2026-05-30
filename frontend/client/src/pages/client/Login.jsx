@@ -25,7 +25,7 @@ export default function Login() {
     }
 
     if (result?.user?.role !== "parent") {
-      setError("Bạn không có quyền truy cập vào trang dành cho phụ huynh");
+      setError("Đăng nhập thất bại. Sai email hoặc mật khẩu!");
       setLoading(false);
       return;
     }

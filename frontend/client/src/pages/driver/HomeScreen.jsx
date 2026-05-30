@@ -1,7 +1,11 @@
-import { useState, useEffect } from 'react';
-import { Bell, Search, MapPin, ChevronRight } from 'lucide-react';
-import { getDriverProfile, getDriverTrips } from '../../services/driver.service';
-import { useNavigate } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { Bell, Search, MapPin, ChevronRight } from "lucide-react";
+import {
+  getDriverProfile,
+  getDriverTrips,
+} from "../../services/driver.service";
+import { useNavigate } from "react-router-dom";
+import DriverLiveMap from "../../components/DriverLiveMap";
 
 export const HomeScreen = () => {
   const navigate = useNavigate();
@@ -13,7 +17,7 @@ export const HomeScreen = () => {
       try {
         const [profRes, tripsRes] = await Promise.all([
           getDriverProfile(),
-          getDriverTrips({ status: 'scheduled' })
+          getDriverTrips({ status: "scheduled" }),
         ]);
 
         if (profRes?.data?.data) {
@@ -24,7 +28,7 @@ export const HomeScreen = () => {
           setUpcomingTrips(tripsRes.data.data.slice(0, 2));
         }
       } catch (error) {
-        console.error('Lỗi khi tải dữ liệu trang chủ:', error);
+        console.error("Lỗi khi tải dữ liệu trang chủ:", error);
       }
     };
     fetchData();
@@ -51,44 +55,51 @@ export const HomeScreen = () => {
           )}
         </div>
         <div className="flex items-center gap-3">
-          <button className="relative" onClick={() => navigate('/driver/notifications')}>
+          <button
+            className="relative"
+            onClick={() => navigate("/driver/notifications")}
+          >
             <Bell size={22} className="text-gray-600" />
             <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></div>
           </button>
-          <button onClick={() => navigate('/driver/profile')}>
-            <img src={displayData?.avatar} className="w-9 h-9 rounded-full object-cover border border-gray-100" />
+          <button onClick={() => navigate("/driver/profile")}>
+            <img
+              src={displayData?.avatar}
+              className="w-9 h-9 rounded-full object-cover border border-gray-100"
+            />
           </button>
         </div>
       </div>
 
       <div className="px-6 mb-6">
-        <h2 className="text-2xl font-bold text-gray-900 leading-tight">Xin chào, {displayData?.name || displayData?.fullName}</h2>
-        <p className="text-gray-500 text-sm">Chúc bạn một ngày lái xe an toàn!</p>
+        <h2 className="text-2xl font-bold text-gray-900 leading-tight">
+          Xin chào, {displayData?.name || displayData?.fullName}
+        </h2>
+        <p className="text-gray-500 text-sm">
+          Chúc bạn một ngày lái xe an toàn!
+        </p>
       </div>
 
       <div className="relative h-[240px] bg-gray-50 mb-6 overflow-hidden rounded-3xl mx-2">
-        <div className="absolute inset-0 opacity-10 flex items-center justify-center">
-          <div className="w-[500px] h-[500px] border border-gray-300 rounded-full"></div>
-          <div className="absolute w-[350px] h-[350px] border border-gray-300 rounded-full"></div>
-          <div className="absolute w-[200px] h-[200px] border border-gray-300 rounded-full"></div>
-        </div>
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="relative">
-            <div className={`w-12 h-12 rounded-full flex items-center justify-center ${isAvailable ? 'bg-primary/20 animate-ping' : 'bg-gray-300'}`}></div>
-            <div className="absolute inset-0 flex items-center justify-center">
-              <div className={`w-6 h-6 rounded-full border-4 border-white shadow-lg ${isAvailable ? 'bg-primary' : 'bg-gray-400'}`}></div>
-            </div>
-          </div>
-        </div>
+        <DriverLiveMap className="h-full w-full" />
 
         <div className="absolute bottom-4 left-4 right-4">
           <div className="bg-white rounded-2xl p-3 shadow-xl border border-gray-100 flex items-center gap-4 cursor-pointer">
-            <div className={`p-3 rounded-full ${isAvailable ? 'bg-primary-light' : 'bg-gray-100'}`}>
-              <Search className={isAvailable ? "text-primary" : "text-gray-400"} size={24} />
+            <div
+              className={`p-3 rounded-full ${isAvailable ? "bg-primary-light" : "bg-gray-100"}`}
+            >
+              <Search
+                className={isAvailable ? "text-primary" : "text-gray-400"}
+                size={24}
+              />
             </div>
             <div>
-              <div className="font-bold text-sm text-gray-800">{isAvailable ? 'Đang chờ chuyến...' : 'Đang ngoại tuyến'}</div>
-              <div className="text-[10px] text-gray-400">Bán kính tìm kiếm: 5km</div>
+              <div className="font-bold text-sm text-gray-800">
+                {isAvailable ? "Đang chờ chuyến..." : "Đang ngoại tuyến"}
+              </div>
+              <div className="text-[10px] text-gray-400">
+                Bán kính tìm kiếm: 5km
+              </div>
             </div>
           </div>
         </div>
@@ -97,21 +108,34 @@ export const HomeScreen = () => {
       <div className="px-6 grid grid-cols-3 gap-3 mb-8">
         <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-50 text-center">
           <span className="text-[10px] text-gray-500 block mb-1">Chuyến</span>
-          <div className="text-base font-bold text-primary">{displayData?.totalTrips || 0}</div>
+          <div className="text-base font-bold text-primary">
+            {displayData?.totalTrips || "Đang tải"}
+          </div>
         </div>
         <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-50 text-center">
-          <span className="text-[10px] text-gray-500 block mb-1">Quãng đường</span>
-          <div className="text-base font-bold text-primary text-[#0d9488]">42km</div>
+          <span className="text-[10px] text-gray-500 block mb-1">
+            Quãng đường
+          </span>
+          <div className="text-base font-bold text-primary text-[#0d9488]">
+            Đang tải
+          </div>
         </div>
         <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-50 text-center">
           <span className="text-[10px] text-gray-500 block mb-1">Thu nhập</span>
-          <div className="text-base font-bold text-primary text-[#0d9488]">1.2M</div>
+          <div className="text-base font-bold text-primary text-[#0d9488]">
+            Đang tải
+          </div>
         </div>
       </div>
 
       <div className="px-6 mb-3 flex justify-between items-center">
         <h3 className="text-lg font-bold">Lịch sắp tới</h3>
-        <button className="text-primary text-xs font-bold" onClick={() => navigate('/driver/schedule')}>Xem tất cả</button>
+        <button
+          className="text-primary text-xs font-bold"
+          onClick={() => navigate("/driver/schedule")}
+        >
+          Xem tất cả
+        </button>
       </div>
 
       <div className="px-5 space-y-3">
@@ -119,18 +143,29 @@ export const HomeScreen = () => {
           upcomingTrips.map((trip) => {
             const time = new Date(trip.plannedStartTime || trip.createdAt);
             return (
-              <div key={trip._id} className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between">
+              <div
+                key={trip._id}
+                className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between"
+              >
                 <div className="flex items-center gap-4">
                   <div className="text-center px-3 py-2 bg-primary-light rounded-xl border-l-4 border-primary">
-                    <div className="text-xs font-bold text-primary">{time.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</div>
+                    <div className="text-xs font-bold text-primary">
+                      {time.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
+                    </div>
                     <div className="text-[8px] text-gray-500">Hôm nay</div>
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className="font-bold text-sm">{trip.kid?.name || 'Bé Gia Bảo'}</span>
+                      <span className="font-bold text-sm">
+                        {trip.kid?.name || "Bé Gia Bảo"}
+                      </span>
                     </div>
                     <div className="text-[9px] text-gray-400 flex items-center gap-1 mt-0.5 line-clamp-1 max-w-[150px]">
-                      <MapPin size={10} className="flex-shrink-0" /> {trip.pickupLocation?.address || '123 Lê Lợi'}
+                      <MapPin size={10} className="flex-shrink-0" />{" "}
+                      {trip.pickupLocation?.address || "123 Lê Lợi"}
                     </div>
                   </div>
                 </div>
@@ -149,7 +184,9 @@ export const HomeScreen = () => {
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="font-bold text-sm">Bé Gia Bảo</span>
-                    <span className="bg-orange-50 text-orange-600 text-[8px] px-2 py-0.5 rounded font-black border border-orange-100">VIP</span>
+                    <span className="bg-orange-50 text-orange-600 text-[8px] px-2 py-0.5 rounded font-black border border-orange-100">
+                      VIP
+                    </span>
                   </div>
                   <div className="text-[9px] text-gray-400 flex items-center gap-1 mt-0.5">
                     <MapPin size={10} /> 123 Lê Lợi, P. Bến Thàn...
