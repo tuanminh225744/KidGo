@@ -323,6 +323,36 @@ export const getParentTrips = async (parentId, { status, page = 1, limit = 20 } 
 };
 
 /**
+ * 7b. Lấy danh sách chuyến của tài xế
+ */
+export const getTripsByDriver = async (
+  driverId,
+  { status, page = 1, limit = 20 } = {},
+) => {
+  const query = { driverId };
+  if (status) query.status = status;
+
+  const skip = (page - 1) * limit;
+  const [trips, total] = await Promise.all([
+    Trip.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit)
+      .populate("driverId", "user licenseNumber rating currentLocation isOnline")
+      .populate("kidId", "fullName avatar")
+      .populate("vehicleId", "licensePlate model color"),
+    Trip.countDocuments(query),
+  ]);
+
+  return {
+    page,
+    total,
+    totalPages: Math.ceil(total / limit),
+    trips,
+  };
+};
+
+/**
  * 7. Lấy tất cả chuyến đang chạy của các con (parent)
  */
 export const getActiveTrips = async (parentId) => {

@@ -3,6 +3,8 @@ import { MapContainer, Marker, TileLayer, CircleMarker, useMap } from "react-lea
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./DriverLiveMap.css";
+import { useAuthStore } from "../store/useAuthStore.js";
+import { connectDriverSocket, disconnectDriverSocket } from "../socket/driverSocket.js";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -35,6 +37,24 @@ const MapCenter = ({ position }) => {
 const DriverLiveMap = ({ className = "" }) => {
   const [position, setPosition] = useState(null);
   const watchIdRef = useRef(null);
+  const positionRef = useRef(null);
+  const user = useAuthStore((state) => state.user);
+  const driverId = user?.driverId || user?._id || user?.id || "";
+
+  useEffect(() => {
+    positionRef.current = position;
+  }, [position]);
+
+  useEffect(() => {
+    connectDriverSocket({
+      driverId,
+      getPosition: () => positionRef.current,
+    });
+
+    return () => {
+      disconnectDriverSocket();
+    };
+  }, [driverId]);
 
   useEffect(() => {
     if (!navigator.geolocation) {

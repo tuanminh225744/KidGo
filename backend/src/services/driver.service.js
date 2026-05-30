@@ -121,6 +121,7 @@ export const updateLocationInRedis = async (driverId, lat, lng) => {
     await redisClient.lpush(`trip_buffer:${driverId.toString()}`, payloadStr);
     // Cắt ngọn, chỉ xài RAM lưu kho lưu đúng 6 điểm gần nhất (60 giây vòng đời)
     await redisClient.ltrim(`trip_buffer:${driverId.toString()}`, 0, 5);
+    // console.log("[Redis] Lưu địa điểm thành công");
   } catch (error) {
     console.error(`Lỗi cập nhật Redis cho tài xế ${driverId}:`, error);
   }
