@@ -298,7 +298,7 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
     clearBookingTimer(booking._id);
 
     // Khóa trạng thái tài xế
-    await Driver.findByIdAndUpdate(driverId, { rideStatus: "waiting_for_kid" });
+    await Driver.findByIdAndUpdate(driverId, { rideStatus: "driving_to_pickup" });
 
     // Tự động Khởi tạo Hành trình (Trip)
     const vehicle = await Vehicle.findOne({
@@ -316,9 +316,9 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
       status: "picking_up",
       plannedRoute: route
         ? {
-            pickupCoords: route.pickupCoords,
-            dropoffCoords: route.dropoffCoords,
-          }
+          pickupCoords: route.pickupCoords,
+          dropoffCoords: route.dropoffCoords,
+        }
         : {},
     });
     await newTrip.save();
