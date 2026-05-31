@@ -166,6 +166,7 @@ export const getNearbyDrivers = async (lat, lng, radius = 5, unit = "km") => {
       "WITHDIST", // Trả kèm khoảng cách để hiển thị lên app
       "ASC", // Tài xế gần nhất hiện lên đầu
     );
+    console.log("da tim thay driver trong pham vi:", nearby);
     return nearby;
   } catch (error) {
     console.error("Lỗi tìm tài xế qua Redis GEO:", error);

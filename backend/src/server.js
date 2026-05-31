@@ -39,6 +39,7 @@ import {
   notFoundHandler,
 } from "./middlewares/errorHandler.middleware.js";
 import { closeRedis } from "./config/redisClient.js";
+import { Redis } from "ioredis";
 
 dotenv.config();
 
@@ -112,6 +113,10 @@ const SYNC_INTERVAL = 60 * 1000;
 const syncInterval = setInterval(async () => {
   await syncLocationsToDB();
 }, SYNC_INTERVAL);
+
+const clearRedis = async () => {
+  await Redis.flushall();
+};
 
 const PORT = process.env.PORT || 3000;
 httpServer.listen(PORT, () => {

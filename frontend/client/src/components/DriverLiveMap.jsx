@@ -9,10 +9,10 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "./DriverLiveMap.css";
-import { useAuthStore } from "../store/useAuthStore.js";
+import { useDriverStore } from "../store/useDriverStore.js";
 import {
+  clearDriverLocationProvider,
   connectDriverSocket,
-  disconnectDriverSocket,
 } from "../socket/driverSocket.js";
 
 delete L.Icon.Default.prototype._getIconUrl;
@@ -47,8 +47,8 @@ const DriverLiveMap = ({ className = "" }) => {
   const [position, setPosition] = useState(null);
   const watchIdRef = useRef(null);
   const positionRef = useRef(null);
-  const user = useAuthStore((state) => state.user);
-  const driverId = user?.driverId || null;
+  const driverInfo = useDriverStore((state) => state.driverInfo);
+  const driverId = driverInfo?._id || null;
 
   useEffect(() => {
     positionRef.current = position;
@@ -61,7 +61,7 @@ const DriverLiveMap = ({ className = "" }) => {
     });
 
     return () => {
-      disconnectDriverSocket();
+      clearDriverLocationProvider();
     };
   }, [driverId]);
 

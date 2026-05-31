@@ -62,6 +62,7 @@ const findAndAssignNearbyDriver = async (booking) => {
     message: "Bạn có một yêu cầu đón mới từ hệ thống.",
     bookingId: booking._id,
   });
+  console.log("da gui yeu cau cho driver");
 
   return driverId;
 };
@@ -109,7 +110,7 @@ const filterFreeDrivers = async (nearbyDriverIdArray) => {
     isOnline: true,
     rideStatus: "free", // CHỈ bắt xế free
   }).select("_id");
-
+  console.log("da tim thay driver ranh trong pham vi:", freeDrivers);
   return freeDrivers.map((d) => d._id.toString());
 };
 

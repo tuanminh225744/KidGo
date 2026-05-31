@@ -46,7 +46,6 @@ export default function setupDriverSockets(io) {
     };
 
     socket.on("update_location", handleLocationUpdate);
-    socket.on("update-location", handleLocationUpdate);
 
     socket.on("disconnect", () => {
       console.log(`[Socket] Driver disconnected: ${socket.id}`);

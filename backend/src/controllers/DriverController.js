@@ -81,10 +81,10 @@ export const toggleDriverStatus = async (req, res, next) => {
 export const updateDriverLocation = async (req, res, next) => {
   try {
     const { latitude, longitude } = req.body;
-    const user = await driverService.getDriverByUserId(req.user.id);
+    const driver = await driverService.getDriverByUserId(req.user.id);
 
     // Lưu vào Redis trước
-    await driverService.updateLocationInRedis(user._id, latitude, longitude);
+    await driverService.updateLocationInRedis(driver._id, latitude, longitude);
 
     // Cập nhật DB
     const currentLocation = {

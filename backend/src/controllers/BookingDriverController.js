@@ -1,5 +1,8 @@
 import * as bookingService from "../services/booking.service.js";
 import { AppError, AuthorizationError } from "../utils/AppError.js";
+import Booking from "../models/operational/booking.model.js";
+import Driver from "../models/core/driver.model.js";
+import { getDriverByUserId } from "../services/driver.service.js";
 
 /**
  * GET /api/v1/drivers/me/booking-requests
@@ -7,16 +10,8 @@ import { AppError, AuthorizationError } from "../utils/AppError.js";
  */
 export const getBookingRequests = async (req, res, next) => {
   try {
-    // Lấy booking requests (pending hoặc matched) cho tài xế này
-    const Booking = require("../models/operational/booking.model.js").default;
-    const Driver = require("../models/core/driver.model.js").default;
+    const driver = await getDriverByUserId(req.user.id);
 
-    const user = require("../services/driver.service.js").getDriverByUserId(
-      req.user.id,
-    );
-    const driver = await await user;
-
-    // Tìm bookings mà preferredDriverId hoặc assignedDriverId là driver này
     const bookings = await Booking.find({
       $or: [
         { preferredDriverId: driver._id, status: "pending" },
@@ -46,17 +41,13 @@ export const getBookingRequests = async (req, res, next) => {
  */
 export const acceptBooking = async (req, res, next) => {
   try {
-    const driverService = await import("../services/driver.service.js");
-    const Booking = require("../models/operational/booking.model.js").default;
-
-    const driverId = (await driverService.getDriverByUserId(req.user.id))._id;
+    const driverId = (await getDriverByUserId(req.user.id))._id;
 
     const booking = await Booking.findById(req.params.bookingId);
     if (!booking) {
       throw new AppError("Không tìm thấy booking.", 404);
     }
 
-    // Verify driver is assigned or preferred
     if (
       booking.assignedDriverId?.toString() !== driverId.toString() &&
       booking.preferredDriverId?.toString() !== driverId.toString()
@@ -85,10 +76,8 @@ export const acceptBooking = async (req, res, next) => {
  */
 export const rejectBooking = async (req, res, next) => {
   try {
-    const driverService = await import("../services/driver.service.js");
-    const Booking = require("../models/operational/booking.model.js").default;
+    const driverId = (await getDriverByUserId(req.user.id))._id;
 
-    const driverId = (await driverService.getDriverByUserId(req.user.id))._id;
     const booking = await Booking.findById(req.params.bookingId);
     if (!booking) {
       throw new AppError("Không tìm thấy booking.", 404);
