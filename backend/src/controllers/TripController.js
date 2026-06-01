@@ -4,6 +4,10 @@ import {
   getTripDetail,
   getRawLocationLog,
   driverStartPickup,
+  verifyTripOtp,
+  verifyTripPickupPhoto,
+  verifyTripDropoffPhoto,
+  verifyTripSecurityQuestion,
   driverPickupKid,
   driverDropoffKid,
   cancelTrip,
@@ -88,22 +92,78 @@ export const startTrip = async (req, res, next) => {
 };
 
 /**
- * POST /api/v1/trips/:tripId/confirm-pickup
- * Tài xế xác nhận đã đón trẻ (nhập OTP)
+ * POST /api/v1/trips/:tripId/verify-otp
+ * Tài xế xác thực OTP
  * Role: driver
- * Body: { otp }
+ */
+export const verifyOtpHandler = async (req, res, next) => {
+  try {
+    const { tripId } = req.params;
+    const { otp } = req.body;
+    const trip = await verifyTripOtp(tripId, otp);
+    res.status(200).json({ success: true, message: "Xác thực OTP thành công.", data: trip });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/v1/trips/:tripId/verify-pickup-photo
+ * Tài xế xác thực ảnh chụp đón
+ * Role: driver
+ */
+export const verifyPickupPhotoHandler = async (req, res, next) => {
+  try {
+    const { tripId } = req.params;
+    const { photo } = req.body;
+    const trip = await verifyTripPickupPhoto(tripId, photo);
+    res.status(200).json({ success: true, message: "Xác thực ảnh đón thành công.", data: trip });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/v1/trips/:tripId/verify-dropoff-photo
+ * Tài xế xác thực ảnh chụp trả
+ * Role: driver
+ */
+export const verifyDropoffPhotoHandler = async (req, res, next) => {
+  try {
+    const { tripId } = req.params;
+    const { photo } = req.body;
+    const trip = await verifyTripDropoffPhoto(tripId, photo);
+    res.status(200).json({ success: true, message: "Xác thực ảnh trả thành công.", data: trip });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/v1/trips/:tripId/verify-security-question
+ * Tài xế xác thực câu hỏi bảo mật
+ * Role: driver
+ */
+export const verifySecurityQuestionHandler = async (req, res, next) => {
+  try {
+    const { tripId } = req.params;
+    const { answer, data } = req.body;
+    const trip = await verifyTripSecurityQuestion(tripId, answer, data);
+    res.status(200).json({ success: true, message: "Xác thực câu hỏi bảo mật thành công.", data: trip });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/v1/trips/:tripId/confirm-pickup
+ * Tài xế chốt xác nhận đã đón trẻ (sau khi các phương thức required đã passed)
+ * Role: driver
  */
 export const confirmPickup = async (req, res, next) => {
   try {
     const { tripId } = req.params;
-    const { otp, method, photo, answer, data } = req.body;
-
-    const trip = await driverPickupKid(tripId, otp, {
-      method,
-      photo,
-      answer,
-      data,
-    });
+    const trip = await driverPickupKid(tripId);
     res.status(200).json({ success: true, message: "Đã xác nhận đón trẻ thành công.", data: trip });
   } catch (error) {
     next(error);

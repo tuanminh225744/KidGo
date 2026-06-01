@@ -20,8 +20,20 @@ export const startTrip = async (tripId) => {
   return api.post(`/trips/${tripId}/start`);
 };
 
-export const confirmPickup = async (tripId, data) => {
-  return api.post(`/trips/${tripId}/confirm-pickup`, data);
+export const verifyOtp = async (tripId, data) => {
+  return api.post(`/trips/${tripId}/verify-otp`, data);
+};
+
+export const verifyPickupPhoto = async (tripId, data) => {
+  return api.post(`/trips/${tripId}/verify-pickup-photo`, data);
+};
+
+export const verifySecurityQuestion = async (tripId, data) => {
+  return api.post(`/trips/${tripId}/verify-security-question`, data);
+};
+
+export const confirmPickup = async (tripId) => {
+  return api.post(`/trips/${tripId}/confirm-pickup`);
 };
 
 export const confirmDropoff = async (tripId) => {

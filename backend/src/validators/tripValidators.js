@@ -32,26 +32,38 @@ export const validateGpsTick = [
 ];
 
 /**
- * Validator cho confirm pickup (OTP)
+ * Validator cho verify OTP
  */
-export const validateConfirmPickup = [
-  body("method")
-    .optional()
-    .isIn(["otp", "photo", "security_question"])
-    .withMessage("method không hợp lệ."),
+export const validateVerifyOtp = [
   body("otp")
-    .optional()
     .isLength({ min: 6, max: 6 })
     .withMessage("Mã OTP phải gồm đúng 6 chữ số.")
     .isNumeric()
     .withMessage("Mã OTP chỉ bao gồm chữ số."),
-  body().custom((_, { req }) => {
-    if (!req.body.method && !req.body.otp && !req.body.photo && !req.body.answer) {
-      throw new Error("Vui lòng cung cấp dữ liệu xác minh.");
-    }
-    return true;
-  }),
 ];
+
+/**
+ * Validator cho verify Photo
+ */
+export const validateVerifyPhoto = [
+  body("photo")
+    .notEmpty()
+    .withMessage("Vui lòng cung cấp URL hoặc dữ liệu ảnh (photo)."),
+];
+
+/**
+ * Validator cho verify Security Question
+ */
+export const validateVerifySecurityQuestion = [
+  body("answer")
+    .notEmpty()
+    .withMessage("Vui lòng cung cấp câu trả lời (answer)."),
+];
+
+/**
+ * Validator cho confirm pickup (không cần tham số body)
+ */
+export const validateConfirmPickup = [];
 
 /**
  * Validator cho query params danh sách trips

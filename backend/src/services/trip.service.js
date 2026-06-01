@@ -92,54 +92,125 @@ export const driverStartPickup = async (tripId) => {
 };
 
 /**
- * 2. Tài xế tới gặp mặt Bé & Nhập khớp Mã OTP
+ * 2. Tài xế tới gặp mặt Bé 
  */
-export const driverPickupKid = async (tripId, enteredOtp, verificationPayload = {}) => {
+export const verifyTripOtp = async (tripId, enteredOtp) => {
   try {
     const trip = await Trip.findById(tripId);
     if (!trip) throw new Error("Hành trình không tồn tại.");
 
-    if (trip.otp?.required) {
-      const storedOtp = await redisClient.get(`trip_otp:${trip._id}`);
-      if (!storedOtp || storedOtp !== enteredOtp.toString()) {
-        throw new Error(
-          "Mã OTP Phụ huynh cung cấp không chính xác hoặc chuyến xe này đã hết hạn OTP.",
-        );
-      }
-      await redisClient.del(`trip_otp:${trip._id}`);
+    if (!trip.otp?.required) throw new Error("Chuyến đi này không yêu cầu OTP.");
+
+    const storedOtp = await redisClient.get(`trip_otp:${trip._id}`);
+    if (!storedOtp || storedOtp !== enteredOtp.toString()) {
+      throw new Error("Mã OTP không chính xác hoặc đã hết hạn.");
     }
 
-    if (trip.otp?.required) {
-      trip.otp = {
-        ...trip.otp.toObject?.(),
-        status: "passed",
-        data: { otpVerified: true },
-        verifiedAt: new Date(),
-      };
+    await redisClient.del(`trip_otp:${trip._id}`);
+
+    trip.otp = {
+      ...trip.otp.toObject?.() || trip.otp,
+      status: "passed",
+      data: { otpVerified: true },
+      verifiedAt: new Date(),
+    };
+
+    await trip.save();
+    return trip;
+  } catch (error) {
+    throw new Error(`Xác thực OTP thất bại: ${error.message}`);
+  }
+};
+
+export const verifyTripPickupPhoto = async (tripId, photo) => {
+  try {
+    const trip = await Trip.findById(tripId);
+    if (!trip) throw new Error("Hành trình không tồn tại.");
+
+    if (!trip.pickupPhoto?.required) throw new Error("Chuyến đi này không yêu cầu chụp ảnh đón.");
+
+    trip.pickupPhoto = {
+      ...trip.pickupPhoto.toObject?.() || trip.pickupPhoto,
+      status: "passed",
+      data: { photo: photo || null },
+      verifiedAt: new Date(),
+    };
+
+    await trip.save();
+    return trip;
+  } catch (error) {
+    throw new Error(`Xác thực ảnh đón thất bại: ${error.message}`);
+  }
+};
+
+export const verifyTripDropoffPhoto = async (tripId, photo) => {
+  try {
+    const trip = await Trip.findById(tripId);
+    if (!trip) throw new Error("Hành trình không tồn tại.");
+
+    if (!trip.dropoffPhoto?.required) throw new Error("Chuyến đi này không yêu cầu chụp ảnh trả.");
+
+    trip.dropoffPhoto = {
+      ...trip.dropoffPhoto.toObject?.() || trip.dropoffPhoto,
+      status: "passed",
+      data: { photo: photo || null },
+      verifiedAt: new Date(),
+    };
+
+    await trip.save();
+    return trip;
+  } catch (error) {
+    throw new Error(`Xác thực ảnh trả thất bại: ${error.message}`);
+  }
+};
+
+export const verifyTripSecurityQuestion = async (tripId, answer) => {
+  try {
+    const trip = await Trip.findById(tripId);
+    if (!trip) throw new Error("Hành trình không tồn tại.");
+
+    if (!trip.securityQuestion?.required) throw new Error("Chuyến đi này không yêu cầu câu hỏi bảo mật.");
+
+    const kid = await Kid.findById(trip.kidId).select("securityAnswer");
+    if (!kid) throw new Error("Không tìm thấy thông tin bé.");
+    if (kid?.securityAnswer === null || kid?.securityAnswer === undefined) throw new Error("Bé chưa có câu trả lời bảo mật.");
+
+    if (kid?.securityAnswer !== answer) throw new Error("Câu trả lời sai.");
+
+    trip.securityQuestion = {
+      ...trip.securityQuestion.toObject?.() || trip.securityQuestion,
+      status: "passed",
+      data: {
+        answer: answer || null,
+      },
+      verifiedAt: new Date(),
+    };
+
+    await trip.save();
+    return trip;
+  } catch (error) {
+    throw new Error(`Xác thực câu hỏi bảo mật thất bại: ${error.message}`);
+  }
+};
+
+/**
+ * 2. Tài xế tới gặp mặt Bé - Chốt xác nhận (kiểm tra requirement)
+ */
+export const driverPickupKid = async (tripId) => {
+  try {
+    const trip = await Trip.findById(tripId);
+    if (!trip) throw new Error("Hành trình không tồn tại.");
+
+    if (trip.otp?.required && trip.otp?.status !== "passed") {
+      throw new Error("Chưa xác thực OTP.");
     }
 
-    if (verificationPayload.method === "photo" && trip.pickupPhoto?.required) {
-      trip.pickupPhoto = {
-        ...trip.pickupPhoto.toObject?.(),
-        status: "passed",
-        data: { photo: verificationPayload.photo || null },
-        verifiedAt: new Date(),
-      };
+    if (trip.pickupPhoto?.required && trip.pickupPhoto?.status !== "passed") {
+      throw new Error("Chưa xác thực chụp ảnh đón.");
     }
 
-    if (
-      verificationPayload.method === "security_question" &&
-      trip.securityQuestion?.required
-    ) {
-      trip.securityQuestion = {
-        ...trip.securityQuestion.toObject?.(),
-        status: "passed",
-        data: {
-          answer: verificationPayload.answer || null,
-          extra: verificationPayload.data || null,
-        },
-        verifiedAt: new Date(),
-      };
+    if (trip.securityQuestion?.required && trip.securityQuestion?.status !== "passed") {
+      throw new Error("Chưa xác thực câu hỏi bảo mật.");
     }
 
     trip.status = "in_progress";
@@ -170,6 +241,10 @@ export const driverDropoffKid = async (tripId) => {
   try {
     const trip = await Trip.findById(tripId);
     if (!trip) throw new Error("Hành trình không tồn tại.");
+
+    if (trip.dropoffPhoto?.required && trip.dropoffPhoto?.status !== "passed") {
+      throw new Error("Chưa xác thực chụp ảnh trả.");
+    }
 
     trip.status = "completed";
     trip.actualDropoffTime = new Date();

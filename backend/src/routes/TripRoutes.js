@@ -5,6 +5,10 @@ import {
   getTripDetails,
   getLocationLog,
   startTrip,
+  verifyOtpHandler,
+  verifyPickupPhotoHandler,
+  verifyDropoffPhotoHandler,
+  verifySecurityQuestionHandler,
   confirmPickup,
   confirmDropoff,
   cancelTripHandler,
@@ -18,6 +22,9 @@ import { validate } from "../middlewares/validate.middleware.js";
 import {
   validateTripIdParam,
   validateGpsTick,
+  validateVerifyOtp,
+  validateVerifyPhoto,
+  validateVerifySecurityQuestion,
   validateConfirmPickup,
   validateTripsQuery,
 } from "../validators/tripValidators.js";
@@ -90,8 +97,64 @@ router.post(
 );
 
 /**
+ * POST /api/v1/trips/:tripId/verify-otp
+ * Tài xế xác thực OTP
+ * Role: driver
+ */
+router.post(
+  "/:tripId/verify-otp",
+  authorize("driver"),
+  validateTripIdParam,
+  validateVerifyOtp,
+  validate,
+  verifyOtpHandler
+);
+
+/**
+ * POST /api/v1/trips/:tripId/verify-pickup-photo
+ * Tài xế xác thực ảnh đón
+ * Role: driver
+ */
+router.post(
+  "/:tripId/verify-pickup-photo",
+  authorize("driver"),
+  validateTripIdParam,
+  validateVerifyPhoto,
+  validate,
+  verifyPickupPhotoHandler
+);
+
+/**
+ * POST /api/v1/trips/:tripId/verify-dropoff-photo
+ * Tài xế xác thực ảnh trả
+ * Role: driver
+ */
+router.post(
+  "/:tripId/verify-dropoff-photo",
+  authorize("driver"),
+  validateTripIdParam,
+  validateVerifyPhoto,
+  validate,
+  verifyDropoffPhotoHandler
+);
+
+/**
+ * POST /api/v1/trips/:tripId/verify-security-question
+ * Tài xế xác thực câu hỏi bảo mật
+ * Role: driver
+ */
+router.post(
+  "/:tripId/verify-security-question",
+  authorize("driver"),
+  validateTripIdParam,
+  validateVerifySecurityQuestion,
+  validate,
+  verifySecurityQuestionHandler
+);
+
+/**
  * POST /api/v1/trips/:tripId/confirm-pickup
- * Tài xế xác nhận đã đón trẻ (nhập OTP)
+ * Tài xế chốt xác nhận đón trẻ sau khi các phương thức bắt buộc đã pass
  * Role: driver
  */
 router.post(
