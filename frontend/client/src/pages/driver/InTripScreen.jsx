@@ -12,6 +12,7 @@ import { OtpVerificationModal } from '../../components/modal/OtpVerificationModa
 import { PhotoVerificationModal } from '../../components/modal/PhotoVerificationModal';
 import { SecurityQuestionModal } from '../../components/modal/SecurityQuestionModal';
 import { OnTripModal } from '../../components/modal/OnTripModal';
+import { DroppingOffModal } from '../../components/modal/DroppingOffModal';
 
 export const InTripScreen = () => {
   const navigate = useNavigate();
@@ -27,6 +28,11 @@ export const InTripScreen = () => {
   const rawCoords = trip?.plannedRoute?.pickupCoords?.coordinates;
   const formattedPickupLocation = rawCoords && rawCoords.length === 2
     ? { lat: rawCoords[1], lng: rawCoords[0] }
+    : undefined;
+
+  const dropoffRawCoords = trip?.plannedRoute?.dropoffCoords?.coordinates;
+  const formattedDropoffLocation = dropoffRawCoords && dropoffRawCoords.length === 2
+    ? { lat: dropoffRawCoords[1], lng: dropoffRawCoords[0] }
     : undefined;
 
   const [otpInput, setOtpInput] = useState("");
@@ -69,12 +75,12 @@ export const InTripScreen = () => {
     setErrorMsg("");
     try {
       const res = await verifyOtp(trip._id, { otp: otpInput });
-      if (res.data?.success) {
-        setTripData(res.data.data);
-        checkNextVerification(res.data.data);
+      if (res?.success) {
+        setTripData(res.data);
+        checkNextVerification(res.data);
       }
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || "Lỗi xác thực OTP");
+      setErrorMsg(err.response?.message || "Lỗi xác thực OTP");
     } finally {
       setLoading(false);
     }
@@ -141,13 +147,29 @@ export const InTripScreen = () => {
     setLoading(true);
     try {
       const res = await confirmPickup(trip._id);
-      if (res.data?.success) {
-        setTripData(res.data.data);
+      if (res?.success) {
+        setTripData(res.data);
         setTripStatus("on_trip");
       }
     } catch (err) {
-      alert("Lỗi chốt chuyến: " + (err.response?.data?.message || err.message));
+      alert("Lỗi chốt chuyến: " + (err.response?.message || err.message));
       setTripStatus("waiting"); // fallback
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleConfirmDropoff = async () => {
+    // Basic dropoff completion logic
+    // In the future, this might need to trigger verifyDropoffPhoto similar to verifyPickupPhoto
+    setLoading(true);
+    try {
+      // Assuming you have a confirmDropoff API, or we just navigate to home
+      // const res = await confirmDropoff(trip._id);
+      alert("Đã hoàn thành chuyến đi!");
+      navigate("/driver/home");
+    } catch (err) {
+      alert("Lỗi xác nhận hoàn thành chuyến đi: " + err.message);
     } finally {
       setLoading(false);
     }
@@ -169,8 +191,14 @@ export const InTripScreen = () => {
       <div className="absolute inset-0 z-0">
         <DriverLiveMap
           className="h-full w-full"
-          startPointProp={(tripStatus === "picking_up" || tripStatus === "waiting") ? "current" : undefined}
-          endPointProp={(tripStatus === "picking_up" || tripStatus === "waiting") ? formattedPickupLocation : undefined}
+          startPointProp={(tripStatus === "picking_up" || tripStatus === "waiting" || tripStatus === "on_trip") ? "current" : undefined}
+          endPointProp={
+            (tripStatus === "picking_up" || tripStatus === "waiting")
+              ? formattedPickupLocation
+              : tripStatus === "on_trip"
+                ? formattedDropoffLocation
+                : undefined
+          }
         />
       </div>
 
@@ -221,6 +249,11 @@ export const InTripScreen = () => {
         {/* On Trip state UI (already existing logic adapted) */}
         {tripStatus === "on_trip" && (
           <OnTripModal setTripStatus={setTripStatus} />
+        )}
+
+        {/* Dropping off state UI */}
+        {tripStatus === "dropping_off" && (
+          <DroppingOffModal onConfirmDropoff={handleConfirmDropoff} loading={loading} />
         )}
       </AnimatePresence>
     </div>
