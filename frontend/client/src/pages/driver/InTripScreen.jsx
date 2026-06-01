@@ -5,6 +5,7 @@ import { useNavigate } from 'react-router-dom';
 import DriverLiveMap from '../../components/DriverLiveMap';
 import { useTripStore } from "../../store/useTripStore";
 import { verifyOtp, verifyPickupPhoto, verifySecurityQuestion, confirmPickup } from "../../services/trip.service";
+import { verifySecurityAnswer } from "../../services/kid.service";
 import { PickingUpModal } from '../../components/modal/PickingUpModal';
 import { WaitingModal } from '../../components/modal/WaitingModal';
 import { OtpVerificationModal } from '../../components/modal/OtpVerificationModal';
@@ -118,6 +119,10 @@ export const InTripScreen = () => {
     setLoading(true);
     setErrorMsg("");
     try {
+      // 1. Verify answer using kid service
+      await verifySecurityAnswer(trip.kidId, securityAnswer);
+      
+      // 2. Mark trip verification as passed
       const res = await verifySecurityQuestion(trip._id, { answer: securityAnswer });
       if (res.data?.success) {
         setTripData(res.data.data);
@@ -203,6 +208,7 @@ export const InTripScreen = () => {
 
         {tripStatus === "verifying" && currentVerificationStep === "security_question" && (
           <SecurityQuestionModal 
+            kidId={trip.kidId}
             securityAnswer={securityAnswer}
             setSecurityAnswer={setSecurityAnswer}
             submitSecurityQuestion={submitSecurityQuestion}

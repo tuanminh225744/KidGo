@@ -171,11 +171,7 @@ export const verifyTripSecurityQuestion = async (tripId, answer) => {
 
     if (!trip.securityQuestion?.required) throw new Error("Chuyến đi này không yêu cầu câu hỏi bảo mật.");
 
-    const kid = await Kid.findById(trip.kidId).select("securityAnswer");
-    if (!kid) throw new Error("Không tìm thấy thông tin bé.");
-    if (kid?.securityAnswer === null || kid?.securityAnswer === undefined) throw new Error("Bé chưa có câu trả lời bảo mật.");
 
-    if (kid?.securityAnswer !== answer) throw new Error("Câu trả lời sai.");
 
     trip.securityQuestion = {
       ...trip.securityQuestion.toObject?.() || trip.securityQuestion,

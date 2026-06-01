@@ -65,7 +65,7 @@ export default function ClientProfile() {
       const result = await updateProfile(payload);
       if (result?.success && result?.data) {
         setUser(result.data);
-        navigate(-1);
+        navigate("/client/home");
       }
     } catch (error) {
       console.error("Lỗi khi cập nhật thông tin người dùng:", error);

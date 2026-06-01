@@ -26,8 +26,8 @@ export const generateTripOtp = async (tripId) => {
     const salt = await bcrypt.genSalt(10);
     const hashedOtp = await bcrypt.hash(otp, salt);
 
-    // Lưu vào Redis với key `tripOtp:${tripId}`, TTL 15 phút (900 giây)
-    await redisClient.set(`tripOtp:${tripId}`, hashedOtp, "EX", 900);
+    // Lưu vào Redis với key `tripOtp:${tripId}`
+    await redisClient.set(`tripOtp:${tripId}`, hashedOtp, "EX", 3600);
 
     // Lưu ý logic gửi thông báo (Push Notification/SMS) tới phụ huynh sẽ được trigger từ đây
 

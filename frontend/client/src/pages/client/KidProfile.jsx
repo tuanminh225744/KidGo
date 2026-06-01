@@ -175,7 +175,7 @@ export default function KidProfile() {
 
     setSuccess("Hồ sơ đã được lưu thành công");
     setLoading(false);
-    setTimeout(() => navigate(-1), 1500);
+    setTimeout(() => navigate("/client/home"), 1000);
   };
 
   return (
