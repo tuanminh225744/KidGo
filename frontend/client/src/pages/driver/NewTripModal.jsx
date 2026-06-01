@@ -4,9 +4,11 @@ import { acceptBooking, rejectBooking } from "../../services/driver.service";
 import { useState } from "react";
 import { useTripStore } from "../../store/useTripStore";
 import { useBookingStoreDriver } from "../../store/useBookingStoreDriver";
+import { useNavigate } from "react-router-dom";
 
 export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
   const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
   const data = tripRequest || {};
   const bookingId = data._id || data.bookingId;
   const title = data.name || data.kidName || data.kidId?.fullName || "Khách mới";
@@ -34,6 +36,7 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
       if (response.success) {
         useTripStore.getState().setTripData(response.data.trip);
         useBookingStoreDriver.getState().setBooking(response.data.booking);
+        navigate("/driver/in-trip");
       }
       onAccept();
     } catch (error) {

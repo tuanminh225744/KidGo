@@ -4,6 +4,7 @@ import {
   Marker,
   TileLayer,
   CircleMarker,
+  Polyline,
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
@@ -14,6 +15,8 @@ import {
   clearDriverLocationProvider,
   connectDriverSocket,
 } from "../socket/driverSocket.js";
+import axios from "axios";
+import polyline from "@mapbox/polyline";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -32,6 +35,17 @@ const currentLocationIcon = new L.DivIcon({
   iconAnchor: [11, 11],
 });
 
+const startMarkerIcon = new L.Icon({
+  iconUrl:
+    "https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png",
+  shadowUrl:
+    "https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-shadow.png",
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41],
+});
+
 const MapCenter = ({ position }) => {
   const map = useMap();
 
@@ -43,12 +57,70 @@ const MapCenter = ({ position }) => {
   return null;
 };
 
-const DriverLiveMap = ({ className = "" }) => {
+const DriverLiveMap = ({ className = "", startPointProp, endPointProp }) => {
   const [position, setPosition] = useState(null);
   const watchIdRef = useRef(null);
   const positionRef = useRef(null);
   const driverInfo = useDriverStore((state) => state.driverInfo);
   const driverId = driverInfo?._id || null;
+  
+  const [route, setRoute] = useState(null);
+
+  const decodePolyline = (geometry) => {
+    if (!geometry) return [];
+    if (typeof geometry === "string") {
+      return polyline.decode(geometry);
+    }
+    if (geometry.coordinates) {
+      return geometry.coordinates.map((coord) => [coord[1], coord[0]]);
+    }
+    return [];
+  };
+
+  const calculateRoute = async (start, end) => {
+    try {
+      const coordinates = [
+        [start.lng, start.lat],
+        [end.lng, end.lat],
+      ];
+
+      const apiKey = import.meta.env.VITE_APP_MAP_API_KEY;
+
+      if (!apiKey) return;
+
+      const response = await axios.post(
+        `https://api.openrouteservice.org/v2/directions/driving-car`,
+        {
+          coordinates: coordinates,
+          extra_info: ["waytype", "steepness"],
+        },
+        {
+          headers: {
+            Authorization: apiKey,
+            "Content-Type": "application/json",
+          },
+        },
+      );
+
+      if (response.data.routes && response.data.routes.length > 0) {
+        const routeData = response.data.routes[0];
+        const geometry = routeData.geometry;
+        const decodedPath = decodePolyline(geometry);
+        setRoute(decodedPath);
+      }
+    } catch (err) {
+      console.error("Lỗi tính toán tuyến đường:", err);
+    }
+  };
+
+  useEffect(() => {
+    const start = startPointProp === "current" ? position : startPointProp;
+    if (start && endPointProp) {
+      calculateRoute(start, endPointProp);
+    } else {
+      setRoute(null);
+    }
+  }, [startPointProp, endPointProp, position]);
 
   useEffect(() => {
     positionRef.current = position;
@@ -129,6 +201,17 @@ const DriverLiveMap = ({ className = "" }) => {
             />
             <Marker position={center} icon={currentLocationIcon} />
           </>
+        )}
+        
+        {endPointProp && (
+          <Marker
+            position={[endPointProp.lat, endPointProp.lng]}
+            icon={startMarkerIcon}
+          />
+        )}
+
+        {route && route.length > 0 && (
+          <Polyline positions={route} color="#4F46C8" weight={5} opacity={0.8} />
         )}
       </MapContainer>
 
