@@ -29,13 +29,8 @@ export const getBookings = async (req, res, next) => {
  */
 export const createBooking = async (req, res, next) => {
   try {
-    const {
-      kidId,
-      routeId,
-      scheduleId,
-      scheduledTime,
-      preferredDriverId,
-    } = req.body;
+    const { kidId, routeId, scheduleId, scheduledTime, preferredDriverId } =
+      req.body;
 
     const bookingData = {
       parentId: req.user.id,
@@ -47,12 +42,12 @@ export const createBooking = async (req, res, next) => {
       type: "one_time",
     };
 
-    const booking = await bookingService.createBooking(bookingData);
+    const result = await bookingService.createBooking(bookingData);
 
     res.status(201).json({
       success: true,
       message: "Tạo booking thành công.",
-      data: booking,
+      data: result,
     });
   } catch (error) {
     next(error);

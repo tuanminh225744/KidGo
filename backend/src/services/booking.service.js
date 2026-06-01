@@ -183,6 +183,7 @@ export const createBooking = async (bookingData) => {
         setTimeout(() => triggerTimeoutCancel(booking._id), 300 * 1000),
       ];
     } else {
+      console.log("tim tai xe xung quan voi", booking)
       const matchedDriverId = await findAndAssignNearbyDriver(booking);
       if (!matchedDriverId) {
         // Lấy tọa độ điểm đón từ Route để tiến hành dô sóng
@@ -298,7 +299,9 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
     clearBookingTimer(booking._id);
 
     // Khóa trạng thái tài xế
-    await Driver.findByIdAndUpdate(driverId, { rideStatus: "driving_to_pickup" });
+    await Driver.findByIdAndUpdate(driverId, {
+      rideStatus: "driving_to_pickup",
+    });
 
     // Tự động Khởi tạo Hành trình (Trip)
     const vehicle = await Vehicle.findOne({
@@ -341,7 +344,7 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
       "booking_confirmed",
     );
 
-    return booking;
+    return { booking: booking, trip: newTrip };
   } catch (error) {
     throw new Error(`Lỗi tài xế nhận chuyến: ${error.message}`);
   }

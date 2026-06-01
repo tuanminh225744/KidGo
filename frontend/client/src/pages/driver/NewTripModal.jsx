@@ -2,6 +2,8 @@ import { motion } from "motion/react";
 import { Calendar, GraduationCap } from "lucide-react";
 import { acceptBooking, rejectBooking } from "../../services/driver.service";
 import { useState } from "react";
+import { useTripStore } from "../../store/useTripStore";
+import { useBookingStoreDriver } from "../../store/useBookingStoreDriver";
 
 export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
   const [loading, setLoading] = useState(false);
@@ -20,44 +22,21 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
     data.destination ||
     "Điểm đến sẽ được cập nhật";
 
-  console.log("[DRIVER_BOOKING_DEBUG][modal] render", {
-    tripRequest,
-    bookingId,
-    title,
-    subtitle,
-    pickupAddress,
-    dropoffAddress,
-  });
-
   const handleAccept = async () => {
-    console.log("[DRIVER_BOOKING_DEBUG][modal] click_accept", {
-      bookingId,
-      tripRequest,
-    });
-
     if (!bookingId) {
-      console.log("[DRIVER_BOOKING_DEBUG][modal] accept_no_booking_id_close_only");
       onAccept();
       return;
     }
 
     try {
       setLoading(true);
-      console.log("[DRIVER_BOOKING_DEBUG][modal] call_accept_api", {
-        bookingId,
-      });
       const response = await acceptBooking(bookingId);
-      console.log("[DRIVER_BOOKING_DEBUG][modal] accept_api_success", {
-        status: response?.status,
-        data: response?.data,
-      });
+      if (response.success) {
+        useTripStore.getState().setTripData(response.data.trip);
+        useBookingStoreDriver.getState().setBooking(response.data.booking);
+      }
       onAccept();
     } catch (error) {
-      console.log("[DRIVER_BOOKING_DEBUG][modal] accept_api_error", {
-        message: error?.message,
-        status: error?.response?.status,
-        data: error?.response?.data,
-      });
       console.error("Lỗi khi nhận chuyến:", error);
     } finally {
       setLoading(false);
@@ -65,34 +44,16 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
   };
 
   const handleSkip = async () => {
-    console.log("[DRIVER_BOOKING_DEBUG][modal] click_reject", {
-      bookingId,
-      tripRequest,
-    });
-
     if (!bookingId) {
-      console.log("[DRIVER_BOOKING_DEBUG][modal] reject_no_booking_id_close_only");
       onSkip();
       return;
     }
 
     try {
       setLoading(true);
-      console.log("[DRIVER_BOOKING_DEBUG][modal] call_reject_api", {
-        bookingId,
-      });
       const response = await rejectBooking(bookingId);
-      console.log("[DRIVER_BOOKING_DEBUG][modal] reject_api_success", {
-        status: response?.status,
-        data: response?.data,
-      });
       onSkip();
     } catch (error) {
-      console.log("[DRIVER_BOOKING_DEBUG][modal] reject_api_error", {
-        message: error?.message,
-        status: error?.response?.status,
-        data: error?.response?.data,
-      });
       console.error("Lỗi khi từ chối chuyến:", error);
     } finally {
       setLoading(false);

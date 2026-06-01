@@ -211,6 +211,31 @@ const MapRouting = ({
     }
   };
 
+  // Lấy tạo độ điểm hiển thị ban đầu thành điểm của người dùng
+  const [mapCenter, setMapCenter] = useState([21.008206, 105.841369]);
+  useEffect(() => {
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude } = position.coords;
+
+        setMapCenter([latitude, longitude]);
+      },
+      (error) => {
+        console.error(error);
+      },
+    );
+  }, []);
+
+  const ChangeMapCenter = ({ center }) => {
+    const map = useMap();
+
+    useEffect(() => {
+      map.setView(center, 15);
+    }, [center, map]);
+
+    return null;
+  };
+
   return (
     <MapContainer
       center={[21.008206, 105.841369]} // Default center Hà Nội
@@ -219,6 +244,7 @@ const MapRouting = ({
       ref={setMap}
       zoomControl={false}
     >
+      <ChangeMapCenter center={mapCenter} />
       <TileLayer
         attribution="&copy; OpenStreetMap"
         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"

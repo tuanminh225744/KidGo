@@ -26,7 +26,7 @@ const sendLocation = () => {
     return;
   }
 
-  socket.emit("update-location", {
+  socket.emit("update_location", {
     driverId: currentDriverId,
     lat: position.lat,
     lng: position.lng,

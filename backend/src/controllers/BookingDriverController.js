@@ -55,7 +55,7 @@ export const acceptBooking = async (req, res, next) => {
       throw new AuthorizationError("Bạn không có quyền chấp nhận booking này.");
     }
 
-    const updatedBooking = await bookingService.driverAcceptBooking(
+    const result = await bookingService.driverAcceptBooking(
       booking._id,
       driverId,
     );
@@ -63,7 +63,10 @@ export const acceptBooking = async (req, res, next) => {
     res.status(200).json({
       success: true,
       message: "Chấp nhận chuyến thành công.",
-      data: updatedBooking,
+      data: {
+        booking: result.booking,
+        trip: result.trip,
+      },
     });
   } catch (error) {
     next(error);
