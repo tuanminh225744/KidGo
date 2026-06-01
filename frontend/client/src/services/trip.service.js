@@ -28,6 +28,10 @@ export const verifyPickupPhoto = async (tripId, data) => {
   return api.post(`/trips/${tripId}/verify-pickup-photo`, data);
 };
 
+export const verifyDropoffPhoto = async (tripId, data) => {
+  return api.post(`/trips/${tripId}/verify-dropoff-photo`, data);
+};
+
 export const verifySecurityQuestion = async (tripId, data) => {
   return api.post(`/trips/${tripId}/verify-security-question`, data);
 };

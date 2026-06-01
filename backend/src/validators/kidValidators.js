@@ -59,6 +59,11 @@ export const validateCreateKid = [
     .isBoolean()
     .withMessage("securitySettings.pickupPhoto phải là boolean"),
 
+  body("securitySettings.dropoffPhoto")
+    .optional()
+    .isBoolean()
+    .withMessage("securitySettings.dropoffPhoto phải là boolean"),
+
   body("securitySettings.securityQuestion")
     .optional()
     .isBoolean()
@@ -80,9 +85,10 @@ export const validateCreateKid = [
     const settings = value.securitySettings || {};
     const hasOtp = settings.otp === true;
     const hasPickupPhoto = settings.pickupPhoto === true;
+    const hasDropoffPhoto = settings.dropoffPhoto === true;
     const hasSecurityQuestion = settings.securityQuestion === true;
 
-    if (!hasOtp && !hasPickupPhoto && !hasSecurityQuestion) {
+    if (!hasOtp && !hasPickupPhoto && !hasDropoffPhoto && !hasSecurityQuestion) {
       throw new Error("Phải chọn ít nhất 1 phương thức bảo mật.");
     }
 
@@ -159,6 +165,11 @@ export const validateUpdateKid = [
     .isBoolean()
     .withMessage("securitySettings.pickupPhoto phải là boolean"),
 
+  body("securitySettings.dropoffPhoto")
+    .optional()
+    .isBoolean()
+    .withMessage("securitySettings.dropoffPhoto phải là boolean"),
+
   body("securitySettings.securityQuestion")
     .optional()
     .isBoolean()
@@ -188,6 +199,7 @@ export const validateUpdateKid = [
     const hasSecuritySettings =
       settings.otp === true ||
       settings.pickupPhoto === true ||
+      settings.dropoffPhoto === true ||
       settings.securityQuestion === true;
 
     if (value.securitySettings && !hasSecuritySettings) {
@@ -242,6 +254,11 @@ export const validateSetupKidSecurity = [
     .isBoolean()
     .withMessage("securitySettings.pickupPhoto phải là boolean"),
 
+  body("securitySettings.dropoffPhoto")
+    .optional()
+    .isBoolean()
+    .withMessage("securitySettings.dropoffPhoto phải là boolean"),
+
   body("securitySettings.securityQuestion")
     .optional()
     .isBoolean()
@@ -264,6 +281,7 @@ export const validateSetupKidSecurity = [
     const hasSecuritySettings =
       settings.otp === true ||
       settings.pickupPhoto === true ||
+      settings.dropoffPhoto === true ||
       settings.securityQuestion === true;
 
     if (!hasSecuritySettings) {

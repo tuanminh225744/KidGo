@@ -4,7 +4,7 @@ import { ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import DriverLiveMap from '../../components/DriverLiveMap';
 import { useTripStore } from "../../store/useTripStore";
-import { verifyOtp, verifyPickupPhoto, verifySecurityQuestion, confirmPickup } from "../../services/trip.service";
+import { verifyOtp, verifyPickupPhoto, verifyDropoffPhoto, verifySecurityQuestion, confirmPickup, confirmDropoff } from "../../services/trip.service";
 import { verifySecurityAnswer } from "../../services/kid.service";
 import { PickingUpModal } from '../../components/modal/PickingUpModal';
 import { WaitingModal } from '../../components/modal/WaitingModal';
@@ -13,6 +13,7 @@ import { PhotoVerificationModal } from '../../components/modal/PhotoVerification
 import { SecurityQuestionModal } from '../../components/modal/SecurityQuestionModal';
 import { OnTripModal } from '../../components/modal/OnTripModal';
 import { DroppingOffModal } from '../../components/modal/DroppingOffModal';
+import { DropoffPhotoModal } from '../../components/modal/DropoffPhotoModal';
 
 export const InTripScreen = () => {
   const navigate = useNavigate();
@@ -159,17 +160,47 @@ export const InTripScreen = () => {
     }
   };
 
+  const submitDropoffPhoto = async () => {
+    if (!photoInput) {
+      setErrorMsg("Vui lòng chụp hoặc chọn ảnh");
+      return;
+    }
+    setLoading(true);
+    setErrorMsg("");
+    try {
+      const fakePhotoUrl = "https://example.com/mock-dropoff-photo.jpg";
+      const res = await verifyDropoffPhoto(trip._id, { photo: fakePhotoUrl });
+      if (res?.success) {
+        setTripData(res.data);
+        setTripStatus("dropping_off");
+      }
+    } catch (err) {
+      setErrorMsg(err.response?.message || "Lỗi xác thực ảnh trả");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleArrivedAtDropoff = () => {
+    const currentTripState = useTripStore.getState();
+    if (currentTripState?.dropoffPhoto?.required && currentTripState.dropoffPhoto?.status !== "passed") {
+      setTripStatus("verifying_dropoff");
+      setCurrentVerificationStep("dropoff_photo");
+    } else {
+      setTripStatus("dropping_off");
+    }
+  };
+
   const handleConfirmDropoff = async () => {
-    // Basic dropoff completion logic
-    // In the future, this might need to trigger verifyDropoffPhoto similar to verifyPickupPhoto
     setLoading(true);
     try {
-      // Assuming you have a confirmDropoff API, or we just navigate to home
-      // const res = await confirmDropoff(trip._id);
-      alert("Đã hoàn thành chuyến đi!");
-      navigate("/driver/home");
+      const res = await confirmDropoff(trip._id);
+      if (res?.success) {
+        alert("Đã hoàn thành chuyến đi!");
+        navigate("/driver/home");
+      }
     } catch (err) {
-      alert("Lỗi xác nhận hoàn thành chuyến đi: " + err.message);
+      alert("Lỗi xác nhận hoàn thành chuyến đi: " + (err.response?.message || err.message));
     } finally {
       setLoading(false);
     }
@@ -248,12 +279,24 @@ export const InTripScreen = () => {
 
         {/* On Trip state UI (already existing logic adapted) */}
         {tripStatus === "on_trip" && (
-          <OnTripModal setTripStatus={setTripStatus} />
+          <OnTripModal setTripStatus={() => handleArrivedAtDropoff()} />
         )}
 
         {/* Dropping off state UI */}
         {tripStatus === "dropping_off" && (
           <DroppingOffModal onConfirmDropoff={handleConfirmDropoff} loading={loading} />
+        )}
+
+        {/* Verifying dropoff UI */}
+        {tripStatus === "verifying_dropoff" && currentVerificationStep === "dropoff_photo" && (
+          <DropoffPhotoModal
+            fileInputRef={fileInputRef}
+            handlePhotoChange={handlePhotoChange}
+            photoInput={photoInput}
+            submitPhoto={submitDropoffPhoto}
+            errorMsg={errorMsg}
+            loading={loading}
+          />
         )}
       </AnimatePresence>
     </div>

@@ -40,7 +40,7 @@ export default function KidProfile() {
   const [securityAnswer, setSecurityAnswer] = useState("");
   const [securityOptions, setSecurityOptions] = useState({
     otp: false,
-    pickupPhoto: false,
+    tripPhotoVerification: false,
     securityQuestion: false,
   });
   const [error, setError] = useState("");
@@ -65,20 +65,31 @@ export default function KidProfile() {
 
   const loadKidData = async () => {
     const result = await getKidById(kidId);
+
     if (result.success) {
       const kid = result.data || result;
+
       setFormData({
         fullName: kid.fullName || "",
-        dateOfBirth: kid.dateOfBirth ? new Date(kid.dateOfBirth) : null,
+        dateOfBirth: kid.dateOfBirth
+          ? new Date(kid.dateOfBirth)
+          : null,
         phone: kid.phone || "",
         school: kid.school || "",
         notes: kid.notes || "",
         avatar: kid.avatar || "",
       });
+
       setSecurityOptions({
         otp: !!kid.securitySettings?.otp,
-        pickupPhoto: !!kid.securitySettings?.pickupPhoto,
-        securityQuestion: !!kid.securitySettings?.securityQuestion,
+
+        tripPhotoVerification:
+          !!kid.securitySettings?.tripPhotoVerification ||
+          !!kid.securitySettings?.pickupPhoto ||
+          !!kid.securitySettings?.dropoffPhoto,
+
+        securityQuestion:
+          !!kid.securitySettings?.securityQuestion,
       });
     }
   };
@@ -118,7 +129,7 @@ export default function KidProfile() {
 
     if (
       !securityOptions.otp &&
-      !securityOptions.pickupPhoto &&
+      !securityOptions.tripPhotoVerification &&
       !securityOptions.securityQuestion
     ) {
       setError("Vui lòng chọn ít nhất 1 phương thức bảo mật");
@@ -138,7 +149,23 @@ export default function KidProfile() {
     if (payload.dateOfBirth instanceof Date) {
       payload.dateOfBirth = payload.dateOfBirth.toISOString();
     }
-    payload.securitySettings = securityOptions;
+    payload.securitySettings = {
+      otp: securityOptions.otp,
+
+      securityQuestion:
+        securityOptions.securityQuestion,
+
+      // Legacy fields
+      pickupPhoto:
+        securityOptions.tripPhotoVerification,
+
+      dropoffPhoto:
+        securityOptions.tripPhotoVerification,
+
+      // New clean field
+      tripPhotoVerification:
+        securityOptions.tripPhotoVerification,
+    };
     if (securityOptions.securityQuestion) {
       payload.securityQuestion = securityQuestion;
       payload.securityAnswer = securityAnswer;
@@ -376,26 +403,38 @@ export default function KidProfile() {
               onClick={() =>
                 setSecurityOptions((prev) => ({
                   ...prev,
-                  pickupPhoto: !prev.pickupPhoto,
+                  tripPhotoVerification:
+                    !prev.tripPhotoVerification,
                 }))
               }
-              className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${securityOptions.pickupPhoto ? "border-primary-container bg-[#EEF2FF]" : "border-outline-variant/20 bg-surface-container-low"}`}
+              className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${securityOptions.tripPhotoVerification
+                  ? "border-primary-container bg-[#EEF2FF]"
+                  : "border-outline-variant/20 bg-surface-container-low"
+                }`}
             >
               <div className="flex items-center gap-3 text-left">
                 <div className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center shadow-sm">
                   <ImagePlus className="text-primary" size={20} />
                 </div>
+
                 <div>
-                  <h3 className="font-bold text-on-surface">Ảnh đón trả</h3>
+                  <h3 className="font-bold text-on-surface">
+                    Ảnh xác nhận đón trả
+                  </h3>
+
                   <p className="text-xs text-on-surface-variant">
-                    Yêu cầu ảnh xác nhận khi đón/trả
+                    Yêu cầu tài xế chụp ảnh khi đón và trả bé
                   </p>
                 </div>
               </div>
+
               <div
-                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${securityOptions.pickupPhoto ? "border-primary-container" : "border-outline-variant"}`}
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${securityOptions.tripPhotoVerification
+                    ? "border-primary-container"
+                    : "border-outline-variant"
+                  }`}
               >
-                {securityOptions.pickupPhoto && (
+                {securityOptions.tripPhotoVerification && (
                   <div className="w-3 h-3 rounded-full bg-primary-container" />
                 )}
               </div>

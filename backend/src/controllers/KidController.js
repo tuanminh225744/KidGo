@@ -44,6 +44,7 @@ export const createKid = async (req, res, next) => {
       securitySettings: {
         otp: !!securitySettings.otp,
         pickupPhoto: !!securitySettings.pickupPhoto,
+        dropoffPhoto: !!securitySettings.dropoffPhoto,
         securityQuestion: !!securitySettings.securityQuestion,
       },
     };
@@ -94,6 +95,7 @@ export const updateKidDetail = async (req, res, next) => {
       securitySettings: {
         otp: !!securitySettings.otp,
         pickupPhoto: !!securitySettings.pickupPhoto,
+        dropoffPhoto: !!securitySettings.dropoffPhoto,
         securityQuestion: !!securitySettings.securityQuestion,
       },
     };
