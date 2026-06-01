@@ -16,7 +16,7 @@ import { OnTripModal } from '../../components/modal/OnTripModal';
 export const InTripScreen = () => {
   const navigate = useNavigate();
   // states: picking_up -> waiting -> verifying -> on_trip -> dropping_off
-  const [tripStatus, setTripStatus] = useState("picking_up"); 
+  const [tripStatus, setTripStatus] = useState("picking_up");
   const [currentVerificationStep, setCurrentVerificationStep] = useState(null); // 'otp', 'photo', 'security_question', null
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
@@ -56,7 +56,7 @@ export const InTripScreen = () => {
       setCurrentVerificationStep("security_question");
       return;
     }
-    
+
     handleConfirmPickup();
   };
 
@@ -98,14 +98,15 @@ export const InTripScreen = () => {
     try {
       // Temporarily sending the blob URL or a mock string to pass validation since we don't have a real file upload setup yet
       // In a real scenario, you would upload the file to S3/Cloudinary and get a URL, then pass it here.
-      const fakePhotoUrl = "https://example.com/mock-photo.jpg"; 
+      const fakePhotoUrl = "https://example.com/mock-photo.jpg";
       const res = await verifyPickupPhoto(trip._id, { photo: fakePhotoUrl });
-      if (res.data?.success) {
-        setTripData(res.data.data);
-        checkNextVerification(res.data.data);
+      console.log(res.data)
+      if (res.success) {
+        setTripData(res.data);
+        checkNextVerification(res.data);
       }
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || "Lỗi xác thực ảnh");
+      setErrorMsg(err.response?.message || "Lỗi xác thực ảnh");
     } finally {
       setLoading(false);
     }
@@ -121,15 +122,15 @@ export const InTripScreen = () => {
     try {
       // 1. Verify answer using kid service
       await verifySecurityAnswer(trip.kidId, securityAnswer);
-      
+
       // 2. Mark trip verification as passed
       const res = await verifySecurityQuestion(trip._id, { answer: securityAnswer });
-      if (res.data?.success) {
-        setTripData(res.data.data);
-        checkNextVerification(res.data.data);
+      if (res?.success) {
+        setTripData(res.data);
+        checkNextVerification(res.data);
       }
     } catch (err) {
-      setErrorMsg(err.response?.data?.message || "Lỗi xác thực câu hỏi bảo mật");
+      setErrorMsg(err.response?.message || "Lỗi xác thực câu hỏi bảo mật");
     } finally {
       setLoading(false);
     }
@@ -186,7 +187,7 @@ export const InTripScreen = () => {
 
         {/* Verification Modals */}
         {tripStatus === "verifying" && currentVerificationStep === "otp" && (
-          <OtpVerificationModal 
+          <OtpVerificationModal
             otpInput={otpInput}
             setOtpInput={setOtpInput}
             submitOtp={submitOtp}
@@ -196,7 +197,7 @@ export const InTripScreen = () => {
         )}
 
         {tripStatus === "verifying" && currentVerificationStep === "photo" && (
-          <PhotoVerificationModal 
+          <PhotoVerificationModal
             fileInputRef={fileInputRef}
             handlePhotoChange={handlePhotoChange}
             photoInput={photoInput}
@@ -207,7 +208,7 @@ export const InTripScreen = () => {
         )}
 
         {tripStatus === "verifying" && currentVerificationStep === "security_question" && (
-          <SecurityQuestionModal 
+          <SecurityQuestionModal
             kidId={trip.kidId}
             securityAnswer={securityAnswer}
             setSecurityAnswer={setSecurityAnswer}

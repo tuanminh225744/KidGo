@@ -7,6 +7,7 @@ import Notification from "../models/support/notification.model.js";
 import mongoose from "mongoose";
 import { getIo } from "../sockets/socketManager.js";
 import { getNearbyDrivers } from "./driver.service.js";
+import { driverStartPickup } from "./trip.service.js";
 
 // Memory Object lưu trữ luồng hệ thống để có thể ngắt bất kì lúc nào
 const activeBookingTimers = {};
@@ -326,25 +327,16 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
     });
     await newTrip.save();
 
-    const io = getIo();
-    io.of("/parent")
-      .to(booking.parentId.toString())
-      .emit("driver_accepted_booking", {
-        title: "Tuyệt quá",
-        message:
-          "Đã có tài xế nhận đón vé yêu của bạn. Nhấn để xem định vị của chiếc xe!",
-        driverId: driverId,
-        bookingId: booking._id,
-      });
+    const updatedTrip = await driverStartPickup(newTrip._id);
 
     await sendParentBookingNotification(
       booking,
       "Tài xế đã xác nhận chuyến",
-      "Đã có tài xế xác nhận nhận chuyến của bạn. Bạn có thể theo dõi hành trình của bé ngay bây giờ.",
+      "Đã có tài xế xác nhận nhận chuyến của bạn.",
       "booking_confirmed",
     );
 
-    return { booking: booking, trip: newTrip };
+    return { booking: booking, trip: updatedTrip };
   } catch (error) {
     throw new Error(`Lỗi tài xế nhận chuyến: ${error.message}`);
   }

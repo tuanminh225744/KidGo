@@ -29,6 +29,7 @@ export const driverStartPickup = async (tripId) => {
     });
 
     const kid = await Kid.findById(trip.kidId).select("securitySettings");
+    console.log("kid?.securitySettings", kid?.securitySettings);
 
     trip.otp = {
       required: !!kid?.securitySettings?.otp,
@@ -37,14 +38,14 @@ export const driverStartPickup = async (tripId) => {
       verifiedAt: null,
     };
     trip.pickupPhoto = {
-      required: !!kid?.securitySettings?.photo,
-      status: kid?.securitySettings?.photo ? "pending" : "not_required",
+      required: !!kid?.securitySettings?.pickupPhoto,
+      status: kid?.securitySettings?.pickupPhoto ? "pending" : "not_required",
       data: null,
       verifiedAt: null,
     };
     trip.dropoffPhoto = {
-      required: !!kid?.securitySettings?.photo,
-      status: kid?.securitySettings?.photo ? "pending" : "not_required",
+      required: !!kid?.securitySettings?.dropoffPhoto,
+      status: kid?.securitySettings?.dropoffPhoto ? "pending" : "not_required",
       data: null,
       verifiedAt: null,
     };
@@ -61,6 +62,10 @@ export const driverStartPickup = async (tripId) => {
     if (otpCode) {
       await redisClient.setex(`trip_otp:${trip._id}`, 7200, otpCode);
     }
+    trip.markModified("otp");
+    trip.markModified("pickupPhoto");
+    trip.markModified("dropoffPhoto");
+    trip.markModified("securityQuestion");
 
     await trip.save();
 
@@ -70,7 +75,7 @@ export const driverStartPickup = async (tripId) => {
     io.of("/parent").to(trip.parentId.toString()).emit("driver_is_coming", {
       title: "Tài xế đang quay xe tới!",
       message:
-        "Tài xế đã bắt đầu di chuyển đến điểm đón bé. Vui lòng chuẩn bị cặp xách ra cửa nhé.",
+        "Tài xế đã bắt đầu di chuyển đến điểm đón bé.",
       tripId: trip._id,
     });
 

@@ -34,6 +34,7 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
       setLoading(true);
       const response = await acceptBooking(bookingId);
       if (response.success) {
+        console.log("Booking accepted:", response);
         useTripStore.getState().setTripData(response.data.trip);
         useBookingStoreDriver.getState().setBooking(response.data.booking);
         navigate("/driver/in-trip");

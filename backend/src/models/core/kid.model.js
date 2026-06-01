@@ -14,6 +14,7 @@ const KidSchema = new Schema(
     securitySettings: {
       otp: { type: Boolean, default: false },
       pickupPhoto: { type: Boolean, default: false },
+      dropoffPhoto: { type: Boolean, default: false },
       securityQuestion: { type: Boolean, default: false },
     },
     securityQuestion: { type: String },
