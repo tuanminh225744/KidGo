@@ -29,7 +29,7 @@ export const getCurrentSubscription = async (req, res, next) => {
  */
 export const createSubscription = async (req, res, next) => {
   try {
-    const { plan, tripsPerMonth, price } = req.body;
+    const { plan } = req.body;
 
     // Tính toán thời gian hiệu lực
     const startDate = new Date();
@@ -44,12 +44,9 @@ export const createSubscription = async (req, res, next) => {
     const subscriptionData = {
       parentId: req.user.id,
       plan,
-      tripsPerMonth,
-      price,
       startDate,
       endDate,
       status: "active",
-      autoRenew: false,
       usedTrips: 0,
     };
 
@@ -105,46 +102,6 @@ export const cancelSubscription = async (req, res, next) => {
   }
 };
 
-/**
- * PATCH /api/v1/subscriptions/:subId/auto-renew
- * Bật/tắt tự gia hạn
- */
-export const toggleAutoRenew = async (req, res, next) => {
-  try {
-    const { autoRenew } = req.body;
-
-    const subscription = await subscriptionService.getSubscriptionById(
-      req.params.subId,
-    );
-
-    // Verify ownership
-    if (subscription.parentId.toString() !== req.user.id.toString()) {
-      throw new AuthorizationError("Bạn không có quyền thay đổi gói này.");
-    }
-
-    if (subscription.status !== "active") {
-      throw new AppError(
-        `Không thể thay đổi auto-renew của gói với trạng thái ${subscription.status}.`,
-        400,
-      );
-    }
-
-    const updated = await subscriptionService.updateSubscription(
-      req.params.subId,
-      {
-        autoRenew,
-      },
-    );
-
-    res.status(200).json({
-      success: true,
-      message: `${autoRenew ? "Bật" : "Tắt"} tự gia hạn thành công.`,
-      data: updated,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
 
 /**
  * GET /api/v1/subscriptions/:subId/usage
@@ -161,19 +118,11 @@ export const getSubscriptionUsage = async (req, res, next) => {
       throw new AuthorizationError("Bạn không có quyền xem thông tin gói này.");
     }
 
-    const remaining = subscription.tripsPerMonth - subscription.usedTrips;
-
     res.status(200).json({
       success: true,
       data: {
         subscriptionId: subscription._id,
-        totalTrips: subscription.tripsPerMonth,
         usedTrips: subscription.usedTrips,
-        remainingTrips: Math.max(0, remaining),
-        usagePercentage: (
-          (subscription.usedTrips / subscription.tripsPerMonth) *
-          100
-        ).toFixed(2),
         status: subscription.status,
       },
     });

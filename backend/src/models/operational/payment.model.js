@@ -5,9 +5,8 @@ const PaymentSchema = new Schema(
   {
     userId: { type: Schema.Types.ObjectId, ref: 'User', required: true },
 
-    // Tham chiếu đến thực thể sinh ra giao dịch này
-    referenceId: { type: Schema.Types.ObjectId, required: true },
-    referenceType: { type: String, enum: ['Booking', 'Subscription', 'WalletTopUp', 'TripSchedule'] },
+    // Tham chiếu đến Lịch trình gốc
+    tripScheduleId: { type: Schema.Types.ObjectId, ref: 'TripSchedule', required: true },
 
     // Giá tiền
     amount: { type: Number, required: true },         // Tổng tiền khách phải trả cho chuyến này/lịch này
@@ -25,8 +24,6 @@ const PaymentSchema = new Schema(
       default: 'pending'
     },
 
-    // Mã giao dịch nếu thanh toán qua ví điện tử
-    gatewayTransactionId: { type: String, default: null },
     paidAt: { type: Date, default: null }
   },
   { timestamps: true }

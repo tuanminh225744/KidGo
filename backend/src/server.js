@@ -23,6 +23,7 @@ import KidRoutes from "./routes/KidRoutes.js";
 import RouteRoutes from "./routes/RouteRoutes.js";
 import PreferredDriverRoutes from "./routes/PreferredDriverRoutes.js";
 import BookingRoutes from "./routes/BookingRoutes.js";
+import PaymentRoutes from "./routes/PaymentRoutes.js";
 import SubscriptionRoutes from "./routes/SubscriptionRoutes.js";
 import TripScheduleRoutes from "./routes/TripScheduleRoutes.js";
 import TripRoutes from "./routes/TripRoutes.js";
@@ -88,6 +89,7 @@ app.use("/api/v1/routes", RouteRoutes);
 app.use("/api/v1/preferred-drivers", PreferredDriverRoutes);
 app.use("/api/v1/bookings/schedules", TripScheduleRoutes); // phải đứng trước /bookings
 app.use("/api/v1/bookings", BookingRoutes);
+app.use("/api/v1/payments", PaymentRoutes);
 app.use("/api/v1/subscriptions", SubscriptionRoutes);
 app.use("/api/v1/drivers", DriverRoutes);
 app.use("/api/v1/trips", TripRoutes);

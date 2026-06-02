@@ -18,10 +18,8 @@ const SubscriptionSchema = new Schema(
     },
     startDate: { type: Date, required: true },
     endDate: { type: Date, required: true },
-    tripsPerMonth: { type: Number, required: true },
     usedTrips: { type: Number, default: 0 },
-    price: { type: Number, required: true }, // VND
-    autoRenew: { type: Boolean, default: false },
+    paymentId: { type: Schema.Types.ObjectId, ref: "Payment", default: null },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );

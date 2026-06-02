@@ -3,7 +3,6 @@ import {
   getCurrentSubscription,
   createSubscription,
   cancelSubscription,
-  toggleAutoRenew,
   getSubscriptionUsage,
 } from "../controllers/SubscriptionController.js";
 import {
@@ -14,7 +13,6 @@ import { validate } from "../middlewares/validate.middleware.js";
 import {
   validateSubscriptionIdParam,
   validateCreateSubscription,
-  validateToggleAutoRenew,
 } from "../validators/subscriptionValidators.js";
 
 const router = express.Router();
@@ -43,17 +41,6 @@ router.patch(
   validateSubscriptionIdParam,
   validate,
   cancelSubscription,
-);
-
-/**
- * PATCH /api/v1/subscriptions/:subId/auto-renew
- * Bật/tắt tự gia hạn
- */
-router.patch(
-  "/:subId/auto-renew",
-  validateToggleAutoRenew,
-  validate,
-  toggleAutoRenew,
 );
 
 /**
