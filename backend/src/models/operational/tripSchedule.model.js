@@ -13,6 +13,7 @@ const TripScheduleSchema = new Schema(
     startDate:         { type: Date },
     endDate:           { type: Date, default: null },
     subscriptionId:    { type: Schema.Types.ObjectId, ref: 'Subscription',  default: null },
+    paymentId:         { type: Schema.Types.ObjectId, ref: 'Payment',       default: null },
   },
   { timestamps: false }
 );

@@ -12,6 +12,7 @@ const BookingSchema = new Schema(
     status: { type: String, enum: ['pending', 'matched', 'confirmed', 'cancelled'], default: 'pending', index: true },
     scheduledTime: { type: Date, required: true, index: true },
     type: { type: String, enum: ['one_time', 'recurring'], default: 'one_time' },
+    paymentId: { type: Schema.Types.ObjectId, ref: 'Payment', default: null },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );

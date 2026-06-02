@@ -86,6 +86,7 @@ export const startScheduleScanner = () => {
             preferredDriverId: schedule.preferredDriverId,
             scheduledTime: exactScheduledTime,
             type: "recurring", // Nhãn hiệu lặp vòng mưu tả
+            paymentId: schedule.paymentId, // Kế thừa mã thanh toán từ Lịch tổng
           };
 
           // Nổ lệnh Booking (Bên dưới tự động Ping tín hiệu gọi Driver tới vớt)

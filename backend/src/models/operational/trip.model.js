@@ -60,6 +60,7 @@ const TripSchema = new Schema(
     dropoffPhoto: { type: VerificationFieldSchema, default: () => ({}) },
     securityQuestion: { type: VerificationFieldSchema, default: () => ({}) },
     distance: { type: Number }, // km thực tế
+    paymentId: { type: Schema.Types.ObjectId, ref: 'Payment', default: null },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );
