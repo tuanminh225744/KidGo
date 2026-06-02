@@ -49,7 +49,7 @@ export const createSchedule = async (req, res, next) => {
       endDate,
       preferredDriverId: preferredDriverId || null,
       subscriptionId: subscriptionId || null,
-      isActive: true,
+      isActive: false,
     };
 
     const schedule = await tripScheduleService.createTripSchedule(scheduleData);

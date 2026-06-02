@@ -6,6 +6,10 @@ export const validatePaymentIdParam = [
     .withMessage("paymentId phải là định dạng ObjectID hợp lệ"),
 ];
 
+export const validatePreviewPayment = [
+  body("tripScheduleId").isMongoId().withMessage("tripScheduleId không hợp lệ"),
+];
+
 export const validateCreatePayment = [
   body("tripScheduleId").isMongoId().withMessage("tripScheduleId không hợp lệ"),
   body("method")

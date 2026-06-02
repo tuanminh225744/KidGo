@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createPayment,
+  previewPayment,
   getPayment,
   updatePaymentStatus,
 } from "../controllers/PaymentController.js";
@@ -12,6 +13,7 @@ import { validate } from "../middlewares/validate.middleware.js";
 import {
   validatePaymentIdParam,
   validateCreatePayment,
+  validatePreviewPayment,
   validateUpdatePaymentStatus,
 } from "../validators/paymentValidators.js";
 
@@ -19,6 +21,18 @@ const router = express.Router();
 
 // Yêu cầu đăng nhập cho tất cả API thanh toán
 router.use(authenticateToken);
+
+/**
+ * POST /api/v1/payments/preview
+ * Tính giá thanh toán
+ */
+router.post(
+  "/preview",
+  authorize("parent"),
+  validatePreviewPayment,
+  validate,
+  previewPayment
+);
 
 /**
  * POST /api/v1/payments

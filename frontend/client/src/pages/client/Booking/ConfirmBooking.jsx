@@ -18,11 +18,9 @@ import {
   createBooking,
   createTripSchedule,
 } from "../../../services/booking.service.js";
+import { createSubscription } from "../../../services/subscription.service.js";
 import { useBookingStore } from "../../../store/useBookingStore.js";
-import {
-  calculateTripPricing,
-  countRecurringTrips,
-} from "../../../utils/bookingPricing.js";
+import { countRecurringTrips } from "../../../utils/bookingPricing.js";
 
 const WEEK_DAYS = [
   { key: "mon", label: "T2", full: "Thứ 2" },
@@ -74,6 +72,7 @@ export default function ConfirmBooking() {
     pickupText,
     dropoffText,
     routeInfo,
+    bookingPlan,
     bookingDateTime,
     recurringDays,
     recurringStartDate,
@@ -107,15 +106,6 @@ export default function ConfirmBooking() {
     [recurringStartDate, recurringEndDate, recurringDays],
   );
 
-  const pricing = useMemo(
-    () =>
-      calculateTripPricing({
-        tripType,
-        routeInfo,
-        recurringTripCount,
-      }),
-    [tripType, routeInfo, recurringTripCount],
-  );
 
   const scheduledTimeLabel = bookingDateTime
     ? formatTime(bookingDateTime)
@@ -123,13 +113,13 @@ export default function ConfirmBooking() {
 
   const scheduledDateTimeLabel = bookingDateTime
     ? new Date(bookingDateTime).toLocaleString("vi-VN", {
-        weekday: "short",
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
-        hour: "2-digit",
-        minute: "2-digit",
-      })
+      weekday: "short",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    })
     : "Chưa chọn thời gian";
 
   const formatDuration = (minutes) => {
@@ -191,49 +181,63 @@ export default function ConfirmBooking() {
         d.getMinutes(),
       ).padStart(2, "0")}`;
 
+      let subscriptionId = undefined;
+      if (bookingPlan === "monthly" || bookingPlan === "yearly") {
+        const subRes = await createSubscription({ 
+          plan: bookingPlan,
+          startDate: recurringStartDate,
+          endDate: recurringEndDate
+        });
+        if (!subRes.data.success) {
+          // Xử lý Axios response wrapper
+          if (subRes.data && subRes.data._id) {
+            subscriptionId = subRes.data._id;
+          } else if (subRes.data && subRes.data.data && subRes.data.data._id) {
+            subscriptionId = subRes.data.data._id;
+          }
+        }
+      }
+
       const schedulePayload =
         tripType === "one-time"
           ? {
-              kidId,
-              routeId,
-              repeatDays: [],
-              pickupTime,
-              startDate: formatDateInput(bookingDateTime),
-              endDate: formatDateInput(bookingDateTime),
-              preferredDriverId: selectedDriverId || undefined,
-            }
+            kidId,
+            routeId,
+            repeatDays: [],
+            pickupTime,
+            startDate: formatDateInput(bookingDateTime),
+            endDate: formatDateInput(bookingDateTime),
+            preferredDriverId: selectedDriverId || undefined,
+            subscriptionId
+          }
           : {
-              kidId,
-              routeId,
-              repeatDays: (recurringDays || [])
-                .map((day) => DAY_MAP[day])
-                .filter((day) => day !== undefined),
-              pickupTime,
-              startDate: recurringStartDate,
-              endDate: recurringEndDate,
-              preferredDriverId: selectedDriverId || undefined,
-            };
+            kidId,
+            routeId,
+            repeatDays: (recurringDays || [])
+              .map((day) => DAY_MAP[day])
+              .filter((day) => day !== undefined),
+            pickupTime,
+            startDate: recurringStartDate,
+            endDate: recurringEndDate,
+            preferredDriverId: selectedDriverId || undefined,
+            subscriptionId
+          };
 
       const schedRes = await createTripSchedule(schedulePayload);
       if (!schedRes.success)
         throw new Error(schedRes.message || "Lỗi tạo lịch trình");
-      console.log("res", schedRes);
 
-      if (tripType === "one-time" && isWithinTwentyMinutes(bookingDateTime)) {
-        const bookRes = await createBooking({
-          kidId,
-          routeId,
-          scheduledTime: bookingDateTime,
-          preferredDriverId: selectedDriverId || undefined,
-          scheduleId: schedRes.data?._id || null,
-        });
+      const isImmediate = tripType === "one-time" && isWithinTwentyMinutes(bookingDateTime);
 
-        if (!bookRes.success)
-          throw new Error(bookRes.message || "Lỗi tạo booking");
-      }
+      // Navigate sang trang thanh toán thay vì tạo booking ở đây
+      navigate("/client/booking/payment", {
+        state: {
+          tripScheduleId: schedRes.data._id,
+          isImmediate,
+          kidName: kid?.fullName
+        }
+      });
 
-      setShowSuccess(true);
-      resetBooking();
     } catch (error) {
       alert("Lỗi: " + error.message);
     } finally {
@@ -434,41 +438,6 @@ export default function ConfirmBooking() {
           <div className="pointer-events-none absolute -right-4 -bottom-4 h-24 w-24 rounded-full bg-primary/5" />
         </div> */}
 
-        <div className="rounded-3xl bg-white p-5 soft-shadow">
-          <div className="flex items-center justify-between text-sm">
-            <span className="text-on-surface-variant">Giá 1 chuyến</span>
-            <span className="font-bold text-on-surface">
-              {pricing.baseTripPrice.toLocaleString("vi-VN")}đ
-            </span>
-          </div>
-          {tripType !== "one-time" && (
-            <>
-              <div className="mt-3 flex items-center justify-between text-sm">
-                <span className="text-on-surface-variant">Tổng trước giảm</span>
-                <span className="font-bold text-on-surface">
-                  {(pricing.baseTripPrice * pricing.trips).toLocaleString(
-                    "vi-VN",
-                  )}
-                  đ
-                </span>
-              </div>
-              <div className="mt-3 flex items-center justify-between text-sm">
-                <span className="text-on-surface-variant">Giảm giá</span>
-                <span className="font-bold text-green-600">
-                  -{pricing.discountAmount.toLocaleString("vi-VN")}đ
-                </span>
-              </div>
-            </>
-          )}
-          <div className="mt-4 flex items-center justify-between border-t border-outline-variant/20 pt-4">
-            <span className="text-sm font-bold uppercase tracking-widest text-on-surface-variant">
-              Thanh toán dự kiến
-            </span>
-            <span className="text-2xl font-extrabold text-primary">
-              {pricing.totalPrice.toLocaleString("vi-VN")}đ
-            </span>
-          </div>
-        </div>
       </main>
 
       <footer className="fixed bottom-20 left-0 right-0 z-30 mx-auto max-w-[430px] bg-white/80 p-5 backdrop-blur-md">
@@ -491,50 +460,7 @@ export default function ConfirmBooking() {
         </button> */}
       </footer>
 
-      <AnimatePresence>
-        {showSuccess && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 px-6 backdrop-blur-sm"
-          >
-            <motion.div
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              className="relative flex w-full max-w-sm flex-col items-center overflow-hidden rounded-[40px] bg-white p-8 text-center shadow-2xl"
-            >
-              <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-green-50 shadow-inner">
-                <div className="animate-bounce text-5xl">🎉</div>
-              </div>
-              <h2 className="mb-3 text-2xl font-extrabold tracking-tight text-on-surface">
-                Đặt xe thành công!
-              </h2>
-              <p className="mb-10 text-sm font-medium leading-relaxed text-on-surface-variant">
-                {tripType === "one-time" &&
-                isWithinTwentyMinutes(bookingDateTime)
-                  ? `Hệ thống đã tạo booking ngay cho bé ${kid?.fullName || "của bạn"}.`
-                  : `Hệ thống đã lưu lịch trình cho bé ${kid?.fullName || "của bạn"} và sẽ tự động tạo booking khi gần đến giờ đón.`}
-              </p>
 
-              <div className="w-full space-y-4">
-                <button
-                  onClick={() => navigate("/client/tracking")}
-                  className="h-14 w-full rounded-2xl bg-primary-container text-lg font-bold text-white transition-all hover:brightness-110 active:scale-95"
-                >
-                  Theo dõi chuyến đi
-                </button>
-                <button
-                  onClick={() => navigate("/client/home")}
-                  className="h-14 w-full rounded-2xl bg-surface-container-high text-lg font-bold text-on-surface transition-colors hover:bg-outline-variant active:scale-95"
-                >
-                  Về trang chủ
-                </button>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   );
 }

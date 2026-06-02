@@ -4,6 +4,7 @@ import SetLocation from './SetLocation.jsx';
 import SetDateTime from './SetDateTime.jsx';
 import SelectDriver from './SelectDriver.jsx';
 import ConfirmBooking from './ConfirmBooking.jsx';
+import PaymentScreen from './PaymentScreen.jsx';
 import React from 'react';
 
 export default function Booking() {
@@ -14,6 +15,7 @@ export default function Booking() {
       <Route path="datetime" element={<SetDateTime />} />
       <Route path="driver" element={<SelectDriver />} />
       <Route path="confirm" element={<ConfirmBooking />} />
+      <Route path="payment" element={<PaymentScreen />} />
     </Routes>
   );
 }

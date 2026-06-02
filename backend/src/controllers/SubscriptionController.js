@@ -29,23 +29,25 @@ export const getCurrentSubscription = async (req, res, next) => {
  */
 export const createSubscription = async (req, res, next) => {
   try {
-    const { plan } = req.body;
+    const { plan, startDate, endDate } = req.body;
 
     // Tính toán thời gian hiệu lực
-    const startDate = new Date();
-    const endDate = new Date();
+    const finalStartDate = startDate ? new Date(startDate) : new Date();
+    const finalEndDate = endDate ? new Date(endDate) : new Date(finalStartDate);
 
-    if (plan === "monthly") {
-      endDate.setMonth(endDate.getMonth() + 1);
-    } else if (plan === "yearly") {
-      endDate.setFullYear(endDate.getFullYear() + 1);
+    if (!endDate) {
+      if (plan === "monthly") {
+        finalEndDate.setMonth(finalEndDate.getMonth() + 1);
+      } else if (plan === "yearly") {
+        finalEndDate.setFullYear(finalEndDate.getFullYear() + 1);
+      }
     }
 
     const subscriptionData = {
       parentId: req.user.id,
       plan,
-      startDate,
-      endDate,
+      startDate: finalStartDate,
+      endDate: finalEndDate,
       status: "active",
       usedTrips: 0,
     };

@@ -99,6 +99,83 @@ export const createPayment = async (req, res, next) => {
 };
 
 /**
+ * POST /api/v1/payments/preview
+ * Tính toán trước giá tiền (dành cho màn hình chọn phương thức)
+ */
+export const previewPayment = async (req, res, next) => {
+  try {
+    const { tripScheduleId } = req.body;
+    
+    // Lấy thông tin lịch trình để tính giá
+    const schedule = await TripSchedule.findById(tripScheduleId)
+      .populate("routeId")
+      .populate("subscriptionId");
+
+    if (!schedule) {
+      throw new AppError("Không tìm thấy Lịch trình (TripSchedule).", 404);
+    }
+    if (!schedule.endDate) {
+      throw new AppError("Lịch trình phải có ngày kết thúc (endDate) để tính tổng thanh toán.", 400);
+    }
+
+    // Đếm số chuyến
+    let tripCount = 0;
+    const start = new Date(schedule.startDate);
+    const end = new Date(schedule.endDate);
+    
+    const maxDays = 366; 
+    let daysPassed = 0;
+
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      if (daysPassed++ > maxDays) break; 
+      
+      const dayOfWeek = d.getDay(); 
+      if (schedule.repeatDays && schedule.repeatDays.length > 0) {
+        if (schedule.repeatDays.includes(dayOfWeek)) {
+          tripCount++;
+        }
+      } else {
+        tripCount = 1;
+        break;
+      }
+    }
+
+    if (tripCount === 0) {
+      throw new AppError("Không có ngày đi học nào nằm trong khoảng thời gian này.", 400);
+    }
+
+    // Tính giá
+    const distance = schedule.routeId?.estimatedDistance || 0;
+    const pricePerTrip = 15000 + (distance * 5000);
+
+    let discount = 0;
+    if (schedule.subscriptionId) {
+      if (schedule.subscriptionId.plan === "monthly") {
+        discount = 0.05;
+      } else if (schedule.subscriptionId.plan === "yearly") {
+        discount = 0.10;
+      }
+    }
+
+    const amount = pricePerTrip * tripCount * (1 - discount);
+    const driverEarning = amount * 0.8;
+
+    res.status(200).json({
+      success: true,
+      data: {
+        tripCount,
+        pricePerTrip,
+        discount,
+        amount,
+        driverEarning
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * GET /api/v1/payments/:paymentId
  * Lấy chi tiết thanh toán
  */
