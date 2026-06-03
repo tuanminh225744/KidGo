@@ -1,5 +1,7 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
+import { useAuthStore } from "./store/useAuthStore.js";
+import { connectParentSocket, disconnectParentSocket } from "./socket/parentSocket.js";
 
 import HomeView from "./pages/client/Home.jsx";
 import Login from "./pages/client/Login.jsx";
@@ -15,6 +17,17 @@ import BottomNav from "./pages/client/BottomNav.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 
 export default function ClientApp() {
+  const user = useAuthStore((state) => state.user);
+
+  useEffect(() => {
+    if (user && user.role === "parent") {
+      connectParentSocket({ parentId: user._id });
+    }
+    return () => {
+      disconnectParentSocket();
+    };
+  }, [user]);
+
   return (
     <div className="max-w-[430px] mx-auto w-full h-screen bg-surface relative flex flex-col shadow-2xl overflow-hidden border-x border-gray-200">
       <div className="flex-1 overflow-y-auto scroll-hide pb-20">

@@ -30,7 +30,7 @@ export default function PaymentScreen() {
 
   const {
     kidId,
-    routeInfo,
+    routeId,
     bookingDateTime,
     selectedDriverId,
     resetBooking,
@@ -103,7 +103,7 @@ export default function PaymentScreen() {
       if (isImmediate) {
         const bookRes = await createBooking({
           kidId,
-          routeId: null,
+          routeId: routeId,
           scheduledTime: bookingDateTime,
           preferredDriverId: selectedDriverId || undefined,
           scheduleId: tripScheduleId,

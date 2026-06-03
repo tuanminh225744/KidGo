@@ -11,7 +11,7 @@ export default function setupParentSockets(io) {
             if (data && data.parentId) {
                 currentParentId = data.parentId;
                 console.log(`[Socket] Authenticated parent: ${currentParentId}`);
-                
+
                 // Nhốt socket này vào trong một room có tên trùng đúng bằng ID Phụ huynh (parentId).
                 // Do đó, lúc service bắn: namespace.to(parentId).emit(...) thì auto người này nhận được.
                 socket.join(currentParentId.toString());
