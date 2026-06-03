@@ -58,8 +58,11 @@ export default function SetDateTime() {
   } = useBookingStore();
 
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [hour, setHour] = useState(7);
-  const [minute, setMinute] = useState(30);
+  const [timeString, setTimeString] = useState(() => {
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 1);
+    return `${String(now.getHours()).padStart(2, "0")}:${String(now.getMinutes()).padStart(2, "0")}`;
+  });
   const [localTripType, setLocalTripType] = useState(tripType || "one-time");
   const [selectedWeekDays, setSelectedWeekDays] = useState([]);
   const [recurringStartDate, setRecurringStartDate] = useState(
@@ -97,53 +100,12 @@ export default function SetDateTime() {
     }
   };
 
-  const days = useMemo(() => {
-    const list = [];
-    const dayNames = ["CN", "T2", "T3", "T4", "T5", "T6", "T7"];
-    for (let i = 0; i < 7; i++) {
-      const d = new Date();
-      d.setDate(d.getDate() + i);
-      list.push({
-        dateObj: d,
-        name: i === 0 ? "Hôm nay" : dayNames[d.getDay()],
-        date: d.getDate(),
-        month: d.getMonth() + 1,
-        year: d.getFullYear(),
-        fullDateStr: `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`,
-      });
-    }
-    return list;
-  }, []);
 
-  const selectedDayItem =
-    days.find(
-      (d) =>
-        d.dateObj.getDate() === selectedDate.getDate() &&
-        d.dateObj.getMonth() === selectedDate.getMonth(),
-    ) || days[0];
 
   const selectedWeekDaysText =
     WEEK_DAYS.filter((day) => selectedWeekDays.includes(day.key))
       .map((day) => day.label)
       .join(", ") || "Chưa chọn ngày trong tuần";
-
-  const handleHourChange = (delta) => {
-    setHour((prev) => {
-      let newHour = prev + delta;
-      if (newHour > 23) newHour = 0;
-      if (newHour < 0) newHour = 23;
-      return newHour;
-    });
-  };
-
-  const handleMinuteChange = (delta) => {
-    setMinute((prev) => {
-      let newMin = prev + delta;
-      if (newMin >= 60) newMin = 0;
-      if (newMin < 0) newMin = 59;
-      return newMin;
-    });
-  };
 
   const handleWeekDayToggle = (key) => {
     setSelectedWeekDays((prev) =>
@@ -173,20 +135,37 @@ export default function SetDateTime() {
     }
   };
 
+  const isPastDateTime = useMemo(() => {
+    if (localTripType !== "one-time") return false;
+
+    const now = new Date();
+    const baseDate = selectedDate;
+
+    if (!baseDate || Number.isNaN(baseDate.getTime())) return false;
+
+    const [h, m] = timeString.split(":").map(Number);
+    const finalDateTime = new Date(baseDate);
+    finalDateTime.setHours(h || 0, m || 0, 0, 0);
+
+    return finalDateTime < now;
+  }, [localTripType, selectedDate, recurringStartDate, timeString]);
+
   const isContinueDisabled =
-    localTripType !== "one-time" &&
-    (selectedWeekDays.length === 0 || !recurringStartDate);
+    (localTripType === "one-time" && !selectedDate) ||
+    (localTripType !== "one-time" &&
+      (selectedWeekDays.length === 0 || !recurringStartDate)) ||
+    isPastDateTime;
 
   const packageTripCount = useMemo(
     () =>
       localTripType === "one-time"
         ? 1
         : countRecurringTrips(
-            recurringStartDate,
-            recurringEndDate,
-            selectedWeekDays,
-            { mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6, sun: 0 },
-          ),
+          recurringStartDate,
+          recurringEndDate,
+          selectedWeekDays,
+          { mon: 1, tue: 2, wed: 3, thu: 4, fri: 5, sat: 6, sun: 0 },
+        ),
     [localTripType, recurringStartDate, recurringEndDate, selectedWeekDays],
   );
 
@@ -206,25 +185,26 @@ export default function SetDateTime() {
         ? selectedDate
         : new Date(recurringStartDate);
     const finalDateTime = new Date(baseDate);
-    finalDateTime.setHours(hour, minute, 0, 0);
+    const [h, m] = timeString.split(":").map(Number);
+    finalDateTime.setHours(h || 0, m || 0, 0, 0);
 
     const nextRecurringEndDate =
       localTripType === "monthly"
         ? new Date(
-            new Date(recurringStartDate).setMonth(
-              new Date(recurringStartDate).getMonth() + 1,
+          new Date(recurringStartDate).setMonth(
+            new Date(recurringStartDate).getMonth() + 1,
+          ),
+        )
+          .toISOString()
+          .slice(0, 10)
+        : localTripType === "yearly"
+          ? new Date(
+            new Date(recurringStartDate).setFullYear(
+              new Date(recurringStartDate).getFullYear() + 1,
             ),
           )
             .toISOString()
             .slice(0, 10)
-        : localTripType === "yearly"
-          ? new Date(
-              new Date(recurringStartDate).setFullYear(
-                new Date(recurringStartDate).getFullYear() + 1,
-              ),
-            )
-              .toISOString()
-              .slice(0, 10)
           : recurringEndDate;
 
     setBookingData({
@@ -314,30 +294,18 @@ export default function SetDateTime() {
         </div>
 
         {localTripType === "one-time" ? (
-          <section>
+          <section className="space-y-6">
             <label className="block text-sm font-bold text-on-surface-variant mb-4 px-1">
               Chọn ngày
+              <DatePicker
+                selected={selectedDate}
+                onChange={(date) => setSelectedDate(date)}
+                dateFormat="dd/MM/yyyy"
+                placeholderText="Chọn ngày"
+                wrapperClassName="w-full"
+                className="mt-2 w-full rounded-3xl border border-outline px-4 py-3 text-sm text-on-surface"
+              />
             </label>
-            <div className="flex gap-4 overflow-x-auto scroll-hide py-2">
-              {days.map((day) => {
-                const isSelected =
-                  selectedDayItem.fullDateStr === day.fullDateStr;
-                return (
-                  <div
-                    key={day.fullDateStr}
-                    onClick={() => setSelectedDate(day.dateObj)}
-                    className={`flex-shrink-0 w-16 h-20 flex flex-col items-center justify-center rounded-2xl border-2 transition-all cursor-pointer ${isSelected ? "bg-primary-container border-primary-container text-white shadow-xl scale-110" : "bg-white border-outline-variant/30 text-on-surface-variant hover:border-primary-container/30"}`}
-                  >
-                    <span
-                      className={`text-[10px] font-bold uppercase mb-1 ${isSelected ? "opacity-90" : "opacity-60"}`}
-                    >
-                      {day.name}
-                    </span>
-                    <span className="text-xl font-extrabold">{day.date}</span>
-                  </div>
-                );
-              })}
-            </div>
           </section>
         ) : (
           <section className="space-y-6">
@@ -360,6 +328,11 @@ export default function SetDateTime() {
                   );
                 })}
               </div>
+              {selectedWeekDays.length === 0 && (
+                <p className="text-error text-sm font-bold mt-2">
+                  Vui lòng chọn ít nhất 1 ngày trong tuần
+                </p>
+              )}
             </div>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -400,61 +373,22 @@ export default function SetDateTime() {
           </section>
         )}
 
-        <section className="bg-white rounded-[16px] p-5 soft-shadow border border-surface-container-high text-center">
-          <label className="text-sm font-bold text-on-surface-variant mb-3 block text-left">
-            Chọn thời gian bắt đầu
-          </label>
 
-          <div className="flex items-center justify-center gap-5 py-1 relative">
-            <div className="flex flex-col items-center gap-1">
-              <button
-                onClick={() => handleHourChange(1)}
-                className="p-1 text-on-surface-variant/40 hover:text-primary transition-colors active:scale-95"
-              >
-                <ChevronUp size={20} />
-              </button>
+        <label className="text-sm font-bold text-on-surface-variant mb-3 block text-left">
+          Chọn thời gian bắt đầu
+        </label>
+        <input
+          type="time"
+          value={timeString}
+          onChange={(e) => setTimeString(e.target.value)}
+          className="w-full rounded-3xl border border-outline mb-1 px-4 py-3 text-sm text-on-surface font-extrabold"
+        />
+        {isPastDateTime && (
+          <p className="text-error text-center text-sm font-bold">
+            Thời gian bắt đầu không được nhỏ hơn hiện tại
+          </p>
+        )}
 
-              <div className="px-3 py-1 bg-primary/5 rounded-xl border-y-2 border-primary/20">
-                <span className="text-3xl font-extrabold text-primary">
-                  {String(hour).padStart(2, "0")}
-                </span>
-              </div>
-
-              <button
-                onClick={() => handleHourChange(-1)}
-                className="p-1 text-on-surface-variant/40 hover:text-primary transition-colors active:scale-95"
-              >
-                <ChevronDown size={20} />
-              </button>
-            </div>
-
-            <span className="text-4xl font-extrabold text-on-surface-variant/40">
-              :
-            </span>
-
-            <div className="flex flex-col items-center gap-1">
-              <button
-                onClick={() => handleMinuteChange(5)}
-                className="p-1 text-on-surface-variant/40 hover:text-primary transition-colors active:scale-95"
-              >
-                <ChevronUp size={20} />
-              </button>
-
-              <div className="px-3 py-1 bg-primary/5 rounded-xl border-y-2 border-primary/20">
-                <span className="text-3xl font-extrabold text-primary">
-                  {String(minute).padStart(2, "0")}
-                </span>
-              </div>
-
-              <button
-                onClick={() => handleMinuteChange(-5)}
-                className="p-1 text-on-surface-variant/40 hover:text-primary transition-colors active:scale-95"
-              >
-                <ChevronDown size={20} />
-              </button>
-            </div>
-          </div>
-        </section>
 
         <div className="flex items-center gap-4 bg-[#8A4CFC]/5 border border-[#8A4CFC]/10 p-5 rounded-3xl shadow-sm">
           <div className="p-3 bg-white rounded-2xl shadow-sm text-secondary">
@@ -466,17 +400,12 @@ export default function SetDateTime() {
             </p>
             {localTripType === "one-time" ? (
               <p className="text-sm font-extrabold text-on-surface">
-                {selectedDayItem.name},{" "}
-                {String(selectedDayItem.date).padStart(2, "0")}/
-                {String(selectedDayItem.month).padStart(2, "0")}/
-                {selectedDayItem.year} lúc {String(hour).padStart(2, "0")}:
-                {String(minute).padStart(2, "0")}
+                Ngày {selectedDate ? selectedDate.toLocaleDateString("vi-VN") : "Chưa chọn"} lúc {timeString}
               </p>
             ) : (
               <div className="space-y-1 text-left">
                 <p className="text-sm font-extrabold text-on-surface">
-                  {selectedWeekDaysText} lúc {String(hour).padStart(2, "0")}:
-                  {String(minute).padStart(2, "0")}
+                  {selectedWeekDaysText} lúc {timeString}
                 </p>
                 <p className="text-sm text-on-surface-variant">
                   Từ {formatDisplayDate(recurringStartDate)} đến{" "}
@@ -529,15 +458,18 @@ export default function SetDateTime() {
             </div>
           )}
         </section> */}
+
       </main>
 
       <div className="fixed bottom-22 left-0 right-0 p-5 bg-white shadow-[0px_-4px_20px_0px_rgba(79,70,200,0.06)] z-30 max-w-[430px] mx-auto space-y-3">
-        <button
-          onClick={handleBookNow}
-          className="w-full bg-secondary-container text-white text-secondary-foreground py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all"
-        >
-          Đặt ngay bây giờ
-        </button>
+        {localTripType === "one-time" && (
+          <button
+            onClick={handleBookNow}
+            className="w-full bg-secondary-container text-white text-secondary-foreground py-4 rounded-2xl font-bold text-lg flex items-center justify-center gap-2 shadow-sm active:scale-[0.98] transition-all"
+          >
+            Đặt ngay bây giờ
+          </button>
+        )}
         <button
           onClick={handleContinue}
           disabled={isContinueDisabled}
