@@ -1,10 +1,10 @@
 import { io } from "socket.io-client";
+import { setupDriverSocketReceiver } from "./driverSocketReceiver.js";
 
 let socket = null;
 let intervalId = null;
 let currentDriverId = null;
 let getPositionRef = null;
-let bookingAssignedHandler = null;
 
 const getSocketUrl = () =>
   import.meta.env.VITE_APP_BASE_URL || "http://localhost:5000";
@@ -45,7 +45,6 @@ const startLocationUpdates = () => {
 export const connectDriverSocket = ({
   driverId,
   getPosition,
-  onBookingAssigned,
 }) => {
   if (!driverId) {
     return;
@@ -65,6 +64,8 @@ export const connectDriverSocket = ({
     socket = io(`${getSocketUrl()}/driver`, {
       autoConnect: true,
     });
+
+    setupDriverSocketReceiver(socket);
 
     socket.on("connect", () => {
       socket.emit("authenticate", { driverId: currentDriverId });
@@ -86,18 +87,6 @@ export const connectDriverSocket = ({
     }
   }
 
-  if (typeof onBookingAssigned === "function") {
-    if (bookingAssignedHandler) {
-      socket.off("booking_assigned", bookingAssignedHandler);
-    }
-
-    bookingAssignedHandler = (payload) => {
-      onBookingAssigned(payload);
-    };
-
-    socket.on("booking_assigned", bookingAssignedHandler);
-  }
-
   startLocationUpdates();
 };
 
@@ -111,13 +100,9 @@ export const disconnectDriverSocket = () => {
   getPositionRef = null;
 
   if (socket) {
-    if (bookingAssignedHandler) {
-      socket.off("booking_assigned", bookingAssignedHandler);
-    }
     socket.disconnect();
     socket = null;
   }
 
   currentDriverId = null;
-  bookingAssignedHandler = null;
 };

@@ -79,6 +79,7 @@ export default function ConfirmBooking() {
     recurringEndDate,
     selectedDriverId,
     resetBooking,
+    setBookingData,
   } = useBookingStore();
 
   useEffect(() => {
@@ -175,6 +176,9 @@ export default function ConfirmBooking() {
       if (!routeRes.success)
         throw new Error(routeRes.message || "Lỗi tạo lộ trình");
       const routeId = routeRes.data._id;
+      
+      // Lưu routeId vào store
+      setBookingData({ routeId });
 
       const d = new Date(bookingDateTime);
       const pickupTime = `${String(d.getHours()).padStart(2, "0")}:${String(
@@ -183,7 +187,7 @@ export default function ConfirmBooking() {
 
       let subscriptionId = undefined;
       if (bookingPlan === "monthly" || bookingPlan === "yearly") {
-        const subRes = await createSubscription({ 
+        const subRes = await createSubscription({
           plan: bookingPlan,
           startDate: recurringStartDate,
           endDate: recurringEndDate

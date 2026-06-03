@@ -16,7 +16,7 @@ import Register from "./pages/driver/Register.jsx";
 import OTP from "./pages/driver/OTP.jsx";
 import SuccessfullyRegistered from "./pages/driver/SuccessfullyRegistered.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
-import DriverBookingNotifier from "./components/DriverBookingNotifier.jsx";
+import DriverSocketManager from "./components/DriverSocketManager.jsx";
 
 export default function DriverApp() {
   return (
@@ -58,7 +58,7 @@ export default function DriverApp() {
           </Route>
         </Routes>
       </div>
-      <DriverBookingNotifier />
+      <DriverSocketManager />
       <BottomNav />
     </div>
   );

@@ -12,6 +12,7 @@ const initialState = {
     distance: null,
     duration: null,
   },
+  routeId: null,
   bookingDateTime: null,
   recurringDays: [],
   recurringStartDate: null,
