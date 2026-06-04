@@ -14,6 +14,8 @@ import { SecurityQuestionModal } from '../../components/modal/SecurityQuestionMo
 import { OnTripModal } from '../../components/modal/OnTripModal';
 import { DroppingOffModal } from '../../components/modal/DroppingOffModal';
 import { DropoffPhotoModal } from '../../components/modal/DropoffPhotoModal';
+import { CashPaymentModal } from '../../components/modal/CashPaymentModal';
+import { confirmCashPayment, getPayment } from '../../services/payment.service';
 
 export const InTripScreen = () => {
   const navigate = useNavigate();
@@ -191,13 +193,54 @@ export const InTripScreen = () => {
     }
   };
 
+  const [paymentInfo, setPaymentInfo] = useState(null);
+
   const handleConfirmDropoff = async () => {
+    if (trip.paymentId) {
+      setLoading(true);
+      try {
+        const paymentIdStr = typeof trip.paymentId === 'object' ? trip.paymentId._id : trip.paymentId;
+        const res = await getPayment(paymentIdStr);
+        if (res?.success) {
+          const paymentData = res.data;
+          setPaymentInfo(paymentData);
+          if (paymentData.method === 'cash' && paymentData.status !== 'completed') {
+            setTripStatus("collect_cash");
+            setLoading(false);
+            return;
+          }
+          await finishTrip(paymentData);
+          return;
+        }
+      } catch (err) {
+        console.error("Lỗi lấy thông tin payment", err);
+      }
+      setLoading(false);
+    }
+    await finishTrip();
+  };
+
+  const handleCashConfirmed = async () => {
+    setLoading(true);
+    try {
+      const paymentIdStr = typeof trip.paymentId === 'object' ? trip.paymentId._id : trip.paymentId;
+      await confirmCashPayment(paymentIdStr);
+      await finishTrip(paymentInfo);
+    } catch (err) {
+      alert("Lỗi xác nhận thu tiền mặt: " + (err.response?.data?.message || err.message));
+      setLoading(false);
+    }
+  };
+
+  const finishTrip = async (fetchedPayment) => {
     setLoading(true);
     try {
       const res = await confirmDropoff(trip._id);
       if (res?.success) {
-        alert("Đã hoàn thành chuyến đi!");
-        navigate("/driver/home");
+        const fare = fetchedPayment?.driverEarning || 0;
+        const distance = trip.distance || trip.plannedRoute?.estimatedDistance || 0;
+        const duration = trip.plannedRoute?.estimatedDuration || 0;
+        navigate("/driver/summary", { state: { tripData: { fare, distance, duration } } });
       }
     } catch (err) {
       alert("Lỗi xác nhận hoàn thành chuyến đi: " + (err.response?.message || err.message));
@@ -295,6 +338,15 @@ export const InTripScreen = () => {
             photoInput={photoInput}
             submitPhoto={submitDropoffPhoto}
             errorMsg={errorMsg}
+            loading={loading}
+          />
+        )}
+
+        {/* Collect Cash UI */}
+        {tripStatus === "collect_cash" && (
+          <CashPaymentModal
+            amount={paymentInfo?.amount || 0}
+            onConfirm={handleCashConfirmed}
             loading={loading}
           />
         )}

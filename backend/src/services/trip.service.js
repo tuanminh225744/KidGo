@@ -251,6 +251,16 @@ export const driverDropoffKid = async (tripId) => {
     trip.actualDropoffTime = new Date();
     await trip.save();
 
+    // Cập nhật tổng thu nhập cho tài xế nếu chuyến có payment
+    if (trip.paymentId) {
+      const payment = await import("../models/operational/payment.model.js").then(m => m.default).then(Payment => Payment.findById(trip.paymentId));
+      if (payment && payment.driverEarning) {
+        await Driver.findByIdAndUpdate(trip.driverId, {
+          $inc: { totalEarnings: payment.driverEarning }
+        });
+      }
+    }
+
     // Kiểm tra kết thúc sớm bất thường
     if (trip.scheduledDropoffTime) {
       const earlyTimeMs =
@@ -438,7 +448,8 @@ export const getActiveTrips = async (parentId) => {
   })
     .populate("driverId", "user licenseNumber rating currentLocation isOnline")
     .populate("kidId", "fullName avatar")
-    .populate("vehicleId", "licensePlate model color");
+    .populate("vehicleId", "licensePlate model color")
+    .populate("paymentId");
 
   return trips;
 };
@@ -451,7 +462,8 @@ export const getTripDetail = async (tripId, userId, role) => {
     .populate("driverId", "user licenseNumber rating")
     .populate("kidId", "fullName avatar")
     .populate("vehicleId", "licensePlate model color")
-    .populate("bookingId");
+    .populate("bookingId")
+    .populate("paymentId");
 
   if (!trip) throw new NotFoundError("Chuyến đi không tồn tại.");
 

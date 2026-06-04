@@ -4,6 +4,7 @@ import {
   previewPayment,
   getPayment,
   updatePaymentStatus,
+  confirmCashPayment,
 } from "../controllers/PaymentController.js";
 import {
   authenticateToken,
@@ -68,6 +69,18 @@ router.patch(
   validateUpdatePaymentStatus,
   validate,
   updatePaymentStatus
+);
+
+/**
+ * POST /api/v1/payments/:paymentId/confirm-cash
+ * Xác nhận tài xế đã nhận tiền mặt
+ */
+router.post(
+  "/:paymentId/confirm-cash",
+  authorize("driver"),
+  validatePaymentIdParam,
+  validate,
+  confirmCashPayment
 );
 
 export default router;

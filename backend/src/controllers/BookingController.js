@@ -29,7 +29,7 @@ export const getBookings = async (req, res, next) => {
  */
 export const createBooking = async (req, res, next) => {
   try {
-    const { kidId, routeId, scheduleId, scheduledTime, preferredDriverId } =
+    const { kidId, routeId, scheduleId, scheduledTime, preferredDriverId, paymentId } =
       req.body;
 
     const bookingData = {
@@ -39,6 +39,7 @@ export const createBooking = async (req, res, next) => {
       scheduleId: scheduleId || null,
       scheduledTime,
       preferredDriverId: preferredDriverId || null,
+      paymentId,
       type: "one_time",
     };
 

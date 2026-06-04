@@ -93,8 +93,10 @@ export default function PaymentScreen() {
   const handlePaymentSuccess = async (payId) => {
     setIsSubmitting(true);
     try {
-      // Cập nhật payment -> completed
-      await updatePaymentStatus(payId, { status: "completed" });
+      // Nếu không phải tiền mặt, cập nhật payment -> completed
+      if (paymentMethod !== 'cash') {
+        await updatePaymentStatus(payId, { status: "completed" });
+      }
 
       // Cập nhật tripSchedule -> active
       await toggleTripSchedule(tripScheduleId, true);
@@ -107,6 +109,7 @@ export default function PaymentScreen() {
           scheduledTime: bookingDateTime,
           preferredDriverId: selectedDriverId || undefined,
           scheduleId: tripScheduleId,
+          paymentId: payId,
         });
 
         if (!bookRes.success && !bookRes.data?.success) {

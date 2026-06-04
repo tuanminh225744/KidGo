@@ -15,3 +15,7 @@ export const getPayment = async (paymentId) => {
 export const updatePaymentStatus = async (paymentId, data) => {
   return api.patch(`/payments/${paymentId}/status`, data);
 };
+
+export const confirmCashPayment = async (paymentId) => {
+  return api.post(`/payments/${paymentId}/confirm-cash`);
+};

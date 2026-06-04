@@ -37,4 +37,11 @@ export const validateCreateBooking = [
     .optional()
     .isMongoId()
     .withMessage("preferredDriverId phải là định dạng ObjectID hợp lệ"),
+
+  body("paymentId")
+    .notEmpty()
+    .withMessage("paymentId là bắt buộc")
+    .bail()
+    .isMongoId()
+    .withMessage("paymentId phải là định dạng ObjectID hợp lệ"),
 ];

@@ -20,6 +20,8 @@ const DriverSchema = new Schema(
     totalTrips: { type: Number, default: 0 },
     rating: { type: Number, min: 1, max: 5 },
     isActive: { type: Boolean, default: true },
+    totalEarnings: { type: Number, default: 0 },
+    cashReceived: { type: Number, default: 0 },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );
