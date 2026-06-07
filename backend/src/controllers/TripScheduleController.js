@@ -12,12 +12,7 @@ export const getSchedules = async (req, res, next) => {
     const result = date
       ? await tripScheduleService.getSchedulesByParentAndDate(req.user.id, date)
       : await tripScheduleService.getSchedulesByParent(req.user.id);
-    return success(
-      res,
-      { count: result.data.length, data: result.data },
-      result.message,
-      200,
-    );
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }

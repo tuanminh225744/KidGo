@@ -11,7 +11,9 @@ import { success, error } from "../utils/response.js";
  */
 export const getBookingRequests = async (req, res, next) => {
   try {
-    const driver = await getDriverByUserId(req.user.id);
+    const driverRes = await getDriverByUserId(req.user.id);
+    const driver = driverRes?.data;
+    if (!driver) throw new AppError("Không tìm thấy tài xế.", 404);
 
     const bookings = await Booking.find({
       $or: [
@@ -29,12 +31,7 @@ export const getBookingRequests = async (req, res, next) => {
       )
       .populate("parentId", "fullName phone");
 
-    return success(
-      res,
-      { count: bookings.length, data: bookings },
-      "Booking requests fetched",
-      200,
-    );
+    return success(res, bookings, "Booking requests fetched", 200);
   } catch (error) {
     next(error);
   }
@@ -46,23 +43,9 @@ export const getBookingRequests = async (req, res, next) => {
  */
 export const acceptBooking = async (req, res, next) => {
   try {
-    const driverId = (await getDriverByUserId(req.user.id))._id;
-
-    const booking = await Booking.findById(req.params.bookingId);
-    if (!booking) {
-      throw new AppError("Không tìm thấy booking.", 404);
-    }
-
-    if (
-      booking.assignedDriverId?.toString() !== driverId.toString() &&
-      booking.preferredDriverId?.toString() !== driverId.toString()
-    ) {
-      throw new AuthorizationError("Bạn không có quyền chấp nhận booking này.");
-    }
-
     const result = await bookingService.driverAcceptBooking(
-      booking._id,
-      driverId,
+      req.params.bookingId,
+      req.user.id,
     );
     return success(
       res,
@@ -81,23 +64,9 @@ export const acceptBooking = async (req, res, next) => {
  */
 export const rejectBooking = async (req, res, next) => {
   try {
-    const driverId = (await getDriverByUserId(req.user.id))._id;
-
-    const booking = await Booking.findById(req.params.bookingId);
-    if (!booking) {
-      throw new AppError("Không tìm thấy booking.", 404);
-    }
-
-    if (
-      booking.assignedDriverId?.toString() !== driverId.toString() &&
-      booking.preferredDriverId?.toString() !== driverId.toString()
-    ) {
-      throw new AuthorizationError("Bạn không có quyền từ chối booking này.");
-    }
-
     const result = await bookingService.driverCancelBooking(
       req.params.bookingId,
-      driverId,
+      req.user.id,
     );
     return success(
       res,

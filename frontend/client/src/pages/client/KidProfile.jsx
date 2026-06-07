@@ -71,9 +71,7 @@ export default function KidProfile() {
 
       setFormData({
         fullName: kid.fullName || "",
-        dateOfBirth: kid.dateOfBirth
-          ? new Date(kid.dateOfBirth)
-          : null,
+        dateOfBirth: kid.dateOfBirth ? new Date(kid.dateOfBirth) : null,
         phone: kid.phone || "",
         school: kid.school || "",
         notes: kid.notes || "",
@@ -88,8 +86,7 @@ export default function KidProfile() {
           !!kid.securitySettings?.pickupPhoto ||
           !!kid.securitySettings?.dropoffPhoto,
 
-        securityQuestion:
-          !!kid.securitySettings?.securityQuestion,
+        securityQuestion: !!kid.securitySettings?.securityQuestion,
       });
     }
   };
@@ -97,9 +94,7 @@ export default function KidProfile() {
   const loadSecurityQuestion = async () => {
     const result = await getKidSecurityQuestion(kidId);
     if (result.success) {
-      setSecurityQuestion(
-        result.data?.securityQuestion || result.securityQuestion || "",
-      );
+      setSecurityQuestion(result.data?.securityQuestion || "");
     }
   };
 
@@ -152,19 +147,15 @@ export default function KidProfile() {
     payload.securitySettings = {
       otp: securityOptions.otp,
 
-      securityQuestion:
-        securityOptions.securityQuestion,
+      securityQuestion: securityOptions.securityQuestion,
 
       // Legacy fields
-      pickupPhoto:
-        securityOptions.tripPhotoVerification,
+      pickupPhoto: securityOptions.tripPhotoVerification,
 
-      dropoffPhoto:
-        securityOptions.tripPhotoVerification,
+      dropoffPhoto: securityOptions.tripPhotoVerification,
 
       // New clean field
-      tripPhotoVerification:
-        securityOptions.tripPhotoVerification,
+      tripPhotoVerification: securityOptions.tripPhotoVerification,
     };
     if (securityOptions.securityQuestion) {
       payload.securityQuestion = securityQuestion;
@@ -189,7 +180,7 @@ export default function KidProfile() {
       return;
     }
 
-    const savedKidId = result.data?._id || result._id || kidId;
+    const savedKidId = result.data?._id || kidId;
 
     if (avatarFile && savedKidId) {
       const uploadResult = await uploadKidAvatar(savedKidId, avatarFile);
@@ -403,14 +394,14 @@ export default function KidProfile() {
               onClick={() =>
                 setSecurityOptions((prev) => ({
                   ...prev,
-                  tripPhotoVerification:
-                    !prev.tripPhotoVerification,
+                  tripPhotoVerification: !prev.tripPhotoVerification,
                 }))
               }
-              className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${securityOptions.tripPhotoVerification
+              className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${
+                securityOptions.tripPhotoVerification
                   ? "border-primary-container bg-[#EEF2FF]"
                   : "border-outline-variant/20 bg-surface-container-low"
-                }`}
+              }`}
             >
               <div className="flex items-center gap-3 text-left">
                 <div className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center shadow-sm">
@@ -429,10 +420,11 @@ export default function KidProfile() {
               </div>
 
               <div
-                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${securityOptions.tripPhotoVerification
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
+                  securityOptions.tripPhotoVerification
                     ? "border-primary-container"
                     : "border-outline-variant"
-                  }`}
+                }`}
               >
                 {securityOptions.tripPhotoVerification && (
                   <div className="w-3 h-3 rounded-full bg-primary-container" />

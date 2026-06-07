@@ -25,12 +25,7 @@ const ensureParentOwnsKid = async (kidId, parentId) => {
 export const getKids = async (req, res, next) => {
   try {
     const result = await kidService.getKidsByParent(req.user.id);
-    return success(
-      res,
-      { count: result.data.length, data: result.data.map(sanitizeKid) },
-      result.message,
-      200,
-    );
+    return success(res, result.data.map(sanitizeKid), result.message, 200);
   } catch (error) {
     next(error);
   }

@@ -23,12 +23,7 @@ export const getTripConfirmations = async (req, res, next) => {
     const confirmations = await Confirmation.find({ tripId }).sort({
       confirmedAt: 1,
     });
-    return success(
-      res,
-      { count: confirmations.length, data: confirmations },
-      "Confirmations fetched",
-      200,
-    );
+    return success(res, confirmations, "Confirmations fetched", 200);
   } catch (error) {
     next(error);
   }

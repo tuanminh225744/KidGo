@@ -37,12 +37,11 @@ export default function ClientProfile() {
     setUploading(true);
     try {
       const result = await uploadAvatar(file);
-      const nextAvatar =
-        result?.data?.data?.avatarUrl || result?.data?.data?.user?.avatar;
+      const nextAvatar = result?.data?.avatarUrl || result?.data?.user?.avatar;
       if (nextAvatar) {
         setFormData((prev) => ({ ...prev, avatar: nextAvatar }));
-        if (result?.data?.data?.user) {
-          setUser(result.data.data.user);
+        if (result?.data?.user) {
+          setUser(result.data.user);
         }
       }
     } catch (error) {

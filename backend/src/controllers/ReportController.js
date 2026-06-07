@@ -29,12 +29,7 @@ export const getReportsByTripIdHandler = async (req, res, next) => {
   try {
     const { tripId } = req.params;
     const result = await reportService.getReportsByTripId(tripId, req.user);
-    return success(
-      res,
-      { count: result.data.reports.length, data: result.data },
-      result.message,
-      200,
-    );
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }

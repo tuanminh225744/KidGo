@@ -25,18 +25,18 @@ export default function Login() {
         return;
       }
 
-      if (result?.user?.role !== "admin") {
+      if (result?.data?.user?.role !== "admin") {
         setError("Đăng nhập thất bại. Sai email hoặc mật khẩu!");
         setLoading(false);
         return;
       }
 
       setAuthTokens({
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
+        accessToken: result.data?.accessToken,
+        refreshToken: result.data?.refreshToken,
       });
 
-      useAuthStore.getState().setUser(result.user);
+      useAuthStore.getState().setUser(result.data?.user);
 
       navigate("/admin/home");
     } catch (err) {

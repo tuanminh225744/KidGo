@@ -29,7 +29,7 @@ export default function DriverApproval() {
     setLoading(true);
     try {
       const response = await getDrivers({ status: "pending" });
-      const data = response?.drivers || [];
+      const data = response?.data.drivers || [];
       setDrivers(data);
     } catch (error) {
       console.error("Error fetching drivers:", error);

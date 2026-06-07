@@ -20,12 +20,13 @@ export const HomeScreen = () => {
           getDriverTrips({ status: "scheduled" }),
         ]);
 
-        if (profRes?.data?.data) {
-          setProfile(profRes.data.data);
+        if (profRes?.data) {
+          setProfile(profRes.data);
         }
 
-        if (tripsRes?.data?.data) {
-          setUpcomingTrips(tripsRes.data.data.slice(0, 2));
+        if (tripsRes?.data.data) {
+          // console.log("tripRes", tripsRes);
+          setUpcomingTrips(tripsRes.data.data.trips.slice(0, 2));
         }
       } catch (error) {
         console.error("Lỗi khi tải dữ liệu trang chủ:", error);

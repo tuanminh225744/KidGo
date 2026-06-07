@@ -117,12 +117,7 @@ export const getDriverTrips = async (req, res, next) => {
     const userRes = await driverService.getDriverByUserId(req.user.id);
     const user = userRes.data;
     const result = await tripService.getTripsByDriver(user._id);
-    return success(
-      res,
-      { count: result.data.length, data: result.data },
-      result.message,
-      200,
-    );
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -152,12 +147,7 @@ export const getDriverReviews = async (req, res, next) => {
     const userRes = await driverService.getDriverByUserId(req.user.id);
     const user = userRes.data;
     const result = await reviewService.getReviewsByDriver(user._id);
-    return success(
-      res,
-      { count: result.data.length, data: result.data },
-      result.message,
-      200,
-    );
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -199,12 +189,7 @@ export const getDriverVehicles = async (req, res, next) => {
     const userRes = await driverService.getDriverByUserId(req.user.id);
     const user = userRes.data;
     const vehicles = await Vehicle.find({ driverId: user._id });
-    return success(
-      res,
-      { count: vehicles.length, data: vehicles },
-      "Driver vehicles fetched",
-      200,
-    );
+    return success(res, vehicles, "Driver vehicles fetched", 200);
   } catch (error) {
     next(error);
   }

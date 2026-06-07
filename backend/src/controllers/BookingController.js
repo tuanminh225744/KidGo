@@ -13,12 +13,7 @@ import { success, error } from "../utils/response.js";
 export const getBookings = async (req, res, next) => {
   try {
     const result = await bookingService.getBookingsByParent(req.user.id);
-    return success(
-      res,
-      { count: result.data.length, data: result.data },
-      result.message,
-      200,
-    );
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }

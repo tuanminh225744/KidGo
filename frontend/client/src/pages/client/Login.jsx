@@ -24,18 +24,18 @@ export default function Login() {
       return;
     }
 
-    if (result?.user?.role !== "parent") {
+    if (result?.data?.user?.role !== "parent") {
       setError("Đăng nhập thất bại. Sai email hoặc mật khẩu!");
       setLoading(false);
       return;
     }
 
     setAuthTokens({
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
+      accessToken: result.data?.accessToken,
+      refreshToken: result.data?.refreshToken,
     });
 
-    useAuthStore.getState().setUser(result.user);
+    useAuthStore.getState().setUser(result.data?.user);
 
     navigate("/client/home");
   };

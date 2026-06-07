@@ -11,12 +11,7 @@ export const getPreferredDrivers = async (req, res, next) => {
     const result = await preferredDriverService.getPreferredDrivers(
       req.user.id,
     );
-    return success(
-      res,
-      { count: result.data.length, data: result.data },
-      result.message,
-      200,
-    );
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }

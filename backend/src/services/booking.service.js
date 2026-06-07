@@ -6,7 +6,7 @@ import Vehicle from "../models/core/vehicle.model.js";
 import Notification from "../models/support/notification.model.js";
 import mongoose from "mongoose";
 import { getIo } from "../sockets/socketManager.js";
-import { getNearbyDrivers } from "./driver.service.js";
+import { getNearbyDrivers, getDriverByUserId } from "./driver.service.js";
 import { driverStartPickup } from "./trip.service.js";
 
 // Memory Object lưu trữ luồng hệ thống để có thể ngắt bất kì lúc nào
@@ -298,8 +298,13 @@ export const parentCancelBooking = async (bookingId, parentId) => {
   }
 };
 
-export const driverAcceptBooking = async (bookingId, driverId) => {
+export const driverAcceptBooking = async (bookingId, userId) => {
   try {
+    const driverRes = await getDriverByUserId(userId);
+    const driver = driverRes?.data;
+    if (!driver) throw new Error("Không tìm thấy tài xế.");
+    const driverId = driver._id;
+
     const booking = await Booking.findById(bookingId);
     if (!booking) throw new Error("Không có booking này.");
     if (!isDriverRelatedToBooking(booking, driverId)) {
@@ -366,8 +371,13 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
   }
 };
 
-export const driverCancelBooking = async (bookingId, driverId) => {
+export const driverCancelBooking = async (bookingId, userId) => {
   try {
+    const driverRes = await getDriverByUserId(userId);
+    const driver = driverRes?.data;
+    if (!driver) throw new Error("Không tìm thấy tài xế.");
+    const driverId = driver._id;
+
     const booking = await Booking.findById(bookingId);
     if (!booking) throw new Error("Không thể hủy lệnh đón không tồn tại.");
     if (!isDriverRelatedToBooking(booking, driverId)) {

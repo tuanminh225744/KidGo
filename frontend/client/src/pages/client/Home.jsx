@@ -54,7 +54,7 @@ export default function Home() {
   const loadKids = async () => {
     const result = await getKidsByParent();
     if (result.success) {
-      setKids(result.data || result);
+      setKids(result.data);
     } else {
       setKids([]);
     }
@@ -92,26 +92,48 @@ export default function Home() {
     ].join("-");
     const result = await getTripSchedulesByDate(dateParam);
     if (result.success) {
-      setTodaySchedules(result.data || []);
+      console.log(result);
+      setTodaySchedules(result.data.data || []);
     } else {
       setTodaySchedules([]);
     }
   };
 
   const loadHistoryTrips = async () => {
-    const result = await getTrips({ status: 'completed', limit: 3 });
-    if (result.success || result.data?.success) {
-      const tripsData = result.data?.trips || result.trips || [];
-      const formatted = tripsData.map(t => ({
+    const result = await getTrips({ status: "completed", limit: 3 });
+    if (result.success) {
+      const tripsData = result.data?.trips || [];
+      const formatted = tripsData.map((t) => ({
         id: t._id,
         time: new Date(t.createdAt).toLocaleString(),
-        status: t.status === 'completed' ? 'HOÀN THÀNH' : t.status === 'cancelled' ? 'HUỶ' : t.status,
-        name: t.kidId?.fullName || 'Unknown',
-        from: t.routeId?.estimatedPickupAddress || t.routeId?.actualPickupAddress || 'N/A',
-        to: t.routeId?.estimatedDropoffAddress || t.routeId?.actualDropoffAddress || 'N/A',
-        price: t.paymentId?.amount ? `${t.paymentId.amount.toLocaleString()}đ` : '0đ',
-        dist: t.routeId?.estimatedDistance ? `${t.routeId.estimatedDistance}km` : t.routeId?.actualDistance ? `${t.routeId.actualDistance}km` : '0.0km',
-        duration: t.routeId?.estimatedDuration ? `${t.routeId.estimatedDuration} phút` : t.routeId?.actualDuration ? `${t.routeId.actualDuration} phút` : '0 phút',
+        status:
+          t.status === "completed"
+            ? "HOÀN THÀNH"
+            : t.status === "cancelled"
+              ? "HUỶ"
+              : t.status,
+        name: t.kidId?.fullName || "Unknown",
+        from:
+          t.routeId?.estimatedPickupAddress ||
+          t.routeId?.actualPickupAddress ||
+          "N/A",
+        to:
+          t.routeId?.estimatedDropoffAddress ||
+          t.routeId?.actualDropoffAddress ||
+          "N/A",
+        price: t.paymentId?.amount
+          ? `${t.paymentId.amount.toLocaleString()}đ`
+          : "0đ",
+        dist: t.routeId?.estimatedDistance
+          ? `${t.routeId.estimatedDistance}km`
+          : t.routeId?.actualDistance
+            ? `${t.routeId.actualDistance}km`
+            : "0.0km",
+        duration: t.routeId?.estimatedDuration
+          ? `${t.routeId.estimatedDuration} phút`
+          : t.routeId?.actualDuration
+            ? `${t.routeId.actualDuration} phút`
+            : "0 phút",
         driver: t.driverId,
       }));
       setHistoryTrips(formatted);
@@ -306,7 +328,7 @@ export default function Home() {
             <div className="text-center text-on-surface-variant">
               Đang tải...
             </div>
-          ) : kids.length === 0 ? (
+          ) : kids?.length === 0 ? (
             <div className="bg-surface-container rounded-3xl p-6 text-center">
               <p className="text-on-surface-variant font-medium">
                 Chưa có bé nào. Hãy thêm một bé.
@@ -314,7 +336,7 @@ export default function Home() {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4">
-              {kids.map((kid) => (
+              {kids?.map((kid) => (
                 <button
                   key={kid._id}
                   onClick={() =>
@@ -385,13 +407,11 @@ export default function Home() {
                       <h3 className="font-bold text-lg mt-1">
                         {schedule.kidId?.fullName || "Bé của bạn"}
                       </h3>
-
                     </div>
                     <div className="text-right">
                       <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/15 text-white font-black">
                         {formatPickupTime(schedule.pickupTime)}
                       </div>
-
                     </div>
                   </div>
                 </button>
@@ -411,9 +431,11 @@ export default function Home() {
             </button>
           </div>
           {loading ? (
-            <div className="text-center text-on-surface-variant py-4">Đang tải...</div>
+            <div className="text-center text-on-surface-variant py-4">
+              Đang tải...
+            </div>
           ) : historyTrips.length === 0 ? (
-            <div className="bg-tertiary-container rounded-3xl p-5 text-white flex flex-col justify-between h-36 shadow-lg shadow-tertiary/20 w-full">
+            <div className="bg-secondary-container rounded-3xl p-5 text-white flex flex-col justify-between h-36 shadow-lg shadow-tertiary/20 w-full">
               <History size={32} strokeWidth={1.5} />
               <div>
                 <h3 className="font-bold text-lg">Chưa có chuyến đi</h3>
@@ -432,7 +454,9 @@ export default function Home() {
                 >
                   <div className="flex justify-between items-start mb-2">
                     <div className="flex items-center gap-2">
-                      <p className="text-xs text-gray-500 font-medium">{trip.time}</p>
+                      <p className="text-xs text-gray-500 font-medium">
+                        {trip.time}
+                      </p>
                       <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-green-100 text-green-700">
                         {trip.status}
                       </span>
@@ -447,7 +471,7 @@ export default function Home() {
                       Bé {trip.name}
                     </h3>
                     <h3 className="font-bold text-gray-800 truncate">
-                      Từ:  {trip.from}
+                      Từ: {trip.from}
                     </h3>
                     <h3 className="font-bold text-gray-800 truncate">
                       Đến: {trip.to}

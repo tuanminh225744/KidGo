@@ -44,12 +44,7 @@ export const getActiveTripsList = async (req, res, next) => {
   try {
     const parentId = req.user.id;
     const result = await getActiveTrips(parentId);
-    return success(
-      res,
-      { count: result.data.length, data: result.data },
-      result.message,
-      200,
-    );
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }

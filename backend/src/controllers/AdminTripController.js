@@ -62,12 +62,7 @@ export const getLiveTrips = async (req, res, next) => {
       .populate("kidId", "fullName")
       .populate("vehicleId", "licensePlate model color");
 
-    return success(
-      res,
-      { count: trips.length, data: trips },
-      "Live trips fetched",
-      200,
-    );
+    return success(res, trips, "Live trips fetched", 200);
   } catch (error) {
     next(error);
   }
