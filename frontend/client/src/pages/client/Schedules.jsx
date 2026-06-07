@@ -96,11 +96,10 @@ export default function Schedules() {
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <span
-                        className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.16em] ${
-                          schedule.isActive
+                        className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-[0.16em] ${schedule.isActive
                             ? "bg-green-50 text-green-700"
                             : "bg-slate-100 text-slate-600"
-                        }`}
+                          }`}
                       >
                         {schedule.isActive ? "Đang bật" : "Đã tắt"}
                       </span>
@@ -111,10 +110,7 @@ export default function Schedules() {
                     <h3 className="font-bold text-on-surface">
                       {schedule.kidId?.fullName || "Bé của bạn"}
                     </h3>
-                    <p className="text-sm text-on-surface-variant flex items-center gap-1.5">
-                      <MapPin size={14} />
-                      {schedule.routeId?.name || "Tuyến chưa có tên"}
-                    </p>
+
                     <p className="text-sm text-on-surface-variant">
                       {schedule.routeId?.pickupAddress || "Chưa có điểm đón"}
                     </p>

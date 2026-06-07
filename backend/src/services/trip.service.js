@@ -394,9 +394,14 @@ export const getParentTrips = async (parentId, { status, page = 1, limit = 20 } 
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate("driverId", "user licenseNumber rating")
+      .populate({
+        path: "driverId",
+        select: "user licenseNumber rating",
+        populate: { path: "user", select: "fullName avatar phone" }
+      })
       .populate("kidId", "fullName avatar")
-      .populate("vehicleId", "licensePlate model color"),
+      .populate("vehicleId", "licensePlate model color")
+      .populate("paymentId"),
     Trip.countDocuments(query),
   ]);
 
@@ -424,9 +429,14 @@ export const getTripsByDriver = async (
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .populate("driverId", "user licenseNumber rating currentLocation isOnline")
+      .populate({
+        path: "driverId",
+        select: "user licenseNumber rating currentLocation isOnline",
+        populate: { path: "user", select: "fullName avatar phone" }
+      })
       .populate("kidId", "fullName avatar")
-      .populate("vehicleId", "licensePlate model color"),
+      .populate("vehicleId", "licensePlate model color")
+      .populate("paymentId"),
     Trip.countDocuments(query),
   ]);
 
@@ -446,7 +456,11 @@ export const getActiveTrips = async (parentId) => {
     parentId,
     status: { $in: ["picking_up", "in_progress"] },
   })
-    .populate("driverId", "user licenseNumber rating currentLocation isOnline")
+    .populate({
+      path: "driverId",
+      select: "user licenseNumber rating currentLocation isOnline",
+      populate: { path: "user", select: "fullName avatar phone" }
+    })
     .populate("kidId", "fullName avatar")
     .populate("vehicleId", "licensePlate model color")
     .populate("paymentId");

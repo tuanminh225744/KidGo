@@ -15,11 +15,12 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
 import { getKidsByParent } from "../../services/kid.service.js";
 import { getCurrentProfile } from "../../services/user.service.js";
-import { getActiveTripsList } from "../../services/trip.service.js";
+import { getActiveTripsList, getTrips } from "../../services/trip.service.js";
 import { getUnreadCount } from "../../services/notification.service.js";
 import { getParentAlerts } from "../../services/alert.service.js";
 import { getTripSchedulesByDate } from "../../services/booking.service.js";
 import { useAuthStore } from "../../store/useAuthStore.js";
+import { TripDetailsModal } from "../../components/modal/TripDetailsModal.jsx";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -29,7 +30,9 @@ export default function Home() {
   const [activeTrips, setActiveTrips] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [todaySchedules, setTodaySchedules] = useState([]);
+  const [historyTrips, setHistoryTrips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTrip, setSelectedTrip] = useState(null);
   const { user, setUser } = useAuthStore();
   const displayProfile = profile || user;
 
@@ -46,6 +49,7 @@ export default function Home() {
       loadActiveTrips(),
       loadAlerts(),
       loadTodaySchedules(),
+      loadHistoryTrips(),
     ]);
     setLoading(false);
   };
@@ -101,6 +105,28 @@ export default function Home() {
       setTodaySchedules(result.data || []);
     } else {
       setTodaySchedules([]);
+    }
+  };
+
+  const loadHistoryTrips = async () => {
+    const result = await getTrips({ status: 'completed', limit: 3 });
+    if (result.success || result.data?.success) {
+      const tripsData = result.data?.trips || result.trips || [];
+      const formatted = tripsData.map(t => ({
+        id: t._id,
+        time: new Date(t.actualDropoffTime || t.createdAt).toLocaleString(),
+        status: t.status === 'completed' ? 'HOÀN THÀNH' : t.status === 'cancelled' ? 'HUỶ' : t.status,
+        name: t.kidId?.fullName || 'Unknown',
+        from: t.plannedRoute?.pickupAddress || 'N/A',
+        to: t.plannedRoute?.dropoffAddress || 'N/A',
+        price: t.paymentId?.amount ? `${t.paymentId.amount.toLocaleString()}đ` : '0đ',
+        dist: t.distance ? `${t.distance}km` : '0.0km',
+        duration: t.plannedRoute?.estimatedDuration ? `${t.plannedRoute.estimatedDuration} phút` : '0 phút',
+        driver: t.driverId,
+      }));
+      setHistoryTrips(formatted);
+    } else {
+      setHistoryTrips([]);
     }
   };
 
@@ -214,17 +240,17 @@ export default function Home() {
                   <div className="w-10 h-10 rounded-full overflow-hidden">
                     <img
                       src={
-                        trip.driver?.avatar ||
-                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.driver?.fullName || "Driver"}`
+                        trip.driverId?.user?.avatar ||
+                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.driverId?.user?.fullName || "Driver"}`
                       }
                       alt="Driver"
                     />
                   </div>
                   <div className="flex-1">
                     <p className="font-bold text-sm text-on-surface">
-                      {trip.driver?.fullName || "Tài xế"}{" "}
+                      {trip.driverId?.user?.fullName || "Tài xế"}{" "}
                       <span className="text-orange-500 ml-1">
-                        ★ {trip.driver?.rating || "4.8"}
+                        ★ {trip.driverId?.rating || "4.8"}
                       </span>
                     </p>
                     <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded font-bold">
@@ -401,17 +427,13 @@ export default function Home() {
                       <h3 className="font-bold text-lg mt-1">
                         {schedule.kidId?.fullName || "Bé của bạn"}
                       </h3>
-                      <p className="text-white/80 text-sm mt-1">
-                        {schedule.routeId?.name || "Tuyến chưa có tên"}
-                      </p>
+
                     </div>
                     <div className="text-right">
                       <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-white/15 text-white font-black">
                         {formatPickupTime(schedule.pickupTime)}
                       </div>
-                      <p className="text-[11px] text-white/70 mt-2">
-                        Đón lúc
-                      </p>
+
                     </div>
                   </div>
                 </button>
@@ -430,17 +452,62 @@ export default function Home() {
               Xem tất cả
             </button>
           </div>
-          <div className="bg-tertiary-container rounded-3xl p-5 text-white flex flex-col justify-between h-36 shadow-lg shadow-tertiary/20 active:scale-95 transition-transform cursor-pointer w-full">
-            <History size={32} strokeWidth={1.5} />
-            <div>
-              <h3 className="font-bold text-lg">Chuyến đi gần nhất</h3>
-              <p className="text-white/80 text-sm">
-                Xem lại các chuyến đi trước đó
-              </p>
+          {loading ? (
+            <div className="text-center text-on-surface-variant py-4">Đang tải...</div>
+          ) : historyTrips.length === 0 ? (
+            <div className="bg-tertiary-container rounded-3xl p-5 text-white flex flex-col justify-between h-36 shadow-lg shadow-tertiary/20 w-full">
+              <History size={32} strokeWidth={1.5} />
+              <div>
+                <h3 className="font-bold text-lg">Chưa có chuyến đi</h3>
+                <p className="text-white/80 text-sm">
+                  Bạn chưa có chuyến đi nào đã hoàn thành
+                </p>
+              </div>
             </div>
-          </div>
+          ) : (
+            <div className="space-y-3">
+              {historyTrips.map((trip) => (
+                <div
+                  key={trip.id}
+                  onClick={() => setSelectedTrip(trip)}
+                  className="bg-white p-4 rounded-3xl shadow-sm border border-outline-variant/30 active:scale-[0.98] transition-transform cursor-pointer relative overflow-hidden"
+                >
+                  <div className="flex justify-between items-start mb-2">
+                    <div className="flex items-center gap-2">
+                      <p className="text-xs text-gray-500 font-medium">{trip.time}</p>
+                      <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-green-100 text-green-700">
+                        {trip.status}
+                      </span>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-bold text-primary">{trip.price}</p>
+                    </div>
+                  </div>
+
+                  <div className="mb-2">
+                    <h3 className="font-bold text-gray-800 truncate">
+                      Bé {trip.name}
+                    </h3>
+                    <h3 className="font-bold text-gray-800 truncate">
+                      Từ:  {trip.from}
+                    </h3>
+                    <h3 className="font-bold text-gray-800 truncate">
+                      Đến: {trip.to}
+                    </h3>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </section>
       </main>
+
+      <TripDetailsModal
+        isOpen={!!selectedTrip}
+        onClose={() => setSelectedTrip(null)}
+        trip={selectedTrip}
+        role="client"
+      />
     </div>
   );
 }

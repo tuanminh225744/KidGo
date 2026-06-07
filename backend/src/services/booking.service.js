@@ -321,6 +321,8 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
       status: "picking_up",
       plannedRoute: route
         ? {
+          pickupAddress: route.pickupAddress,
+          dropoffAddress: route.dropoffAddress,
           pickupCoords: route.pickupCoords,
           dropoffCoords: route.dropoffCoords,
         }

@@ -3,29 +3,32 @@ import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
 import { getDriverTrips } from '../../services/driver.service';
 import { useNavigate } from 'react-router-dom';
+import { TripDetailsModal } from '../../components/modal/TripDetailsModal';
 
 export default function HistoryView() {
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState('today');
   const [trips, setTrips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedTrip, setSelectedTrip] = useState(null);
 
   useEffect(() => {
     const fetchTrips = async () => {
       try {
         setLoading(true);
         const res = await getDriverTrips({ period: selectedTab });
-        if (res?.data?.data) {
-          const formatted = res.data.data.map(t => ({
+        if (res?.success || res?.data?.success) {
+          const tripsData = res.data?.trips || res.trips || [];
+          const formatted = tripsData.map(t => ({
             id: t._id,
-            time: new Date(t.plannedStartTime || t.createdAt).toLocaleString(),
+            time: new Date(t.actualDropoffTime || t.createdAt).toLocaleString(),
             status: t.status === 'completed' ? 'HOÀN THÀNH' : t.status === 'cancelled' ? 'HUỶ' : t.status === 'deviated' ? 'LỆCH LỘ TRÌNH' : t.status,
-            name: t.kid?.name || 'Unknown',
-            from: t.pickupLocation?.address || 'N/A',
-            to: t.dropoffLocation?.address || 'N/A',
-            price: t.fare ? `${t.fare.toLocaleString()}đ` : '0đ',
+            name: t.kidId?.fullName || 'Unknown',
+            from: t.plannedRoute?.pickupAddress || 'N/A',
+            to: t.plannedRoute?.dropoffAddress || 'N/A',
+            price: t.paymentId?.amount ? `${t.paymentId.amount.toLocaleString()}đ` : '0đ',
             dist: t.distance ? `${t.distance}km` : '0.0km',
-            duration: t.duration ? `${t.duration} phút` : '0 phút',
+            duration: t.plannedRoute?.estimatedDuration ? `${t.plannedRoute.estimatedDuration} phút` : '0 phút',
             rating: t.rating || null,
             hasAlert: t.status === 'deviated',
             cancelled: t.status === 'cancelled'
@@ -56,7 +59,7 @@ export default function HistoryView() {
     <div className="pb-24">
       <div className="flex items-center justify-between p-4 bg-white sticky top-0 z-10">
         <div className="flex items-center gap-3">
-          <ChevronLeft className="w-6 h-6 text-gray-600 cursor-pointer" onClick={() => onNavigate('home')} />
+          {/* <ChevronLeft className="w-6 h-6 text-gray-600 cursor-pointer" onClick={() => onNavigate('home')} /> */}
           <h1 className="text-xl font-bold text-[#1D7C45]">Lịch sử chuyến</h1>
         </div>
         <CalendarDays className="w-6 h-6 text-gray-600 cursor-pointer" />
@@ -100,8 +103,8 @@ export default function HistoryView() {
           trips.map((trip) => (
             <div
               key={trip.id}
-              onClick={() => trip.hasAlert && navigate('/driver/deviation')}
-              className={`bg-white p-4 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden ${trip.hasAlert ? 'cursor-pointer hover:border-orange-300' : ''}`}>
+              onClick={() => setSelectedTrip(trip)}
+              className={`bg-white p-4 rounded-xl border border-gray-100 shadow-sm relative overflow-hidden cursor-pointer active:scale-[0.98] transition-transform ${trip.hasAlert ? 'hover:border-orange-300' : ''}`}>
 
               <div className="flex justify-between items-start mb-2">
                 <div className="flex items-center gap-2">
@@ -116,25 +119,30 @@ export default function HistoryView() {
               </div>
 
               <div className="mb-2">
-                <h3 className={`font-bold ${trip.cancelled ? 'text-gray-400 line-through' : 'text-gray-800'}`}>
-                  {trip.name} • {trip.from} → {trip.to}
+                <h3 className="font-bold text-gray-800 truncate">
+                  Bé {trip.name}
+                </h3>
+                <h3 className="font-bold text-gray-800 truncate">
+                  Từ:  {trip.from}
+                </h3>
+                <h3 className="font-bold text-gray-800 truncate">
+                  Đến: {trip.to}
                 </h3>
                 <p className="text-xs text-gray-500 mt-1">{trip.dist} • {trip.duration}</p>
               </div>
 
-              <div className="flex justify-end items-center gap-2 pt-2 border-t border-gray-50">
-                {!trip.cancelled && trip.rating && (
-                  <div className="flex items-center gap-1">
-                    <Star className="w-3 h-3 fill-orange-400 text-orange-400" />
-                    <span className="text-xs font-bold text-orange-500">{trip.rating}</span>
-                  </div>
-                )}
-                <ChevronDown className="w-4 h-4 text-gray-400" />
-              </div>
+
             </div>
           ))
         )}
       </div>
+
+      <TripDetailsModal
+        isOpen={!!selectedTrip}
+        onClose={() => setSelectedTrip(null)}
+        trip={selectedTrip}
+        role="driver"
+      />
     </div>
   );
 }
