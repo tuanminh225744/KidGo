@@ -22,15 +22,14 @@ const clearBookingTimer = (bookingId) => {
   }
 };
 
-const sendParentBookingNotification = async (booking, title, body, type) => {
+const sendParentBookingNotification = async (booking, title, body, type, tripId = null) => {
   const notification = new Notification({
     recipientId: booking.parentId,
     recipientType: "parent",
     type,
     title,
     body,
-    channel: "push",
-    refId: booking._id,
+    tripId,
   });
   await notification.save();
   return notification;
@@ -46,9 +45,12 @@ const isDriverRelatedToBooking = (booking, driverId) => {
 
 const findAndAssignNearbyDriver = async (booking) => {
   const route = await Route.findById(booking.routeId);
-  if (!route?.pickupCoords?.coordinates) return null;
+  const pickupCoords =
+    route?.estimatedPickupCoords?.coordinates ||
+    route?.actualPickupCoords?.coordinates;
+  if (!pickupCoords) return null;
 
-  const [lng, lat] = route.pickupCoords.coordinates;
+  const [lng, lat] = pickupCoords;
   const nearby = await getNearbyDrivers(lat, lng, 10, "km");
   const freeDriverIds = await filterFreeDrivers(nearby);
   if (freeDriverIds.length === 0) return null;
@@ -188,14 +190,17 @@ export const createBooking = async (bookingData) => {
       const matchedDriverId = await findAndAssignNearbyDriver(booking);
       if (!matchedDriverId) {
         // Lấy tọa độ điểm đón từ Route để tiến hành dô sóng
-        const route = await Route.findById(booking.routeId);
-        if (!route || !route.pickupCoords || !route.pickupCoords.coordinates) {
+      const route = await Route.findById(booking.routeId);
+        const pickupCoords =
+          route?.estimatedPickupCoords?.coordinates ||
+          route?.actualPickupCoords?.coordinates;
+        if (!route || !pickupCoords) {
           throw new Error(
             "Không đủ tọa độ để khởi động Rada dò tìm cuốc (Route ID thiếu/sai).",
           );
         }
 
-        const [lng, lat] = route.pickupCoords.coordinates;
+        const [lng, lat] = pickupCoords;
         // Tiến hành mở máy dò
         await startGenericMatchingCycle(booking._id, lat, lng);
       }
@@ -321,10 +326,17 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
       status: "picking_up",
       plannedRoute: route
         ? {
-          pickupAddress: route.pickupAddress,
-          dropoffAddress: route.dropoffAddress,
-          pickupCoords: route.pickupCoords,
-          dropoffCoords: route.dropoffCoords,
+          pickupAddress:
+            route.estimatedPickupAddress || route.actualPickupAddress || null,
+          dropoffAddress:
+            route.estimatedDropoffAddress || route.actualDropoffAddress || null,
+          pickupCoords:
+            route.estimatedPickupCoords || route.actualPickupCoords || null,
+          dropoffCoords:
+            route.estimatedDropoffCoords || route.actualDropoffCoords || null,
+          waypoints: route.estimatedWaypoints || route.actualWaypoints || [],
+          estimatedDistance: route.estimatedDistance ?? null,
+          estimatedDuration: route.estimatedDuration ?? null,
         }
         : {},
     });
@@ -337,6 +349,7 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
       "Tài xế đã xác nhận chuyến",
       "Đã có tài xế xác nhận nhận chuyến của bạn.",
       "booking_confirmed",
+      updatedTrip._id,
     );
 
     return { booking: booking, trip: updatedTrip };
@@ -393,7 +406,10 @@ export const getBookingsByParent = async (parentId) => {
   try {
     const bookings = await Booking.find({ parentId })
       .populate("kidId", "fullName avatar")
-      .populate("routeId", "name pickupAddress dropoffAddress")
+      .populate(
+        "routeId",
+        "estimatedPickupAddress estimatedDropoffAddress estimatedDistance estimatedDuration actualPickupAddress actualDropoffAddress actualDistance actualDuration",
+      )
       .populate("assignedDriverId", "user")
       .sort({ createdAt: -1 });
     return bookings;
@@ -409,7 +425,10 @@ export const getBookingById = async (bookingId) => {
   try {
     const booking = await Booking.findById(bookingId)
       .populate("kidId", "fullName avatar")
-      .populate("routeId", "name pickupAddress dropoffAddress")
+      .populate(
+        "routeId",
+        "estimatedPickupAddress estimatedDropoffAddress estimatedDistance estimatedDuration actualPickupAddress actualDropoffAddress actualDistance actualDuration",
+      )
       .populate("assignedDriverId", "user");
 
     if (!booking) {

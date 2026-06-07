@@ -1,13 +1,12 @@
 import Trip from "../models/operational/trip.model.js";
 import Driver from "../models/core/driver.model.js";
-import Alert from "../models/safetyAndLogs/alert.model.js";
 import Review from "../models/support/review.model.js";
 
 // ── Dashboard ───────────────────────────────────────────────────────────────────
 
 /**
  * GET /api/v1/admin/dashboard
- * Tổng quan: trips hôm nay, drivers online, open alerts
+ * Tổng quan: trips hôm nay, drivers online, active trips
  */
 export const getAdminDashboardStats = async () => {
   const startOfDay = new Date();
@@ -15,15 +14,14 @@ export const getAdminDashboardStats = async () => {
   const endOfDay = new Date();
   endOfDay.setHours(23, 59, 59, 999);
 
-  const [totalTripsToday, onlineDrivers, openAlerts, activeTrips] =
+  const [totalTripsToday, onlineDrivers, activeTrips] =
     await Promise.all([
       Trip.countDocuments({ createdAt: { $gte: startOfDay, $lte: endOfDay } }),
       Driver.countDocuments({ isOnline: true }),
-      Alert.countDocuments({ status: "open" }),
       Trip.countDocuments({ status: { $in: ["picking_up", "in_progress"] } }),
     ]);
 
-  return { totalTripsToday, onlineDrivers, openAlerts, activeTrips };
+  return { totalTripsToday, onlineDrivers, activeTrips, openAlerts: 0 };
 };
 
 // ── Reports ─────────────────────────────────────────────────────────────────────
@@ -65,51 +63,17 @@ export const getTripReport = async ({ startDate, endDate } = {}) => {
 
 /**
  * GET /api/v1/admin/reports/alerts
- * Báo cáo alert rate theo driver
+ * Báo cáo alert rate theo driver (đã ngừng dùng alert model)
  */
 export const getAlertReport = async () => {
-  const [totalTrips, totalAlerts, alertsByType, alertRatePerDriver] =
-    await Promise.all([
-      Trip.countDocuments(),
-      Alert.countDocuments(),
-      Alert.aggregate([
-        { $group: { _id: "$type", count: { $sum: 1 } } },
-        { $sort: { count: -1 } },
-      ]),
-      Alert.aggregate([
-        { $group: { _id: "$driverId", alertCount: { $sum: 1 } } },
-        {
-          $lookup: {
-            from: "drivers",
-            localField: "_id",
-            foreignField: "_id",
-            as: "driverInfo",
-          },
-        },
-        { $unwind: { path: "$driverInfo", preserveNullAndEmptyArrays: true } },
-        {
-          $lookup: {
-            from: "users",
-            localField: "driverInfo.user",
-            foreignField: "_id",
-            as: "userInfo",
-          },
-        },
-        { $unwind: { path: "$userInfo", preserveNullAndEmptyArrays: true } },
-        {
-          $project: {
-            driverId: "$_id",
-            alertCount: 1,
-            driverName: "$userInfo.fullName",
-            licenseNumber: "$driverInfo.licenseNumber",
-          },
-        },
-        { $sort: { alertCount: -1 } },
-      ]),
-    ]);
-
-  const alertRate = totalTrips > 0 ? (totalAlerts / totalTrips).toFixed(4) : 0;
-  return { totalTrips, totalAlerts, alertRate, alertsByType, alertRatePerDriver };
+  const totalTrips = await Trip.countDocuments();
+  return {
+    totalTrips,
+    totalAlerts: 0,
+    alertRate: 0,
+    alertsByType: [],
+    alertRatePerDriver: [],
+  };
 };
 
 /**
@@ -183,7 +147,7 @@ export const exportReportCSV = async ({ type = "trips", startDate, endDate } = {
       .lean();
 
     // Tạo nội dung CSV
-    const header = "tripId,status,parentName,parentEmail,kidName,driverLicense,scheduledPickup,scheduledDropoff,createdAt\n";
+    const header = "tripId,status,parentName,parentEmail,kidName,driverLicense,pickupAddress,dropoffAddress,createdAt\n";
     const rows = trips.map((t) => [
       t._id,
       t.status,
@@ -191,8 +155,14 @@ export const exportReportCSV = async ({ type = "trips", startDate, endDate } = {
       t.parentId?.email ?? "",
       t.kidId?.fullName ?? "",
       t.driverId?.licenseNumber ?? "",
-      t.scheduledPickupTime?.toISOString() ?? "",
-      t.scheduledDropoffTime?.toISOString() ?? "",
+      t.plannedRoute?.pickupAddress ||
+        t.plannedRoute?.estimatedPickupAddress ||
+        t.plannedRoute?.actualPickupAddress ||
+        "",
+      t.plannedRoute?.dropoffAddress ||
+        t.plannedRoute?.estimatedDropoffAddress ||
+        t.plannedRoute?.actualDropoffAddress ||
+        "",
       t.createdAt?.toISOString() ?? "",
     ].join(",")).join("\n");
 
@@ -200,29 +170,8 @@ export const exportReportCSV = async ({ type = "trips", startDate, endDate } = {
   }
 
   if (type === "alerts") {
-    const matchQuery = Object.keys(dateFilter).length
-      ? { detectedAt: dateFilter }
-      : {};
-
-    const alerts = await Alert.find(matchQuery)
-      .sort({ detectedAt: -1 })
-      .populate("driverId", "licenseNumber")
-      .populate("parentId", "fullName")
-      .lean();
-
     const header = "alertId,type,level,status,driverLicense,parentName,detectedAt,resolvedAt\n";
-    const rows = alerts.map((a) => [
-      a._id,
-      a.type,
-      a.level,
-      a.status,
-      a.driverId?.licenseNumber ?? "",
-      a.parentId?.fullName ?? "",
-      a.detectedAt?.toISOString() ?? "",
-      a.resolvedAt?.toISOString() ?? "",
-    ].join(",")).join("\n");
-
-    return { csv: header + rows, filename: `alerts_export_${Date.now()}.csv` };
+    return { csv: header, filename: `alerts_export_${Date.now()}.csv` };
   }
 
   throw new Error("type phải là 'trips' hoặc 'alerts'.");

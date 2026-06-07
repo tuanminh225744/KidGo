@@ -1,11 +1,8 @@
 import Trip from "../models/operational/trip.model.js";
 import Driver from "../models/core/driver.model.js";
 import Kid from "../models/core/kid.model.js";
-import LocationLog from "../models/safetyAndLogs/locationLog.model.js";
-import * as turf from "@turf/turf";
 import { getIo } from "../sockets/socketManager.js";
 import redisClient from "../config/redisClient.js";
-import { createAlert } from "./alert.service.js";
 import { AppError, NotFoundError } from "../utils/AppError.js";
 
 /**
@@ -215,7 +212,6 @@ export const driverPickupKid = async (tripId) => {
     }
 
     trip.status = "in_progress";
-    trip.actualPickupTime = new Date();
     await trip.save();
 
     // Nâng cấp trạng thái ông xế lên "Đang bon bon trên cầu"
@@ -248,7 +244,6 @@ export const driverDropoffKid = async (tripId) => {
     }
 
     trip.status = "completed";
-    trip.actualDropoffTime = new Date();
     await trip.save();
 
     // Cập nhật tổng thu nhập cho tài xế nếu chuyến có payment
@@ -257,24 +252,6 @@ export const driverDropoffKid = async (tripId) => {
       if (payment && payment.driverEarning) {
         await Driver.findByIdAndUpdate(trip.driverId, {
           $inc: { totalEarnings: payment.driverEarning }
-        });
-      }
-    }
-
-    // Kiểm tra kết thúc sớm bất thường
-    if (trip.scheduledDropoffTime) {
-      const earlyTimeMs =
-        trip.scheduledDropoffTime.getTime() - trip.actualDropoffTime.getTime();
-      if (earlyTimeMs > 10 * 60 * 1000) {
-        // Sớm hơn 10 phút
-        await createAlert({
-          tripId: trip._id,
-          driverId: trip.driverId,
-          parentId: trip.parentId,
-          type: "early_end",
-          level: "warning",
-          location: trip.plannedRoute.dropoffCoords, // Sử dụng dropoff location
-          metadata: { early_minutes: Math.round(earlyTimeMs / 60000) },
         });
       }
     }
@@ -294,91 +271,6 @@ export const driverDropoffKid = async (tripId) => {
   } catch (error) {
     throw new Error(`Lỗi ấn nút trả khách: ${error.message}`);
   }
-};
-
-/**
- * 4. Lấy lộ trình nén để vẽ đường đi trên bản đồ.
- *    Nguồn duy nhất: LocationLog collection (raw GPS) → lọc nén 10m tại query time.
- *    Dùng cho: Frontend vẽ Polyline (Google Maps / Mapbox)
- */
-export const getCompressedRoute = async (tripId, minDistMeters = 10) => {
-  const trip = await Trip.findById(tripId).select(
-    "status plannedRoute scheduledPickupTime",
-  );
-  if (!trip) throw new Error("Hành trình không tồn tại.");
-
-  // Kéo toàn bộ điểm raw theo thứ tự thời gian tăng dần
-  const logs = await LocationLog.find({ tripId })
-    .sort({ recordedAt: 1 })
-    .select("coords recordedAt -_id");
-
-  // Áp dụng thuật toán Map Snapping (chỉ giữ điểm nếu cách điểm trước > minDistMeters)
-  const minDistKm = minDistMeters / 1000;
-  const polyline = [];
-  for (const log of logs) {
-    const [lng, lat] = log.coords.coordinates;
-    if (polyline.length === 0) {
-      polyline.push({ lat, lng });
-      continue;
-    }
-    const last = polyline[polyline.length - 1];
-    const dist = turf.distance(
-      turf.point([last.lng, last.lat]),
-      turf.point([lng, lat]),
-      { units: "kilometers" },
-    );
-    if (dist >= minDistKm) {
-      polyline.push({ lat, lng });
-    }
-  }
-
-  return {
-    tripId: trip._id,
-    status: trip.status,
-    plannedRoute: trip.plannedRoute,
-    polyline,
-    totalPoints: polyline.length,
-    totalRawPoints: logs.length,
-  };
-};
-
-/**
- * 5. Lấy toàn bộ Log GPS độ phân giải cao (raw, 10 giây / điểm).
- *    Dữ liệu nguồn: collection LocationLog
- *    Dùng cho: Admin tra cứu sự cố, phân tích chi tiết
- */
-export const getRawLocationLog = async (
-  tripId,
-  { page = 1, limit = 500 } = {},
-) => {
-  const skip = (page - 1) * limit;
-
-  const [logs, total] = await Promise.all([
-    LocationLog.find({ tripId })
-      .sort({ recordedAt: 1 }) // Thứ tự thời gian tăng dần
-      .skip(skip)
-      .limit(limit)
-      .select("coords speed heading accuracy recordedAt -_id"),
-    LocationLog.countDocuments({ tripId }),
-  ]);
-
-  // Flatten coords để client không phải xử lý GeoJSON
-  const points = logs.map((l) => ({
-    lat: l.coords.coordinates[1],
-    lng: l.coords.coordinates[0],
-    speed: l.speed,
-    heading: l.heading,
-    accuracy: l.accuracy,
-    time: l.recordedAt,
-  }));
-
-  return {
-    tripId,
-    page,
-    total,
-    totalPages: Math.ceil(total / limit),
-    points,
-  };
 };
 
 /**
@@ -533,22 +425,6 @@ export const recordGpsTick = async (tripId, driverId, { lat, lng, speed, heading
   if (trip.status !== "in_progress") {
     throw new AppError("Chuyến đi chưa bắt đầu hoặc đã kết thúc.", 400);
   }
-
-  const coords = {
-    type: "Point",
-    coordinates: [lng, lat],
-  };
-
-  // Lưu log GPS vào DB (ghi nền qua Redis nếu cần)
-  const logEntry = new LocationLog({
-    tripId,
-    coords,
-    speed: speed || 0,
-    heading: heading || 0,
-    accuracy: accuracy || 0,
-    recordedAt: new Date(),
-  });
-  await logEntry.save();
 
   // Cập nhật vị trí hiện tại của driver trong Redis
   await redisClient.setex(

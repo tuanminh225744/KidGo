@@ -28,8 +28,8 @@ export const validateCreateNotification = [
     .isString()
     .withMessage("body phải là chuỗi văn bản"),
 
-  body("channel")
+  body("tripId")
     .optional()
-    .isIn(["push", "sms", "call"])
-    .withMessage("channel chỉ có thể là 'push', 'sms', hoặc 'call'"),
+    .isMongoId()
+    .withMessage("tripId phải là định dạng ObjectID hợp lệ"),
 ];

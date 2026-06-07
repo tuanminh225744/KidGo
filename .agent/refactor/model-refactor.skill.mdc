@@ -1,0 +1,38 @@
+Model Refactor Skill
+
+Khi một model thay đổi:
+
+Ví dụ:
+
+User:
+
+thêm field phone
+đổi full_name thành name
+
+AI phải:
+
+Bước 1:
+Xác định các file phụ thuộc vào User.
+
+Bước 2:
+Liệt kê các thay đổi cần thực hiện.
+
+Ví dụ:
+
+Affected files:
+
+user.model.ts
+user.schema.ts
+user.service.ts
+user.controller.ts
+user.routes.ts
+
+Bước 3:
+Đề xuất thứ tự refactor an toàn.
+
+Update model
+Update service
+Update controller
+Update router
+
+Không bỏ sót validation.

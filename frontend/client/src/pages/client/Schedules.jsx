@@ -112,7 +112,7 @@ export default function Schedules() {
                     </h3>
 
                     <p className="text-sm text-on-surface-variant">
-                      {schedule.routeId?.pickupAddress || "Chưa có điểm đón"}
+                      {schedule.routeId?.estimatedPickupAddress || schedule.routeId?.actualPickupAddress || "Chưa có điểm đón"}
                     </p>
                   </div>
                   <div className="text-right shrink-0">

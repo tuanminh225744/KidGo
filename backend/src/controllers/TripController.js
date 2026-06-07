@@ -2,7 +2,6 @@ import {
   getParentTrips,
   getActiveTrips,
   getTripDetail,
-  getRawLocationLog,
   driverStartPickup,
   verifyTripOtp,
   verifyTripPickupPhoto,
@@ -55,22 +54,6 @@ export const getTripDetails = async (req, res, next) => {
     const { tripId } = req.params;
     const trip = await getTripDetail(tripId, req.user.id, req.user.role);
     res.status(200).json({ success: true, data: trip });
-  } catch (error) {
-    next(error);
-  }
-};
-
-/**
- * GET /api/v1/trips/:tripId/location-log
- * Log GPS toàn bộ chuyến (phân trang)
- * Role: parent
- */
-export const getLocationLog = async (req, res, next) => {
-  try {
-    const { tripId } = req.params;
-    const { page, limit } = req.query;
-    const result = await getRawLocationLog(tripId, { page: +page, limit: +limit });
-    res.status(200).json({ success: true, ...result });
   } catch (error) {
     next(error);
   }

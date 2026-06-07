@@ -101,7 +101,10 @@ export const getSchedulesByParent = async (parentId) => {
   try {
     const schedules = await TripSchedule.find({ parentId })
       .populate("kidId", "fullName avatar")
-      .populate("routeId", "name pickupAddress dropoffAddress")
+      .populate(
+        "routeId",
+        "estimatedPickupAddress estimatedDropoffAddress estimatedDistance estimatedDuration actualPickupAddress actualDropoffAddress actualDistance actualDuration",
+      )
       .populate("preferredDriverId", "user")
       .sort({ createdAt: -1 });
     return schedules;
@@ -141,7 +144,10 @@ export const getSchedulesByParentAndDate = async (parentId, date) => {
       ],
     })
       .populate("kidId", "fullName avatar")
-      .populate("routeId", "name pickupAddress dropoffAddress")
+      .populate(
+        "routeId",
+        "estimatedPickupAddress estimatedDropoffAddress estimatedDistance estimatedDuration actualPickupAddress actualDropoffAddress actualDistance actualDuration",
+      )
       .populate("preferredDriverId", "user")
       .sort({ pickupTime: 1, createdAt: -1 });
 

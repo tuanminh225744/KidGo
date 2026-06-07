@@ -2,9 +2,7 @@ import cron from "node-cron";
 import redisClient from "../config/redisClient.js";
 import * as turf from "@turf/turf";
 import Trip from "../models/operational/trip.model.js";
-import LocationLog from "../models/safetyAndLogs/locationLog.model.js";
 import { getIo } from "../sockets/socketManager.js";
-import { createAlert } from "../services/alert.service.js";
 
 export const runTripAnalytics = async () => {
   try {
@@ -27,6 +25,7 @@ export const runTripAnalytics = async () => {
       const pts = rawBuffer.map((str) => JSON.parse(str));
       const newestPoint = pts[0];
       const previousPoint = pts[1];
+      let speedKmh = 0;
 
       // Setup Không Gian TurfJS
       const currentPosition = turf.point([newestPoint.lng, newestPoint.lat]);
@@ -46,51 +45,25 @@ export const runTripAnalytics = async () => {
         (newestPoint.time - previousPoint.time) / (1000 * 60 * 60);
 
       if (timeDiffHours > 0) {
-        const speedKmh = distKm / timeDiffHours;
+        speedKmh = distKm / timeDiffHours;
         if (speedKmh > 50) {
           const warningKey = `speeding_warning:${trip._id}`;
           const warningStart = await redisClient.get(warningKey);
 
           if (!warningStart) {
-            // Lần đầu: Tạo cảnh báo tốc độ
             await redisClient.setex(warningKey, 180, Date.now()); // tự xóa sau 3 phút
-            await createAlert({
-              tripId: trip._id,
-              driverId: trip.driverId,
-              parentId: trip.parentId,
-              type: "speed",
-              level: speedKmh > 70 ? "critical" : "warning",
-              location: {
-                type: "Point",
-                coordinates: [newestPoint.lng, newestPoint.lat],
-              },
-              metadata: { speed_kmh: Math.round(speedKmh) },
-            });
+            console.warn(
+              `[TripMonitor] Speed warning for trip ${trip._id}: ${Math.round(speedKmh)} km/h`,
+            );
           } else {
-            // Đã có cảnh báo: kiểm tra xem có cải tà quy chính chưa
             const timeElapsedMs = Date.now() - parseInt(warningStart);
             if (timeElapsedMs > 60 * 1000) {
-              // > 1 phút vẫn không chịu phanh
-              // Tạo cảnh báo nghiêm trọng hơn hoặc cập nhật
-              await createAlert({
-                tripId: trip._id,
-                driverId: trip.driverId,
-                parentId: trip.parentId,
-                type: "speed",
-                level: "critical",
-                location: {
-                  type: "Point",
-                  coordinates: [newestPoint.lng, newestPoint.lat],
-                },
-                metadata: {
-                  speed_kmh: Math.round(speedKmh),
-                  duration_minutes: Math.round(timeElapsedMs / 60000),
-                },
-              });
+              console.warn(
+                `[TripMonitor] Persistent speed warning for trip ${trip._id}: ${Math.round(speedKmh)} km/h after ${Math.round(timeElapsedMs / 60000)} min`,
+              );
             }
           }
         } else {
-          // Ngoan ngoãn giảm tốc -> xóa "án tích" trong Redis
           await redisClient.del(`speeding_warning:${trip._id}`);
         }
       }
@@ -103,25 +76,13 @@ export const runTripAnalytics = async () => {
         const stopStart = await redisClient.get(stopKey);
 
         if (!stopStart) {
-          // Bắt đầu dừng
           await redisClient.setex(stopKey, 600, Date.now()); // theo dõi 10 phút
         } else {
           const stopDurationMs = Date.now() - parseInt(stopStart);
           if (stopDurationMs > 5 * 60 * 1000) {
-            // > 5 phút
-            await createAlert({
-              tripId: trip._id,
-              driverId: trip.driverId,
-              parentId: trip.parentId,
-              type: "unplanned_stop",
-              level: "warning",
-              location: {
-                type: "Point",
-                coordinates: [newestPoint.lng, newestPoint.lat],
-              },
-              metadata: { stop_duration: Math.round(stopDurationMs / 60000) },
-            });
-            // Reset để tránh spam
+            console.warn(
+              `[TripMonitor] Unplanned stop for trip ${trip._id}: ${Math.round(stopDurationMs / 60000)} min`,
+            );
             await redisClient.del(stopKey);
           }
         }
@@ -135,25 +96,13 @@ export const runTripAnalytics = async () => {
       // ============================================
       const timeSinceLastUpdate = Date.now() - newestPoint.time;
       if (timeSinceLastUpdate > 2 * 60 * 1000) {
-        // > 2 phút
         const gpsKey = `gps_lost:${trip._id}`;
         const gpsAlertSent = await redisClient.get(gpsKey);
 
         if (!gpsAlertSent) {
-          await createAlert({
-            tripId: trip._id,
-            driverId: trip.driverId,
-            parentId: trip.parentId,
-            type: "gps_lost",
-            level: "critical",
-            location: {
-              type: "Point",
-              coordinates: [newestPoint.lng, newestPoint.lat],
-            },
-            metadata: {
-              last_update_minutes: Math.round(timeSinceLastUpdate / 60000),
-            },
-          });
+          console.warn(
+            `[TripMonitor] GPS lost for trip ${trip._id}: ${Math.round(timeSinceLastUpdate / 60000)} min`,
+          );
           await redisClient.setex(gpsKey, 300, "sent"); // tránh spam trong 5 phút
         }
       } else {
@@ -188,18 +137,9 @@ export const runTripAnalytics = async () => {
 
         if (!detourAlertSent) {
           const deviation = Math.max(distToDropoff - totalRouteDist, 0);
-          await createAlert({
-            tripId: trip._id,
-            driverId: trip.driverId,
-            parentId: trip.parentId,
-            type: deviation > 2 ? "major_detour" : "detour",
-            level: deviation > 2 ? "critical" : "warning",
-            location: {
-              type: "Point",
-              coordinates: [newestPoint.lng, newestPoint.lat],
-            },
-            metadata: { deviation_meters: Math.round(deviation * 1000) },
-          });
+          console.warn(
+            `[TripMonitor] Detour warning for trip ${trip._id}: ${Math.round(deviation * 1000)}m`,
+          );
           await redisClient.setex(detourKey, 600, "sent"); // tránh spam 10 phút
         }
       } else {
@@ -219,33 +159,6 @@ export const runTripAnalytics = async () => {
           });
       }
 
-      // ============================================
-      // 4. GHI LOCATION LOG (Single Source of Truth)
-      // ============================================
-      // Lưu toàn bộ điểm GPS trong buffer vào LocationLog (raw, full resolution).
-      // KHÔNG ghi vào Trip.actualRoute nữa — getCompressedRoute() sẽ tính từ LocationLog khi cần.
-      const logDocs = pts.map((pt, i) => {
-        let speed = null;
-        if (i < pts.length - 1) {
-          const nextPt = pts[i + 1];
-          const d = turf.distance(
-            turf.point([nextPt.lng, nextPt.lat]),
-            turf.point([pt.lng, pt.lat]),
-            { units: "kilometers" },
-          );
-          const tHrs = (pt.time - nextPt.time) / (1000 * 60 * 60);
-          speed = tHrs > 0 ? d / tHrs : 0;
-        }
-        return {
-          tripId: trip._id,
-          coords: { type: "Point", coordinates: [pt.lng, pt.lat] },
-          speed: speed !== null ? Math.round(speed) : undefined,
-          recordedAt: new Date(pt.time),
-        };
-      });
-      await LocationLog.insertMany(logDocs, { ordered: false });
-
-      // Đốt cầu: Xóa sạch buffer để phút tiếp theo đo lại từ đầu
       await redisClient.del(`trip_buffer:${driverIdStr}`);
     }
   } catch (error) {

@@ -5,7 +5,27 @@ import { AppError, NotFoundError } from "../utils/AppError.js";
  * Tạo notification mới (admin)
  */
 export const createNotification = async (data) => {
-  const notification = new Notification(data);
+  const {
+    recipientId,
+    recipientType,
+    type,
+    title,
+    body,
+    tripId,
+    isRead,
+    readAt,
+  } = data;
+
+  const notification = new Notification({
+    recipientId,
+    recipientType,
+    type,
+    title,
+    body,
+    tripId,
+    isRead,
+    readAt,
+  });
   await notification.save();
   return notification;
 };

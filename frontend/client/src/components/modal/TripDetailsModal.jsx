@@ -84,14 +84,14 @@ export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
                   <div className="w-4 h-4 rounded-full bg-green-500 ring-4 ring-gray-50 mt-1 shrink-0"></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-500 font-medium">Điểm đón</p>
-                    <p className="text-sm font-medium text-gray-800 break-words line-clamp-2">{trip.from || trip.plannedRoute?.pickupAddress || 'N/A'}</p>
+                    <p className="text-sm font-medium text-gray-800 break-words line-clamp-2">{trip.from || trip.plannedRoute?.estimatedPickupAddress || trip.plannedRoute?.actualPickupAddress || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="flex gap-4 relative z-10">
                   <div className="w-4 h-4 rounded-full bg-primary ring-4 ring-gray-50 mt-1 shrink-0"></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-500 font-medium">Điểm trả</p>
-                    <p className="text-sm font-medium text-gray-800 break-words line-clamp-2">{trip.to || trip.plannedRoute?.dropoffAddress || 'N/A'}</p>
+                    <p className="text-sm font-medium text-gray-800 break-words line-clamp-2">{trip.to || trip.plannedRoute?.estimatedDropoffAddress || trip.plannedRoute?.actualDropoffAddress || 'N/A'}</p>
                   </div>
                 </div>
               </div>
@@ -102,7 +102,7 @@ export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
                   <div className="p-2 bg-white rounded-full shadow-sm"><MapPin size={16} className="text-primary" /></div>
                   <div>
                     <p className="text-[10px] text-gray-500 font-medium">Quãng đường</p>
-                    <p className="font-bold text-sm text-gray-800">{trip.dist || (trip.distance ? `${trip.distance} km` : 'N/A')}</p>
+                    <p className="font-bold text-sm text-gray-800">{trip.dist || (trip.plannedRoute?.estimatedDistance ? `${trip.plannedRoute.estimatedDistance} km` : trip.plannedRoute?.actualDistance ? `${trip.plannedRoute.actualDistance} km` : 'N/A')}</p>
                   </div>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-2xl flex items-center gap-3">

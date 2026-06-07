@@ -46,7 +46,10 @@ export const getDriverReviews = async (driverId, { page = 1, limit = 20 } = {}) 
       .skip(skip)
       .limit(limit)
       .populate("parentId", "fullName avatar")
-      .populate("tripId", "scheduledPickupTime scheduledDropoffTime"),
+      .populate(
+        "tripId",
+        "createdAt status plannedRoute",
+      ),
     Review.countDocuments({ driverId }),
     Review.aggregate([
       { $match: { driverId: driverObjectId } },

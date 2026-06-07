@@ -13,33 +13,40 @@ const initialState = {
   status: "scheduled",
 
   plannedRoute: {
-    pickupAddress: null,
-
-    pickupCoords: {
+    estimatedPickupAddress: null,
+    estimatedPickupCoords: {
       type: "Point",
       coordinates: [],
     },
 
-    dropoffAddress: null,
-
-    dropoffCoords: {
+    estimatedDropoffAddress: null,
+    estimatedDropoffCoords: {
       type: "Point",
       coordinates: [],
     },
 
-    waypoints: [],
+    estimatedWaypoints: [],
+    actualPickupAddress: null,
+    actualPickupCoords: {
+      type: "Point",
+      coordinates: [],
+    },
+    actualDropoffAddress: null,
+    actualDropoffCoords: {
+      type: "Point",
+      coordinates: [],
+    },
+    actualWaypoints: [],
 
     estimatedDuration: null,
     estimatedDistance: null,
+    actualDuration: null,
+    actualDistance: null,
+    scheduledPickupTime: null,
+    actualPickupTime: null,
+    scheduledDropoffTime: null,
+    actualDropoffTime: null,
   },
-
-  actualRoute: [],
-
-  scheduledPickupTime: null,
-  actualPickupTime: null,
-
-  scheduledDropoffTime: null,
-  actualDropoffTime: null,
 
   otp: {
     required: false,
@@ -69,9 +76,69 @@ const initialState = {
     verifiedAt: null,
   },
 
-  distance: null,
-
   createdAt: null,
+};
+
+const sanitizePlannedRoute = (plannedRoute) => {
+  if (!plannedRoute || typeof plannedRoute !== "object") {
+    return plannedRoute;
+  }
+
+  const sanitized = {
+    ...plannedRoute,
+    estimatedPickupAddress: plannedRoute.estimatedPickupAddress ?? null,
+    estimatedPickupCoords: plannedRoute.estimatedPickupCoords ?? {
+      type: "Point",
+      coordinates: [],
+    },
+    estimatedDropoffAddress: plannedRoute.estimatedDropoffAddress ?? null,
+    estimatedDropoffCoords: plannedRoute.estimatedDropoffCoords ?? {
+      type: "Point",
+      coordinates: [],
+    },
+    estimatedWaypoints: plannedRoute.estimatedWaypoints ?? [],
+    actualPickupAddress: plannedRoute.actualPickupAddress ?? null,
+    actualPickupCoords: plannedRoute.actualPickupCoords ?? {
+      type: "Point",
+      coordinates: [],
+    },
+    actualDropoffAddress: plannedRoute.actualDropoffAddress ?? null,
+    actualDropoffCoords: plannedRoute.actualDropoffCoords ?? {
+      type: "Point",
+      coordinates: [],
+    },
+    actualWaypoints: plannedRoute.actualWaypoints ?? [],
+    estimatedDuration: plannedRoute.estimatedDuration ?? null,
+    estimatedDistance: plannedRoute.estimatedDistance ?? null,
+    actualDuration: plannedRoute.actualDuration ?? null,
+    actualDistance: plannedRoute.actualDistance ?? null,
+    scheduledPickupTime: plannedRoute.scheduledPickupTime ?? null,
+    actualPickupTime: plannedRoute.actualPickupTime ?? null,
+    scheduledDropoffTime: plannedRoute.scheduledDropoffTime ?? null,
+    actualDropoffTime: plannedRoute.actualDropoffTime ?? null,
+  };
+
+  delete sanitized.pickupAddress;
+  delete sanitized.pickupCoords;
+  delete sanitized.dropoffAddress;
+  delete sanitized.dropoffCoords;
+  delete sanitized.waypoints;
+
+  return sanitized;
+};
+
+const sanitizeTripData = (tripData = {}) => {
+  const sanitized = { ...tripData };
+  delete sanitized.actualRoute;
+  delete sanitized.scheduledPickupTime;
+  delete sanitized.scheduledDropoffTime;
+  delete sanitized.actualPickupTime;
+  delete sanitized.actualDropoffTime;
+  delete sanitized.distance;
+  return {
+    ...sanitized,
+    plannedRoute: sanitizePlannedRoute(sanitized.plannedRoute),
+  };
 };
 
 export const useTripStore = create(
@@ -80,10 +147,23 @@ export const useTripStore = create(
       ...initialState,
 
       setTripData: (tripData) =>
-        set((state) => ({
-          ...state,
-          ...tripData,
-        })),
+        set((state) => {
+          const stateRest = { ...state };
+          delete stateRest.actualRoute;
+          delete stateRest.scheduledPickupTime;
+          delete stateRest.scheduledDropoffTime;
+          delete stateRest.actualPickupTime;
+          delete stateRest.actualDropoffTime;
+          delete stateRest.distance;
+
+          return {
+            ...stateRest,
+            ...sanitizeTripData(tripData),
+            plannedRoute: sanitizePlannedRoute(
+              tripData?.plannedRoute ?? state.plannedRoute,
+            ),
+          };
+        }),
 
       resetTrip: () => set(initialState),
     }),
@@ -103,20 +183,11 @@ export const useTripStore = create(
         status: state.status,
 
         plannedRoute: state.plannedRoute,
-        actualRoute: state.actualRoute,
-
-        scheduledPickupTime: state.scheduledPickupTime,
-        actualPickupTime: state.actualPickupTime,
-
-        scheduledDropoffTime: state.scheduledDropoffTime,
-        actualDropoffTime: state.actualDropoffTime,
 
         otp: state.otp,
         pickupPhoto: state.pickupPhoto,
         dropoffPhoto: state.dropoffPhoto,
         securityQuestion: state.securityQuestion,
-
-        distance: state.distance,
 
         createdAt: state.createdAt,
       }),

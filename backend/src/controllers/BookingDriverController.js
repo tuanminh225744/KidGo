@@ -20,9 +20,12 @@ export const getBookingRequests = async (req, res, next) => {
           status: { $in: ["pending", "matched"] },
         },
       ],
-    })
+      })
       .populate("kidId", "fullName avatar")
-      .populate("routeId", "name pickupAddress dropoffAddress")
+      .populate(
+        "routeId",
+        "estimatedPickupAddress estimatedDropoffAddress estimatedDistance estimatedDuration actualPickupAddress actualDropoffAddress actualDistance actualDuration",
+      )
       .populate("parentId", "fullName phone");
 
     res.status(200).json({

@@ -17,7 +17,6 @@ import { getKidsByParent } from "../../services/kid.service.js";
 import { getCurrentProfile } from "../../services/user.service.js";
 import { getActiveTripsList, getTrips } from "../../services/trip.service.js";
 import { getUnreadCount } from "../../services/notification.service.js";
-import { getParentAlerts } from "../../services/alert.service.js";
 import { getTripSchedulesByDate } from "../../services/booking.service.js";
 import { useAuthStore } from "../../store/useAuthStore.js";
 import { TripDetailsModal } from "../../components/modal/TripDetailsModal.jsx";
@@ -28,7 +27,6 @@ export default function Home() {
   const [profile, setProfile] = useState(null);
   const [unreadCount, setUnreadCount] = useState(0);
   const [activeTrips, setActiveTrips] = useState([]);
-  const [alerts, setAlerts] = useState([]);
   const [todaySchedules, setTodaySchedules] = useState([]);
   const [historyTrips, setHistoryTrips] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -47,7 +45,6 @@ export default function Home() {
       loadProfile(),
       loadUnreadCount(),
       loadActiveTrips(),
-      loadAlerts(),
       loadTodaySchedules(),
       loadHistoryTrips(),
     ]);
@@ -86,13 +83,6 @@ export default function Home() {
     }
   };
 
-  const loadAlerts = async () => {
-    const result = await getParentAlerts({ status: "open" });
-    if (result.success) {
-      setAlerts(result.data?.alerts || result.data || []);
-    }
-  };
-
   const loadTodaySchedules = async () => {
     const today = new Date();
     const dateParam = [
@@ -114,13 +104,13 @@ export default function Home() {
       const tripsData = result.data?.trips || result.trips || [];
       const formatted = tripsData.map(t => ({
         id: t._id,
-        time: new Date(t.actualDropoffTime || t.createdAt).toLocaleString(),
+        time: new Date(t.createdAt).toLocaleString(),
         status: t.status === 'completed' ? 'HOÀN THÀNH' : t.status === 'cancelled' ? 'HUỶ' : t.status,
         name: t.kidId?.fullName || 'Unknown',
-        from: t.plannedRoute?.pickupAddress || 'N/A',
-        to: t.plannedRoute?.dropoffAddress || 'N/A',
+        from: t.plannedRoute?.estimatedPickupAddress || t.plannedRoute?.actualPickupAddress || 'N/A',
+        to: t.plannedRoute?.estimatedDropoffAddress || t.plannedRoute?.actualDropoffAddress || 'N/A',
         price: t.paymentId?.amount ? `${t.paymentId.amount.toLocaleString()}đ` : '0đ',
-        dist: t.distance ? `${t.distance}km` : '0.0km',
+        dist: t.plannedRoute?.estimatedDistance ? `${t.plannedRoute.estimatedDistance}km` : '0.0km',
         duration: t.plannedRoute?.estimatedDuration ? `${t.plannedRoute.estimatedDuration} phút` : '0 phút',
         driver: t.driverId,
       }));
@@ -296,38 +286,6 @@ export default function Home() {
                   </button>
                 </div>
               </motion.div>
-            </section>
-          ))}
-
-        {/* Alert Card */}
-        {alerts.length > 0 &&
-          alerts.slice(0, 1).map((alert) => (
-            <section key={alert._id}>
-              <div className="bg-[#FEF3C7] border-l-4 border-orange-400 rounded-2xl p-4 flex items-center justify-between shadow-sm">
-                <div className="flex gap-3">
-                  <span className="text-orange-600">⚠️</span>
-                  <div>
-                    <p className="font-bold text-[#92400E] text-sm">
-                      {alert.type === "speeding"
-                        ? "Xe chạy quá tốc độ"
-                        : alert.type === "detour"
-                          ? "Xe lệch lộ trình"
-                          : alert.type === "unplanned_stop"
-                            ? "Dừng xe không đúng lịch"
-                            : "Cảnh báo chuyến đi"}
-                    </p>
-                    <p className="text-[#92400E]/80 text-xs">
-                      {alert.message || "Bấm để xem chi tiết và xác nhận"}
-                    </p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => navigate(`/alerts/${alert._id}`)}
-                  className="bg-white/50 px-4 py-1.5 rounded-xl text-[#92400E] font-bold text-sm shadow-sm"
-                >
-                  Xem
-                </button>
-              </div>
             </section>
           ))}
 

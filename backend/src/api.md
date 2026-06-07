@@ -11,10 +11,6 @@ GET
 /api/v1/trips/:tripId
 Chi tiết chuyến
 tất cả
-GET
-/api/v1/trips/:tripId/location-log
-Log GPS toàn bộ chuyến
-parent
 POST
 /api/v1/trips/:tripId/start
 Tài xế bắt đầu chuyến
@@ -39,28 +35,6 @@ WS
 ws://api/v1/trips/:tripId/track
 WebSocket tracking realtime
 parent
-Alerts
-5 API
-GET
-/api/v1/alerts
-Danh sách alert của phụ huynh
-parent
-GET
-/api/v1/alerts/:alertId
-Chi tiết alert
-tất cả
-PATCH
-/api/v1/alerts/:alertId/acknowledge
-Phụ huynh xác nhận đã biết
-parent
-PATCH
-/api/v1/alerts/:alertId/resolve
-Đóng alert
-tất cả
-PATCH
-/api/v1/alerts/:alertId/escalate
-Phụ huynh yêu cầu admin hỗ trợ
-parent
 Confirmations
 2 API
 GET
@@ -81,6 +55,20 @@ GET
 /api/v1/reviews/driver/:driverId
 Xem đánh giá của một tài xế
 parent
+Reports
+3 API
+POST
+/api/v1/reports
+Tạo report cho chuyến đi
+parent
+GET
+/api/v1/reports/trip/:tripId
+Danh sách report theo tripId
+parent, admin
+DELETE
+/api/v1/reports/:reportId
+Xóa report theo id
+parent, admin
 Notifications
 4 API
 GET
@@ -148,7 +136,7 @@ GET
 Vị trí live của tài xế
 admin
 Admin — Trip Monitoring
-4 API
+3 API
 GET
 /api/v1/admin/trips
 Tất cả chuyến (lọc theo status)
@@ -165,37 +153,15 @@ WS
 ws://api/v1/admin/trips/live-feed
 WebSocket live feed tất cả trips
 admin
-Admin — Alert Management
+Admin — Reports & Stats
 4 API
 GET
-/api/v1/admin/alerts
-Tất cả alert (có thể filter)
-admin
-GET
-/api/v1/admin/alerts/open
-Tất cả alert đang mở
-admin
-PATCH
-/api/v1/admin/alerts/:alertId/resolve
-Admin đóng alert
-admin
-PATCH
-/api/v1/admin/alerts/:alertId/false-positive
-Đánh dấu cảnh báo sai
-admin
-Admin — Reports & Stats
-5 API
-GET
 /api/v1/admin/dashboard
-Tổng quan: trips, alerts, drivers online
+Tổng quan: trips, drivers online
 admin
 GET
 /api/v1/admin/reports/trips
 Báo cáo chuyến theo khoảng thời gian
-admin
-GET
-/api/v1/admin/reports/alerts
-Báo cáo alert rate theo driver
 admin
 GET
 /api/v1/admin/reports/drivers

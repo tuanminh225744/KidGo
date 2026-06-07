@@ -50,16 +50,10 @@ const TripSchema = new Schema(
       index: true,
     },
     plannedRoute: { type: PlannedRouteSchema },
-    actualRoute: { type: Array, default: [] }, // GeoJSON Point[]
-    scheduledPickupTime: { type: Date },
-    actualPickupTime: { type: Date },
-    scheduledDropoffTime: { type: Date },
-    actualDropoffTime: { type: Date },
     otp: { type: VerificationFieldSchema, default: () => ({}) },
     pickupPhoto: { type: VerificationFieldSchema, default: () => ({}) },
     dropoffPhoto: { type: VerificationFieldSchema, default: () => ({}) },
     securityQuestion: { type: VerificationFieldSchema, default: () => ({}) },
-    distance: { type: Number }, // km thực tế
     paymentId: { type: Schema.Types.ObjectId, ref: 'Payment', default: null },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
