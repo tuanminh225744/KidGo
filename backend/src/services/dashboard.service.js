@@ -141,6 +141,7 @@ export const exportReportCSV = async ({ type = "trips", startDate, endDate } = {
 
     const trips = await Trip.find(matchQuery)
       .sort({ createdAt: -1 })
+      .populate("routeId")
       .populate("driverId", "licenseNumber")
       .populate("parentId", "fullName email")
       .populate("kidId", "fullName")
@@ -155,13 +156,11 @@ export const exportReportCSV = async ({ type = "trips", startDate, endDate } = {
       t.parentId?.email ?? "",
       t.kidId?.fullName ?? "",
       t.driverId?.licenseNumber ?? "",
-      t.plannedRoute?.pickupAddress ||
-        t.plannedRoute?.estimatedPickupAddress ||
-        t.plannedRoute?.actualPickupAddress ||
+      t.routeId?.estimatedPickupAddress ||
+        t.routeId?.actualPickupAddress ||
         "",
-      t.plannedRoute?.dropoffAddress ||
-        t.plannedRoute?.estimatedDropoffAddress ||
-        t.plannedRoute?.actualDropoffAddress ||
+      t.routeId?.estimatedDropoffAddress ||
+        t.routeId?.actualDropoffAddress ||
         "",
       t.createdAt?.toISOString() ?? "",
     ].join(",")).join("\n");

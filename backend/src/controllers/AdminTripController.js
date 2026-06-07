@@ -20,6 +20,7 @@ export const getAllTrips = async (req, res, next) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(+limit)
+        .populate("routeId")
         .populate("driverId", "user licenseNumber rating")
         .populate("parentId", "fullName email phone")
         .populate("kidId", "fullName")
@@ -50,6 +51,7 @@ export const getLiveTrips = async (req, res, next) => {
     const trips = await Trip.find({
       status: { $in: ["picking_up", "in_progress"] },
     })
+      .populate("routeId")
       .populate("driverId", "user licenseNumber currentLocation rideStatus")
       .populate("parentId", "fullName phone")
       .populate("kidId", "fullName")
@@ -70,6 +72,7 @@ export const getTripDetailAdmin = async (req, res, next) => {
   try {
     const { tripId } = req.params;
     const trip = await Trip.findById(tripId)
+      .populate("routeId")
       .populate("driverId", "user licenseNumber rating currentLocation")
       .populate("parentId", "fullName email phone")
       .populate("kidId", "fullName avatar")

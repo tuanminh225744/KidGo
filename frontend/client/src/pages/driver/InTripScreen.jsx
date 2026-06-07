@@ -28,12 +28,12 @@ export const InTripScreen = () => {
   const trip = useTripStore((state) => state);
   const setTripData = useTripStore((state) => state.setTripData);
 
-  const rawCoords = trip?.plannedRoute?.estimatedPickupCoords?.coordinates || trip?.plannedRoute?.actualPickupCoords?.coordinates;
+  const rawCoords = trip?.routeId?.estimatedPickupCoords?.coordinates || trip?.routeId?.actualPickupCoords?.coordinates;
   const formattedPickupLocation = rawCoords && rawCoords.length === 2
     ? { lat: rawCoords[1], lng: rawCoords[0] }
     : undefined;
 
-  const dropoffRawCoords = trip?.plannedRoute?.estimatedDropoffCoords?.coordinates || trip?.plannedRoute?.actualDropoffCoords?.coordinates;
+  const dropoffRawCoords = trip?.routeId?.estimatedDropoffCoords?.coordinates || trip?.routeId?.actualDropoffCoords?.coordinates;
   const formattedDropoffLocation = dropoffRawCoords && dropoffRawCoords.length === 2
     ? { lat: dropoffRawCoords[1], lng: dropoffRawCoords[0] }
     : undefined;
@@ -238,8 +238,8 @@ export const InTripScreen = () => {
       const res = await confirmDropoff(trip._id);
       if (res?.success) {
         const fare = fetchedPayment?.driverEarning || 0;
-        const distance = trip.plannedRoute?.estimatedDistance || trip.plannedRoute?.actualDistance || 0;
-        const duration = trip.plannedRoute?.estimatedDuration || 0;
+        const distance = trip.routeId?.estimatedDistance || trip.routeId?.actualDistance || 0;
+        const duration = trip.routeId?.estimatedDuration || trip.routeId?.actualDuration || 0;
         navigate("/driver/summary", { state: { tripData: { fare, distance, duration } } });
       }
     } catch (err) {

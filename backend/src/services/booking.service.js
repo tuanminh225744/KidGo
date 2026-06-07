@@ -315,6 +315,9 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
       isActive: true,
     });
     const route = await Route.findById(booking.routeId);
+    if (!route) {
+      throw new Error("Không tìm thấy lộ trình cho booking này.");
+    }
 
     const newTrip = new Trip({
       bookingId: booking._id,
@@ -322,23 +325,9 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
       kidId: booking.kidId,
       parentId: booking.parentId,
       vehicleId: vehicle ? vehicle._id : new mongoose.Types.ObjectId(), // Dùng mock ID nếu test data chưa có xe
+      routeId: route._id,
       paymentId: booking.paymentId,
       status: "picking_up",
-      plannedRoute: route
-        ? {
-          pickupAddress:
-            route.estimatedPickupAddress || route.actualPickupAddress || null,
-          dropoffAddress:
-            route.estimatedDropoffAddress || route.actualDropoffAddress || null,
-          pickupCoords:
-            route.estimatedPickupCoords || route.actualPickupCoords || null,
-          dropoffCoords:
-            route.estimatedDropoffCoords || route.actualDropoffCoords || null,
-          waypoints: route.estimatedWaypoints || route.actualWaypoints || [],
-          estimatedDistance: route.estimatedDistance ?? null,
-          estimatedDuration: route.estimatedDuration ?? null,
-        }
-        : {},
     });
     await newTrip.save();
 

@@ -7,7 +7,7 @@ import { getIo } from "../sockets/socketManager.js";
 export const runTripAnalytics = async () => {
   try {
     // Tìm toàn bộ danh sách các chuyến xe đang lăn bánh
-    const activeTrips = await Trip.find({ status: "in_progress" });
+    const activeTrips = await Trip.find({ status: "in_progress" }).populate("routeId");
     const io = getIo();
 
     for (const trip of activeTrips) {
@@ -29,9 +29,9 @@ export const runTripAnalytics = async () => {
 
       // Setup Không Gian TurfJS
       const currentPosition = turf.point([newestPoint.lng, newestPoint.lat]);
-      const dropoffPosition = turf.point(
-        trip.plannedRoute.dropoffCoords.coordinates,
-      );
+      const dropoffCoords = trip.routeId?.actualDropoffCoords?.coordinates || trip.routeId?.estimatedDropoffCoords?.coordinates;
+      if (!dropoffCoords || dropoffCoords.length !== 2) continue;
+      const dropoffPosition = turf.point(dropoffCoords);
 
       // ============================================
       // 1. TÍNH TOÁN XE ĐUA VƯỢT TỐC ĐỘ (Speeding đa tầng)
@@ -116,9 +116,9 @@ export const runTripAnalytics = async () => {
         units: "kilometers",
       });
       // Giả sử planned route là đường thẳng từ pickup đến dropoff
-      const pickupPosition = turf.point(
-        trip.plannedRoute.pickupCoords.coordinates,
-      );
+      const pickupCoords = trip.routeId?.actualPickupCoords?.coordinates || trip.routeId?.estimatedPickupCoords?.coordinates;
+      if (!pickupCoords || pickupCoords.length !== 2) continue;
+      const pickupPosition = turf.point(pickupCoords);
       const totalRouteDist = turf.distance(pickupPosition, dropoffPosition, {
         units: "kilometers",
       });

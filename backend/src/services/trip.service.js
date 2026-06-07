@@ -65,6 +65,7 @@ export const driverStartPickup = async (tripId) => {
     trip.markModified("securityQuestion");
 
     await trip.save();
+    await trip.populate("routeId");
 
     const io = getIo();
 
@@ -118,6 +119,7 @@ export const verifyTripOtp = async (tripId, enteredOtp) => {
     };
 
     await trip.save();
+    await trip.populate("routeId");
     return trip;
   } catch (error) {
     throw new Error(`Xác thực OTP thất bại: ${error.message}`);
@@ -139,6 +141,7 @@ export const verifyTripPickupPhoto = async (tripId, photo) => {
     };
 
     await trip.save();
+    await trip.populate("routeId");
     return trip;
   } catch (error) {
     throw new Error(`Xác thực ảnh đón thất bại: ${error.message}`);
@@ -160,6 +163,7 @@ export const verifyTripDropoffPhoto = async (tripId, photo) => {
     };
 
     await trip.save();
+    await trip.populate("routeId");
     return trip;
   } catch (error) {
     throw new Error(`Xác thực ảnh trả thất bại: ${error.message}`);
@@ -185,6 +189,7 @@ export const verifyTripSecurityQuestion = async (tripId, answer) => {
     };
 
     await trip.save();
+    await trip.populate("routeId");
     return trip;
   } catch (error) {
     throw new Error(`Xác thực câu hỏi bảo mật thất bại: ${error.message}`);
@@ -213,6 +218,7 @@ export const driverPickupKid = async (tripId) => {
 
     trip.status = "in_progress";
     await trip.save();
+    await trip.populate("routeId");
 
     // Nâng cấp trạng thái ông xế lên "Đang bon bon trên cầu"
     await Driver.findByIdAndUpdate(trip.driverId, { rideStatus: "in_trip" });
@@ -245,6 +251,7 @@ export const driverDropoffKid = async (tripId) => {
 
     trip.status = "completed";
     await trip.save();
+    await trip.populate("routeId");
 
     // Cập nhật tổng thu nhập cho tài xế nếu chuyến có payment
     if (trip.paymentId) {
@@ -286,6 +293,7 @@ export const getParentTrips = async (parentId, { status, page = 1, limit = 20 } 
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
+      .populate("routeId")
       .populate({
         path: "driverId",
         select: "user licenseNumber rating",
@@ -321,6 +329,7 @@ export const getTripsByDriver = async (
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
+      .populate("routeId")
       .populate({
         path: "driverId",
         select: "user licenseNumber rating currentLocation isOnline",
@@ -348,6 +357,7 @@ export const getActiveTrips = async (parentId) => {
     parentId,
     status: { $in: ["picking_up", "in_progress"] },
   })
+    .populate("routeId")
     .populate({
       path: "driverId",
       select: "user licenseNumber rating currentLocation isOnline",
@@ -365,6 +375,7 @@ export const getActiveTrips = async (parentId) => {
  */
 export const getTripDetail = async (tripId, userId, role) => {
   const trip = await Trip.findById(tripId)
+    .populate("routeId")
     .populate("driverId", "user licenseNumber rating")
     .populate("kidId", "fullName avatar")
     .populate("vehicleId", "licensePlate model color")
@@ -402,6 +413,7 @@ export const cancelTrip = async (tripId, userId, role) => {
 
   trip.status = "cancelled";
   await trip.save();
+  await trip.populate("routeId");
 
   // Giải phóng tài xế
   await Driver.findByIdAndUpdate(trip.driverId, { rideStatus: "free" });

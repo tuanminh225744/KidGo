@@ -12,7 +12,7 @@ const initialState = {
 
   status: "scheduled",
 
-  plannedRoute: {
+  routeId: {
     estimatedPickupAddress: null,
     estimatedPickupCoords: {
       type: "Point",
@@ -79,43 +79,43 @@ const initialState = {
   createdAt: null,
 };
 
-const sanitizePlannedRoute = (plannedRoute) => {
-  if (!plannedRoute || typeof plannedRoute !== "object") {
-    return plannedRoute;
+const sanitizeRoute = (route) => {
+  if (!route || typeof route !== "object") {
+    return route;
   }
 
   const sanitized = {
-    ...plannedRoute,
-    estimatedPickupAddress: plannedRoute.estimatedPickupAddress ?? null,
-    estimatedPickupCoords: plannedRoute.estimatedPickupCoords ?? {
+    ...route,
+    estimatedPickupAddress: route.estimatedPickupAddress ?? null,
+    estimatedPickupCoords: route.estimatedPickupCoords ?? {
       type: "Point",
       coordinates: [],
     },
-    estimatedDropoffAddress: plannedRoute.estimatedDropoffAddress ?? null,
-    estimatedDropoffCoords: plannedRoute.estimatedDropoffCoords ?? {
+    estimatedDropoffAddress: route.estimatedDropoffAddress ?? null,
+    estimatedDropoffCoords: route.estimatedDropoffCoords ?? {
       type: "Point",
       coordinates: [],
     },
-    estimatedWaypoints: plannedRoute.estimatedWaypoints ?? [],
-    actualPickupAddress: plannedRoute.actualPickupAddress ?? null,
-    actualPickupCoords: plannedRoute.actualPickupCoords ?? {
+    estimatedWaypoints: route.estimatedWaypoints ?? [],
+    actualPickupAddress: route.actualPickupAddress ?? null,
+    actualPickupCoords: route.actualPickupCoords ?? {
       type: "Point",
       coordinates: [],
     },
-    actualDropoffAddress: plannedRoute.actualDropoffAddress ?? null,
-    actualDropoffCoords: plannedRoute.actualDropoffCoords ?? {
+    actualDropoffAddress: route.actualDropoffAddress ?? null,
+    actualDropoffCoords: route.actualDropoffCoords ?? {
       type: "Point",
       coordinates: [],
     },
-    actualWaypoints: plannedRoute.actualWaypoints ?? [],
-    estimatedDuration: plannedRoute.estimatedDuration ?? null,
-    estimatedDistance: plannedRoute.estimatedDistance ?? null,
-    actualDuration: plannedRoute.actualDuration ?? null,
-    actualDistance: plannedRoute.actualDistance ?? null,
-    scheduledPickupTime: plannedRoute.scheduledPickupTime ?? null,
-    actualPickupTime: plannedRoute.actualPickupTime ?? null,
-    scheduledDropoffTime: plannedRoute.scheduledDropoffTime ?? null,
-    actualDropoffTime: plannedRoute.actualDropoffTime ?? null,
+    actualWaypoints: route.actualWaypoints ?? [],
+    estimatedDuration: route.estimatedDuration ?? null,
+    estimatedDistance: route.estimatedDistance ?? null,
+    actualDuration: route.actualDuration ?? null,
+    actualDistance: route.actualDistance ?? null,
+    scheduledPickupTime: route.scheduledPickupTime ?? null,
+    actualPickupTime: route.actualPickupTime ?? null,
+    scheduledDropoffTime: route.scheduledDropoffTime ?? null,
+    actualDropoffTime: route.actualDropoffTime ?? null,
   };
 
   delete sanitized.pickupAddress;
@@ -129,15 +129,10 @@ const sanitizePlannedRoute = (plannedRoute) => {
 
 const sanitizeTripData = (tripData = {}) => {
   const sanitized = { ...tripData };
-  delete sanitized.actualRoute;
-  delete sanitized.scheduledPickupTime;
-  delete sanitized.scheduledDropoffTime;
-  delete sanitized.actualPickupTime;
-  delete sanitized.actualDropoffTime;
-  delete sanitized.distance;
+  delete sanitized.plannedRoute;
   return {
     ...sanitized,
-    plannedRoute: sanitizePlannedRoute(sanitized.plannedRoute),
+    routeId: sanitizeRoute(sanitized.routeId),
   };
 };
 
@@ -149,18 +144,13 @@ export const useTripStore = create(
       setTripData: (tripData) =>
         set((state) => {
           const stateRest = { ...state };
-          delete stateRest.actualRoute;
-          delete stateRest.scheduledPickupTime;
-          delete stateRest.scheduledDropoffTime;
-          delete stateRest.actualPickupTime;
-          delete stateRest.actualDropoffTime;
-          delete stateRest.distance;
+          delete stateRest.plannedRoute;
 
           return {
             ...stateRest,
             ...sanitizeTripData(tripData),
-            plannedRoute: sanitizePlannedRoute(
-              tripData?.plannedRoute ?? state.plannedRoute,
+            routeId: sanitizeRoute(
+              tripData?.routeId ?? state.routeId,
             ),
           };
         }),
@@ -170,6 +160,17 @@ export const useTripStore = create(
     {
       name: "kidgo_trip",
       storage: createJSONStorage(() => localStorage),
+      version: 2,
+      migrate: (persistedState) => {
+        const nextState = { ...(persistedState || {}) };
+
+        if (!nextState.routeId && nextState.plannedRoute) {
+          nextState.routeId = sanitizeRoute(nextState.plannedRoute);
+        }
+
+        delete nextState.plannedRoute;
+        return nextState;
+      },
 
       partialize: (state) => ({
         _id: state._id,
@@ -182,7 +183,7 @@ export const useTripStore = create(
 
         status: state.status,
 
-        plannedRoute: state.plannedRoute,
+        routeId: state.routeId,
 
         otp: state.otp,
         pickupPhoto: state.pickupPhoto,

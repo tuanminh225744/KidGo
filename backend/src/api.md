@@ -35,6 +35,8 @@ WS
 ws://api/v1/trips/:tripId/track
 WebSocket tracking realtime
 parent
+NOTE
+Trip response now returns populated `routeId` instead of embedded `plannedRoute`.
 Confirmations
 2 API
 GET

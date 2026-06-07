@@ -1,26 +1,6 @@
 import mongoose from "mongoose";
 const { Schema, model, models } = mongoose;
 
-// Embedded sub-schema cho plannedRoute
-const PlannedRouteSchema = new Schema(
-  {
-    pickupAddress: { type: String },
-    pickupCoords: {
-      type: { type: String, default: "Point" },
-      coordinates: [Number],
-    },
-    dropoffAddress: { type: String },
-    dropoffCoords: {
-      type: { type: String, default: "Point" },
-      coordinates: [Number],
-    },
-    waypoints: { type: Array, default: [] },
-    estimatedDuration: { type: Number },
-    estimatedDistance: { type: Number },
-  },
-  { _id: false },
-);
-
 const VerificationFieldSchema = new Schema(
   {
     required: { type: Boolean, default: false },
@@ -43,13 +23,13 @@ const TripSchema = new Schema(
     kidId: { type: Schema.Types.ObjectId, ref: "Kid", required: true },
     parentId: { type: Schema.Types.ObjectId, ref: "User", required: true },
     vehicleId: { type: Schema.Types.ObjectId, ref: "Vehicle", required: true },
+    routeId: { type: Schema.Types.ObjectId, ref: "Route", required: true },
     status: {
       type: String,
       enum: ["scheduled", "picking_up", "in_progress", "completed", "cancelled"],
       default: "scheduled",
       index: true,
     },
-    plannedRoute: { type: PlannedRouteSchema },
     otp: { type: VerificationFieldSchema, default: () => ({}) },
     pickupPhoto: { type: VerificationFieldSchema, default: () => ({}) },
     dropoffPhoto: { type: VerificationFieldSchema, default: () => ({}) },

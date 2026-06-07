@@ -41,14 +41,14 @@ export const getDriverReviews = async (driverId, { page = 1, limit = 20 } = {}) 
   const driverObjectId = new mongoose.default.Types.ObjectId(driverId);
 
   const [reviews, total, avgResult] = await Promise.all([
-    Review.find({ driverId })
+      Review.find({ driverId })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate("parentId", "fullName avatar")
       .populate(
         "tripId",
-        "createdAt status plannedRoute",
+        "createdAt status routeId",
       ),
     Review.countDocuments({ driverId }),
     Review.aggregate([

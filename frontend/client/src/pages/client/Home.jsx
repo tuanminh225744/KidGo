@@ -107,11 +107,11 @@ export default function Home() {
         time: new Date(t.createdAt).toLocaleString(),
         status: t.status === 'completed' ? 'HOÀN THÀNH' : t.status === 'cancelled' ? 'HUỶ' : t.status,
         name: t.kidId?.fullName || 'Unknown',
-        from: t.plannedRoute?.estimatedPickupAddress || t.plannedRoute?.actualPickupAddress || 'N/A',
-        to: t.plannedRoute?.estimatedDropoffAddress || t.plannedRoute?.actualDropoffAddress || 'N/A',
+        from: t.routeId?.estimatedPickupAddress || t.routeId?.actualPickupAddress || 'N/A',
+        to: t.routeId?.estimatedDropoffAddress || t.routeId?.actualDropoffAddress || 'N/A',
         price: t.paymentId?.amount ? `${t.paymentId.amount.toLocaleString()}đ` : '0đ',
-        dist: t.plannedRoute?.estimatedDistance ? `${t.plannedRoute.estimatedDistance}km` : '0.0km',
-        duration: t.plannedRoute?.estimatedDuration ? `${t.plannedRoute.estimatedDuration} phút` : '0 phút',
+        dist: t.routeId?.estimatedDistance ? `${t.routeId.estimatedDistance}km` : t.routeId?.actualDistance ? `${t.routeId.actualDistance}km` : '0.0km',
+        duration: t.routeId?.estimatedDuration ? `${t.routeId.estimatedDuration} phút` : t.routeId?.actualDuration ? `${t.routeId.actualDuration} phút` : '0 phút',
         driver: t.driverId,
       }));
       setHistoryTrips(formatted);
