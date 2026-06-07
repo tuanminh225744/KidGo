@@ -3,6 +3,7 @@ import { AppError, AuthorizationError } from "../utils/AppError.js";
 import Booking from "../models/operational/booking.model.js";
 import Driver from "../models/core/driver.model.js";
 import { getDriverByUserId } from "../services/driver.service.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * GET /api/v1/drivers/me/booking-requests
@@ -20,7 +21,7 @@ export const getBookingRequests = async (req, res, next) => {
           status: { $in: ["pending", "matched"] },
         },
       ],
-      })
+    })
       .populate("kidId", "fullName avatar")
       .populate(
         "routeId",
@@ -28,11 +29,12 @@ export const getBookingRequests = async (req, res, next) => {
       )
       .populate("parentId", "fullName phone");
 
-    res.status(200).json({
-      success: true,
-      count: bookings.length,
-      data: bookings,
-    });
+    return success(
+      res,
+      { count: bookings.length, data: bookings },
+      "Booking requests fetched",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -62,15 +64,12 @@ export const acceptBooking = async (req, res, next) => {
       booking._id,
       driverId,
     );
-
-    res.status(200).json({
-      success: true,
-      message: "Chấp nhận chuyến thành công.",
-      data: {
-        booking: result.booking,
-        trip: result.trip,
-      },
-    });
+    return success(
+      res,
+      result.data,
+      result.message || "Chấp nhận chuyến thành công.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -96,16 +95,16 @@ export const rejectBooking = async (req, res, next) => {
       throw new AuthorizationError("Bạn không có quyền từ chối booking này.");
     }
 
-    const updatedBooking = await bookingService.driverCancelBooking(
+    const result = await bookingService.driverCancelBooking(
       req.params.bookingId,
       driverId,
     );
-
-    res.status(200).json({
-      success: true,
-      message: "Từ chối chuyến thành công.",
-      data: updatedBooking,
-    });
+    return success(
+      res,
+      result.data,
+      result.message || "Từ chối chuyến thành công.",
+      200,
+    );
   } catch (error) {
     next(error);
   }

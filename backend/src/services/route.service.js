@@ -5,7 +5,8 @@ import { AppError, NotFoundError } from "../utils/AppError.js";
  * Lấy danh sách tất cả lộ trình của phụ huynh
  */
 export const getRoutesByParent = async (parentId) => {
-  return Route.find({ parentId }).sort({ createdAt: -1 });
+  const list = await Route.find({ parentId }).sort({ createdAt: -1 });
+  return { success: true, message: "Routes fetched", data: list };
 };
 
 /**
@@ -13,7 +14,8 @@ export const getRoutesByParent = async (parentId) => {
  */
 export const createRoute = async (routeData) => {
   const route = new Route(routeData);
-  return route.save();
+  const saved = await route.save();
+  return { success: true, message: "Route created", data: saved };
 };
 
 /**
@@ -24,7 +26,7 @@ export const getRouteById = async (routeId) => {
   if (!route) {
     throw new NotFoundError("Không tìm thấy lộ trình.");
   }
-  return route;
+  return { success: true, message: "Route fetched", data: route };
 };
 
 /**
@@ -39,7 +41,7 @@ export const updateRoute = async (routeId, updateData) => {
   if (!route) {
     throw new NotFoundError("Không tìm thấy lộ trình.");
   }
-  return route;
+  return { success: true, message: "Route updated", data: route };
 };
 
 /**
@@ -50,5 +52,5 @@ export const deleteRoute = async (routeId) => {
   if (!route) {
     throw new NotFoundError("Không tìm thấy lộ trình.");
   }
-  return route;
+  return { success: true, message: "Route deleted", data: route };
 };

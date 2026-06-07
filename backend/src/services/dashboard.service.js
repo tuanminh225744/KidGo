@@ -14,14 +14,17 @@ export const getAdminDashboardStats = async () => {
   const endOfDay = new Date();
   endOfDay.setHours(23, 59, 59, 999);
 
-  const [totalTripsToday, onlineDrivers, activeTrips] =
-    await Promise.all([
-      Trip.countDocuments({ createdAt: { $gte: startOfDay, $lte: endOfDay } }),
-      Driver.countDocuments({ isOnline: true }),
-      Trip.countDocuments({ status: { $in: ["picking_up", "in_progress"] } }),
-    ]);
+  const [totalTripsToday, onlineDrivers, activeTrips] = await Promise.all([
+    Trip.countDocuments({ createdAt: { $gte: startOfDay, $lte: endOfDay } }),
+    Driver.countDocuments({ isOnline: true }),
+    Trip.countDocuments({ status: { $in: ["picking_up", "in_progress"] } }),
+  ]);
 
-  return { totalTripsToday, onlineDrivers, activeTrips, openAlerts: 0 };
+  return {
+    success: true,
+    message: "Dashboard stats fetched",
+    data: { totalTripsToday, onlineDrivers, activeTrips, openAlerts: 0 },
+  };
 };
 
 // ── Reports ─────────────────────────────────────────────────────────────────────
@@ -55,10 +58,16 @@ export const getTripReport = async ({ startDate, endDate } = {}) => {
       matchStage,
       { $group: { _id: "$status", count: { $sum: 1 } } },
     ]),
-    Trip.countDocuments(Object.keys(dateFilter).length ? { createdAt: dateFilter } : {}),
+    Trip.countDocuments(
+      Object.keys(dateFilter).length ? { createdAt: dateFilter } : {},
+    ),
   ]);
 
-  return { totalTrips, tripsPerDay, statusBreakdown };
+  return {
+    success: true,
+    message: "Trip report fetched",
+    data: { totalTrips, tripsPerDay, statusBreakdown },
+  };
 };
 
 /**
@@ -68,11 +77,15 @@ export const getTripReport = async ({ startDate, endDate } = {}) => {
 export const getAlertReport = async () => {
   const totalTrips = await Trip.countDocuments();
   return {
-    totalTrips,
-    totalAlerts: 0,
-    alertRate: 0,
-    alertsByType: [],
-    alertRatePerDriver: [],
+    success: true,
+    message: "Alert report fetched",
+    data: {
+      totalTrips,
+      totalAlerts: 0,
+      alertRate: 0,
+      alertsByType: [],
+      alertRatePerDriver: [],
+    },
   };
 };
 
@@ -122,14 +135,18 @@ export const getDriverRankingReport = async () => {
     { $sort: { averageRating: -1, reviewCount: -1 } },
   ]);
 
-  return rankings;
+  return { success: true, message: "Driver rankings fetched", data: rankings };
 };
 
 /**
  * GET /api/v1/admin/reports/export
  * Export tất cả trips ra CSV
  */
-export const exportReportCSV = async ({ type = "trips", startDate, endDate } = {}) => {
+export const exportReportCSV = async ({
+  type = "trips",
+  startDate,
+  endDate,
+} = {}) => {
   const dateFilter = {};
   if (startDate) dateFilter.$gte = new Date(startDate);
   if (endDate) dateFilter.$lte = new Date(endDate);
@@ -148,29 +165,43 @@ export const exportReportCSV = async ({ type = "trips", startDate, endDate } = {
       .lean();
 
     // Tạo nội dung CSV
-    const header = "tripId,status,parentName,parentEmail,kidName,driverLicense,pickupAddress,dropoffAddress,createdAt\n";
-    const rows = trips.map((t) => [
-      t._id,
-      t.status,
-      t.parentId?.fullName ?? "",
-      t.parentId?.email ?? "",
-      t.kidId?.fullName ?? "",
-      t.driverId?.licenseNumber ?? "",
-      t.routeId?.estimatedPickupAddress ||
-        t.routeId?.actualPickupAddress ||
-        "",
-      t.routeId?.estimatedDropoffAddress ||
-        t.routeId?.actualDropoffAddress ||
-        "",
-      t.createdAt?.toISOString() ?? "",
-    ].join(",")).join("\n");
+    const header =
+      "tripId,status,parentName,parentEmail,kidName,driverLicense,pickupAddress,dropoffAddress,createdAt\n";
+    const rows = trips
+      .map((t) =>
+        [
+          t._id,
+          t.status,
+          t.parentId?.fullName ?? "",
+          t.parentId?.email ?? "",
+          t.kidId?.fullName ?? "",
+          t.driverId?.licenseNumber ?? "",
+          t.routeId?.estimatedPickupAddress ||
+            t.routeId?.actualPickupAddress ||
+            "",
+          t.routeId?.estimatedDropoffAddress ||
+            t.routeId?.actualDropoffAddress ||
+            "",
+          t.createdAt?.toISOString() ?? "",
+        ].join(","),
+      )
+      .join("\n");
 
-    return { csv: header + rows, filename: `trips_export_${Date.now()}.csv` };
+    return {
+      success: true,
+      message: "CSV exported",
+      data: { csv: header + rows, filename: `trips_export_${Date.now()}.csv` },
+    };
   }
 
   if (type === "alerts") {
-    const header = "alertId,type,level,status,driverLicense,parentName,detectedAt,resolvedAt\n";
-    return { csv: header, filename: `alerts_export_${Date.now()}.csv` };
+    const header =
+      "alertId,type,level,status,driverLicense,parentName,detectedAt,resolvedAt\n";
+    return {
+      success: true,
+      message: "CSV exported",
+      data: { csv: header, filename: `alerts_export_${Date.now()}.csv` },
+    };
   }
 
   throw new Error("type phải là 'trips' hoặc 'alerts'.");
@@ -183,5 +214,9 @@ export const getAdvancedReports = async () => {
     getAlertReport(),
     getDriverRankingReport(),
   ]);
-  return { ...tripReport, ...alertReport, driverRankings };
+  return {
+    success: true,
+    message: "Advanced reports fetched",
+    data: { ...tripReport, ...alertReport, driverRankings },
+  };
 };

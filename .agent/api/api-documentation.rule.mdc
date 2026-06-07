@@ -1,0 +1,32 @@
+# API Documentation Rule
+
+Mỗi endpoint API phải được mô tả theo cấu trúc sau:
+
+1. Endpoint Name
+2. HTTP Method
+3. URL
+4. Description
+5. Authentication Requirement
+6. Request Parameters
+7. Request Body
+8. Success Response
+9. Error Responses
+
+Không được bỏ qua Request Body hoặc Response Body nếu endpoint có sử dụng.
+
+Response phải sử dụng ví dụ JSON thực tế.
+
+Mọi field phải có:
+
+* name
+* type
+* required
+* description
+
+Nếu endpoint yêu cầu xác thực:
+
+* ghi rõ role được phép truy cập
+
+Nếu endpoint thay đổi:
+
+* cập nhật toàn bộ tài liệu liên quan.

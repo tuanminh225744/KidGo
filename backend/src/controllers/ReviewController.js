@@ -1,5 +1,6 @@
 import * as reviewService from "../services/review.service.js";
 import { AppError } from "../utils/AppError.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * POST /api/v1/reviews
@@ -11,20 +12,13 @@ export const upsertReview = async (req, res, next) => {
     const parentId = req.user.id;
     const { tripId, rating, comment, tags } = req.body;
 
-    const review = await reviewService.upsertReview(parentId, {
+    const result = await reviewService.upsertReview(parentId, {
       tripId,
       rating,
       comment,
       tags,
     });
-
-    res.status(200).json({
-      success: true,
-      message: review.isNew
-        ? "Đã gửi đánh giá thành công."
-        : "Đã cập nhật đánh giá thành công.",
-      data: review,
-    });
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -43,7 +37,7 @@ export const getDriverReviewsHandler = async (req, res, next) => {
       page: +page || 1,
       limit: +limit || 20,
     });
-    res.status(200).json({ success: true, ...result });
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }

@@ -1,5 +1,6 @@
 import { getUserById, updateUser } from "../services/user.service.js";
 import { AppError } from "../utils/AppError.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * GET /api/v1/users/me
@@ -7,11 +8,8 @@ import { AppError } from "../utils/AppError.js";
  */
 export const getCurrentProfile = async (req, res, next) => {
   try {
-    const user = await getUserById(req.user.id)
-    res.status(200).json({
-      success: true,
-      data: user,
-    });
+    const result = await getUserById(req.user.id);
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -30,13 +28,13 @@ export const updateProfile = async (req, res, next) => {
     if (email) updateData.email = email;
     if (avatar) updateData.avatar = avatar;
 
-    const updatedUser = await updateUser(req.user.id, updateData);
-
-    res.status(200).json({
-      success: true,
-      message: "Cập nhật profile thành công",
-      data: updatedUser,
-    });
+    const result = await updateUser(req.user.id, updateData);
+    return success(
+      res,
+      result.data,
+      result.message || "Cập nhật profile thành công",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -53,7 +51,8 @@ export const updateDeviceToken = async (req, res, next) => {
       throw new AppError("Vui lòng cung cấp deviceToken", 400);
     }
 
-    const user = await getUserById(req.user.id);
+    const fetchResult = await getUserById(req.user.id);
+    const user = fetchResult.data;
 
     // Thêm token nếu chưa tồn tại
     let deviceTokens = user.deviceTokens || [];
@@ -62,10 +61,7 @@ export const updateDeviceToken = async (req, res, next) => {
       await updateUser(req.user.id, { deviceTokens });
     }
 
-    res.status(200).json({
-      success: true,
-      message: "Cập nhật Device Token thành công",
-    });
+    return success(res, null, "Cập nhật Device Token thành công", 200);
   } catch (error) {
     next(error);
   }
@@ -85,16 +81,13 @@ export const uploadUserAvatar = async (req, res, next) => {
     const avatarUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
 
     // Lưu vào tài khoản user
-    const updatedUser = await updateUser(req.user.id, { avatar: avatarUrl });
-
-    res.status(200).json({
-      success: true,
-      message: "Upload ảnh đại diện thành công",
-      data: {
-        avatarUrl,
-        user: updatedUser,
-      },
-    });
+    const result = await updateUser(req.user.id, { avatar: avatarUrl });
+    return success(
+      res,
+      { avatarUrl, user: result.data },
+      result.message || "Upload ảnh đại diện thành công",
+      200,
+    );
   } catch (error) {
     next(error);
   }

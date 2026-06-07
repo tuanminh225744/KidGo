@@ -1,5 +1,6 @@
 import * as kidService from "../services/kid.service.js";
 import { AppError, AuthorizationError } from "../utils/AppError.js";
+import { success, error } from "../utils/response.js";
 
 const sanitizeKid = (kid) => {
   const kidObject = kid.toObject ? kid.toObject() : { ...kid };
@@ -8,7 +9,8 @@ const sanitizeKid = (kid) => {
 };
 
 const ensureParentOwnsKid = async (kidId, parentId) => {
-  const kid = await kidService.getKidById(kidId);
+  const result = await kidService.getKidById(kidId);
+  const kid = result.data;
   const ownerId =
     kid.parentId?._id?.toString?.() || kid.parentId?.toString?.() || null;
 
@@ -22,13 +24,13 @@ const ensureParentOwnsKid = async (kidId, parentId) => {
 // GET /api/v1/kids
 export const getKids = async (req, res, next) => {
   try {
-    const kids = await kidService.getKidsByParent(req.user.id);
-
-    res.status(200).json({
-      success: true,
-      count: kids.length,
-      data: kids.map(sanitizeKid),
-    });
+    const result = await kidService.getKidsByParent(req.user.id);
+    return success(
+      res,
+      { count: result.data.length, data: result.data.map(sanitizeKid) },
+      result.message,
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -37,7 +39,12 @@ export const getKids = async (req, res, next) => {
 // POST /api/v1/kids
 export const createKid = async (req, res, next) => {
   try {
-    const { securitySettings = {}, securityQuestion, securityAnswer, ...restBody } = req.body;
+    const {
+      securitySettings = {},
+      securityQuestion,
+      securityAnswer,
+      ...restBody
+    } = req.body;
     const kidPayload = {
       ...restBody,
       parentId: req.user.id,
@@ -57,15 +64,13 @@ export const createKid = async (req, res, next) => {
       kidPayload.securityAnswer = undefined;
     }
 
-    const kid = await kidService.createKid({
-      ...kidPayload,
-    });
-
-    res.status(201).json({
-      success: true,
-      message: "Tạo hồ sơ kid thành công.",
-      data: sanitizeKid(kid),
-    });
+    const result = await kidService.createKid({ ...kidPayload });
+    return success(
+      res,
+      sanitizeKid(result.data),
+      result.message || "Tạo hồ sơ kid thành công.",
+      201,
+    );
   } catch (error) {
     next(error);
   }
@@ -75,11 +80,7 @@ export const createKid = async (req, res, next) => {
 export const getKidDetail = async (req, res, next) => {
   try {
     const kid = await ensureParentOwnsKid(req.params.kidId, req.user.id);
-
-    res.status(200).json({
-      success: true,
-      data: sanitizeKid(kid),
-    });
+    return success(res, sanitizeKid(kid), "Kid fetched", 200);
   } catch (error) {
     next(error);
   }
@@ -89,7 +90,12 @@ export const getKidDetail = async (req, res, next) => {
 export const updateKidDetail = async (req, res, next) => {
   try {
     await ensureParentOwnsKid(req.params.kidId, req.user.id);
-    const { securitySettings = {}, securityQuestion, securityAnswer, ...restBody } = req.body;
+    const {
+      securitySettings = {},
+      securityQuestion,
+      securityAnswer,
+      ...restBody
+    } = req.body;
     const updatePayload = {
       ...restBody,
       securitySettings: {
@@ -108,13 +114,13 @@ export const updateKidDetail = async (req, res, next) => {
       updatePayload.securityAnswer = undefined;
     }
 
-    const updatedKid = await kidService.updateKid(req.params.kidId, updatePayload);
-
-    res.status(200).json({
-      success: true,
-      message: "Cập nhật hồ sơ kid thành công.",
-      data: sanitizeKid(updatedKid),
-    });
+    const result = await kidService.updateKid(req.params.kidId, updatePayload);
+    return success(
+      res,
+      sanitizeKid(result.data),
+      result.message || "Cập nhật hồ sơ kid thành công.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -124,13 +130,13 @@ export const updateKidDetail = async (req, res, next) => {
 export const deleteKid = async (req, res, next) => {
   try {
     await ensureParentOwnsKid(req.params.kidId, req.user.id);
-    const deletedKid = await kidService.softDeleteKid(req.params.kidId);
-
-    res.status(200).json({
-      success: true,
-      message: "Đã vô hiệu hóa hồ sơ kid.",
-      data: sanitizeKid(deletedKid),
-    });
+    const result = await kidService.softDeleteKid(req.params.kidId);
+    return success(
+      res,
+      sanitizeKid(result.data),
+      result.message || "Đã vô hiệu hóa hồ sơ kid.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -142,17 +148,17 @@ export const setupKidSecurity = async (req, res, next) => {
     await ensureParentOwnsKid(req.params.kidId, req.user.id);
     const { securityQuestion, securityAnswer } = req.body;
 
-    const updatedKid = await kidService.setupSecurityQuestion(
+    const result = await kidService.setupSecurityQuestion(
       req.params.kidId,
       securityQuestion,
       securityAnswer,
     );
-
-    res.status(200).json({
-      success: true,
-      message: "Thiết lập security question thành công.",
-      data: sanitizeKid(updatedKid),
-    });
+    return success(
+      res,
+      sanitizeKid(result.data),
+      result.message || "Thiết lập security question thành công.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -161,16 +167,18 @@ export const setupKidSecurity = async (req, res, next) => {
 // GET /api/v1/kids/:kidId/security-question
 export const getKidSecurityQuestion = async (req, res, next) => {
   try {
-    const kid = await kidService.getKidSecurityQuestion(req.params.kidId);
-
-    res.status(200).json({
-      success: true,
-      data: {
+    const result = await kidService.getKidSecurityQuestion(req.params.kidId);
+    const kid = result.data;
+    return success(
+      res,
+      {
         kidId: kid._id,
         fullName: kid.fullName,
         securityQuestion: kid.securityQuestion,
       },
-    });
+      result.message,
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -180,17 +188,11 @@ export const getKidSecurityQuestion = async (req, res, next) => {
 export const verifyKidSecurityAnswer = async (req, res, next) => {
   try {
     const { securityAnswer } = req.body;
-    const isValid = await kidService.verifySecurityAnswer(
+    const result = await kidService.verifySecurityAnswer(
       req.params.kidId,
       securityAnswer,
     );
-
-    res.status(200).json({
-      success: true,
-      data: {
-        isValid,
-      },
-    });
+    return success(res, { isValid: result.data }, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -206,18 +208,15 @@ export const uploadKidAvatar = async (req, res, next) => {
     }
 
     const avatarUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
-    const updatedKid = await kidService.updateKid(req.params.kidId, {
+    const result = await kidService.updateKid(req.params.kidId, {
       avatar: avatarUrl,
     });
-
-    res.status(200).json({
-      success: true,
-      message: "Upload ảnh đại diện kid thành công.",
-      data: {
-        avatarUrl,
-        kid: sanitizeKid(updatedKid),
-      },
-    });
+    return success(
+      res,
+      { avatarUrl, kid: sanitizeKid(result.data) },
+      result.message || "Upload ảnh đại diện kid thành công.",
+      200,
+    );
   } catch (error) {
     next(error);
   }

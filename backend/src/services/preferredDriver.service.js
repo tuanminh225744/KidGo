@@ -42,7 +42,11 @@ export const addPreferredDriver = async ({
     });
 
     await newPreferredDriver.save();
-    return newPreferredDriver;
+    return {
+      success: true,
+      message: "Preferred driver added",
+      data: newPreferredDriver,
+    };
   } catch (error) {
     console.error("Lỗi khi thêm tài xế ưu tiên:", error);
     throw new Error(error.message || "Lỗi hệ thống khi thêm tài xế ưu tiên");
@@ -65,7 +69,7 @@ export const getPreferredDrivers = async (parentId) => {
           select: "fullName phone email avatar",
         },
       });
-    return list;
+    return { success: true, message: "Preferred drivers fetched", data: list };
   } catch (error) {
     console.error("Lỗi khi tải danh sách tài xế ưu tiên:", error);
     throw new Error("Lỗi hệ thống khi lấy danh sách tài xế ưu tiên");
@@ -90,6 +94,7 @@ export const removePreferredDriver = async (parentId, driverId) => {
     return {
       success: true,
       message: "Đã xóa tài xế khỏi danh sách ưu tiên thành công",
+      data: null,
     };
   } catch (error) {
     console.error("Lỗi khi xóa tài xế ưu tiên:", error);
@@ -122,7 +127,11 @@ export const updatePreferredDriver = async (parentId, driverId, updateData) => {
       throw new Error("Tài xế này không nằm trong danh sách ưu tiên của bạn.");
     }
 
-    return updated;
+    return {
+      success: true,
+      message: "Preferred driver updated",
+      data: updated,
+    };
   } catch (error) {
     console.error("Lỗi khi cập nhật tài xế ưu tiên:", error);
     throw new Error(

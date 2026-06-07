@@ -1,4 +1,5 @@
 import * as reportService from "../services/report.service.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * POST /api/v1/reports
@@ -7,12 +8,13 @@ import * as reportService from "../services/report.service.js";
  */
 export const createReport = async (req, res, next) => {
   try {
-    const report = await reportService.createReport(req.user.id, req.body);
-    res.status(201).json({
-      success: true,
-      message: "Đã tạo report thành công.",
-      data: report,
-    });
+    const result = await reportService.createReport(req.user.id, req.body);
+    return success(
+      res,
+      result.data,
+      result.message || "Đã tạo report thành công.",
+      201,
+    );
   } catch (error) {
     next(error);
   }
@@ -27,11 +29,12 @@ export const getReportsByTripIdHandler = async (req, res, next) => {
   try {
     const { tripId } = req.params;
     const result = await reportService.getReportsByTripId(tripId, req.user);
-    res.status(200).json({
-      success: true,
-      count: result.reports.length,
-      data: result,
-    });
+    return success(
+      res,
+      { count: result.data.reports.length, data: result.data },
+      result.message,
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -45,12 +48,13 @@ export const getReportsByTripIdHandler = async (req, res, next) => {
 export const deleteReportHandler = async (req, res, next) => {
   try {
     const { reportId } = req.params;
-    const report = await reportService.deleteReport(reportId, req.user);
-    res.status(200).json({
-      success: true,
-      message: "Đã xóa report thành công.",
-      data: report,
-    });
+    const result = await reportService.deleteReport(reportId, req.user);
+    return success(
+      res,
+      result.data,
+      result.message || "Đã xóa report thành công.",
+      200,
+    );
   } catch (error) {
     next(error);
   }

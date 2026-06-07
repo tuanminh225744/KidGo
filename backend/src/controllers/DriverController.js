@@ -7,6 +7,7 @@ import {
   AuthorizationError,
   NotFoundError,
 } from "../utils/AppError.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * GET /api/v1/drivers/me
@@ -14,13 +15,10 @@ import {
  */
 export const getDriverProfile = async (req, res, next) => {
   try {
-    const user = await driverService.getDriverByUserId(req.user.id);
-    const driver = await driverService.getDriverById(user._id);
-
-    res.status(200).json({
-      success: true,
-      data: driver,
-    });
+    const userRes = await driverService.getDriverByUserId(req.user.id);
+    const user = userRes.data;
+    const driverRes = await driverService.getDriverById(user._id);
+    return success(res, driverRes.data, driverRes.message, 200);
   } catch (error) {
     next(error);
   }
@@ -32,7 +30,8 @@ export const getDriverProfile = async (req, res, next) => {
  */
 export const updateDriverProfile = async (req, res, next) => {
   try {
-    const user = await driverService.getDriverByUserId(req.user.id);
+    const userRes = await driverService.getDriverByUserId(req.user.id);
+    const user = userRes.data;
     const { licenseNumber, licenseExpiry, certificationLevel } = req.body;
 
     const updateData = {};
@@ -42,12 +41,12 @@ export const updateDriverProfile = async (req, res, next) => {
       updateData.certificationLevel = certificationLevel;
 
     const updated = await driverService.updateDriver(user._id, updateData);
-
-    res.status(200).json({
-      success: true,
-      message: "Cập nhật thông tin tài xế thành công.",
-      data: updated,
-    });
+    return success(
+      res,
+      updated.data,
+      updated.message || "Cập nhật thông tin tài xế thành công.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -60,15 +59,17 @@ export const updateDriverProfile = async (req, res, next) => {
 export const toggleDriverStatus = async (req, res, next) => {
   try {
     const { isOnline } = req.body;
-    const user = await driverService.getDriverByUserId(req.user.id);
+    const userRes = await driverService.getDriverByUserId(req.user.id);
+    const user = userRes.data;
 
     const updated = await driverService.updateDriver(user._id, { isOnline });
-
-    res.status(200).json({
-      success: true,
-      message: `${isOnline ? "Bật" : "Tắt"} trạng thái sẵn sàng thành công.`,
-      data: updated,
-    });
+    return success(
+      res,
+      updated.data,
+      updated.message ||
+        `${isOnline ? "Bật" : "Tắt"} trạng thái sẵn sàng thành công.`,
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -81,7 +82,8 @@ export const toggleDriverStatus = async (req, res, next) => {
 export const updateDriverLocation = async (req, res, next) => {
   try {
     const { latitude, longitude } = req.body;
-    const driver = await driverService.getDriverByUserId(req.user.id);
+    const userRes = await driverService.getDriverByUserId(req.user.id);
+    const driver = userRes.data;
 
     // Lưu vào Redis trước
     await driverService.updateLocationInRedis(driver._id, latitude, longitude);
@@ -92,15 +94,15 @@ export const updateDriverLocation = async (req, res, next) => {
       coordinates: [longitude, latitude],
     };
 
-    const updated = await driverService.updateDriver(user._id, {
+    const updated = await driverService.updateDriver(driver._id, {
       currentLocation,
     });
-
-    res.status(200).json({
-      success: true,
-      message: "Cập nhật vị trí thành công.",
-      data: updated,
-    });
+    return success(
+      res,
+      updated.data,
+      updated.message || "Cập nhật vị trí thành công.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -112,14 +114,15 @@ export const updateDriverLocation = async (req, res, next) => {
  */
 export const getDriverTrips = async (req, res, next) => {
   try {
-    const user = await driverService.getDriverByUserId(req.user.id);
-    const trips = await tripService.getTripsByDriver(user._id);
-
-    res.status(200).json({
-      success: true,
-      count: trips.length,
-      data: trips,
-    });
+    const userRes = await driverService.getDriverByUserId(req.user.id);
+    const user = userRes.data;
+    const result = await tripService.getTripsByDriver(user._id);
+    return success(
+      res,
+      { count: result.data.length, data: result.data },
+      result.message,
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -131,13 +134,10 @@ export const getDriverTrips = async (req, res, next) => {
  */
 export const getDriverEarnings = async (req, res, next) => {
   try {
-    const user = await driverService.getDriverByUserId(req.user.id);
-    const earnings = await tripService.getDriverEarnings(user._id);
-
-    res.status(200).json({
-      success: true,
-      data: earnings,
-    });
+    const userRes = await driverService.getDriverByUserId(req.user.id);
+    const user = userRes.data;
+    const result = await tripService.getDriverEarnings(user._id);
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -149,14 +149,15 @@ export const getDriverEarnings = async (req, res, next) => {
  */
 export const getDriverReviews = async (req, res, next) => {
   try {
-    const user = await driverService.getDriverByUserId(req.user.id);
-    const reviews = await reviewService.getReviewsByDriver(user._id);
-
-    res.status(200).json({
-      success: true,
-      count: reviews.length,
-      data: reviews,
-    });
+    const userRes = await driverService.getDriverByUserId(req.user.id);
+    const user = userRes.data;
+    const result = await reviewService.getReviewsByDriver(user._id);
+    return success(
+      res,
+      { count: result.data.length, data: result.data },
+      result.message,
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -183,12 +184,7 @@ export const addVehicle = async (req, res, next) => {
     });
 
     await vehicle.save();
-
-    res.status(201).json({
-      success: true,
-      message: "Thêm xe thành công.",
-      data: vehicle,
-    });
+    return success(res, vehicle, "Thêm xe thành công.", 201);
   } catch (error) {
     next(error);
   }
@@ -200,14 +196,15 @@ export const addVehicle = async (req, res, next) => {
  */
 export const getDriverVehicles = async (req, res, next) => {
   try {
-    const user = await driverService.getDriverByUserId(req.user.id);
+    const userRes = await driverService.getDriverByUserId(req.user.id);
+    const user = userRes.data;
     const vehicles = await Vehicle.find({ driverId: user._id });
-
-    res.status(200).json({
-      success: true,
-      count: vehicles.length,
-      data: vehicles,
-    });
+    return success(
+      res,
+      { count: vehicles.length, data: vehicles },
+      "Driver vehicles fetched",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -232,16 +229,10 @@ export const setActiveVehicle = async (req, res, next) => {
 
     // Đặt tất cả xe của driver này là không active
     await Vehicle.updateMany({ driverId: user._id }, { isActive: false });
-
     // Đặt xe này là active
     vehicle.isActive = true;
     await vehicle.save();
-
-    res.status(200).json({
-      success: true,
-      message: "Chọn xe đang dùng thành công.",
-      data: vehicle,
-    });
+    return success(res, vehicle, "Chọn xe đang dùng thành công.", 200);
   } catch (error) {
     next(error);
   }

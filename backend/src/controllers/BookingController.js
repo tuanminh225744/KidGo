@@ -4,6 +4,7 @@ import {
   NotFoundError,
   AuthorizationError,
 } from "../utils/AppError.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * GET /api/v1/bookings
@@ -11,13 +12,13 @@ import {
  */
 export const getBookings = async (req, res, next) => {
   try {
-    const bookings = await bookingService.getBookingsByParent(req.user.id);
-
-    res.status(200).json({
-      success: true,
-      count: bookings.length,
-      data: bookings,
-    });
+    const result = await bookingService.getBookingsByParent(req.user.id);
+    return success(
+      res,
+      { count: result.data.length, data: result.data },
+      result.message,
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -29,8 +30,14 @@ export const getBookings = async (req, res, next) => {
  */
 export const createBooking = async (req, res, next) => {
   try {
-    const { kidId, routeId, scheduleId, scheduledTime, preferredDriverId, paymentId } =
-      req.body;
+    const {
+      kidId,
+      routeId,
+      scheduleId,
+      scheduledTime,
+      preferredDriverId,
+      paymentId,
+    } = req.body;
 
     const bookingData = {
       parentId: req.user.id,
@@ -44,12 +51,12 @@ export const createBooking = async (req, res, next) => {
     };
 
     const result = await bookingService.createBooking(bookingData);
-
-    res.status(201).json({
-      success: true,
-      message: "Tạo booking thành công.",
-      data: result,
-    });
+    return success(
+      res,
+      result.data,
+      result.message || "Tạo booking thành công.",
+      201,
+    );
   } catch (error) {
     next(error);
   }
@@ -61,17 +68,13 @@ export const createBooking = async (req, res, next) => {
  */
 export const getBookingDetail = async (req, res, next) => {
   try {
-    const booking = await bookingService.getBookingById(req.params.bookingId);
-
+    const result = await bookingService.getBookingById(req.params.bookingId);
+    const booking = result.data;
     // Verify ownership
     if (booking.parentId.toString() !== req.user.id.toString()) {
       throw new AuthorizationError("Bạn không có quyền truy cập booking này.");
     }
-
-    res.status(200).json({
-      success: true,
-      data: booking,
-    });
+    return success(res, booking, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -83,8 +86,10 @@ export const getBookingDetail = async (req, res, next) => {
  */
 export const cancelBooking = async (req, res, next) => {
   try {
-    const booking = await bookingService.getBookingById(req.params.bookingId);
-
+    const resultFetch = await bookingService.getBookingById(
+      req.params.bookingId,
+    );
+    const booking = resultFetch.data;
     // Verify ownership
     if (booking.parentId.toString() !== req.user.id.toString()) {
       throw new AuthorizationError("Bạn không có quyền hủy booking này.");
@@ -98,16 +103,16 @@ export const cancelBooking = async (req, res, next) => {
       );
     }
 
-    const cancelledBooking = await bookingService.cancelBooking(
+    const cancelled = await bookingService.cancelBooking(
       req.params.bookingId,
       req.user.id,
     );
-
-    res.status(200).json({
-      success: true,
-      message: "Hủy booking thành công.",
-      data: cancelledBooking,
-    });
+    return success(
+      res,
+      cancelled.data,
+      cancelled.message || "Hủy booking thành công.",
+      200,
+    );
   } catch (error) {
     next(error);
   }

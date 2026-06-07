@@ -3,52 +3,56 @@ import bcrypt from "bcryptjs";
 import { AppError, NotFoundError } from "../utils/AppError.js";
 
 export const getKidsByParent = async (parentId) => {
-  return Kid.find({ parentId, isActive: true }).sort({ createdAt: -1 });
+  const list = await Kid.find({ parentId, isActive: true }).sort({
+    createdAt: -1,
+  });
+  return { success: true, message: "Kids fetched", data: list };
 };
 
 export const createKid = async (kidData) => {
-  return Kid.create(kidData);
+  const kid = await Kid.create(kidData);
+  return { success: true, message: "Kid created", data: kid };
 };
 
 export const getKidById = async (kidId) => {
   const kid = await Kid.findById(kidId).populate(
     "parentId",
-    "fullName phone email avatar"
+    "fullName phone email avatar",
   );
 
   if (!kid || !kid.isActive) {
     throw new NotFoundError("Không tìm thấy hồ sơ kid.");
   }
 
-  return kid;
+  return { success: true, message: "Kid fetched", data: kid };
 };
 
 export const updateKid = async (kidId, updateData) => {
   const updatedKid = await Kid.findOneAndUpdate(
     { _id: kidId, isActive: true },
     { $set: updateData },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   ).populate("parentId", "fullName phone email avatar");
 
   if (!updatedKid) {
     throw new NotFoundError("Không tìm thấy hồ sơ kid.");
   }
 
-  return updatedKid;
+  return { success: true, message: "Kid updated", data: updatedKid };
 };
 
 export const softDeleteKid = async (kidId) => {
   const deletedKid = await Kid.findOneAndUpdate(
     { _id: kidId, isActive: true },
     { $set: { isActive: false } },
-    { new: true }
+    { new: true },
   ).populate("parentId", "fullName phone email avatar");
 
   if (!deletedKid) {
     throw new NotFoundError("Không tìm thấy hồ sơ kid.");
   }
 
-  return deletedKid;
+  return { success: true, message: "Kid soft-deleted", data: deletedKid };
 };
 
 export const setupSecurityQuestion = async (kidId, question, answer) => {
@@ -63,19 +67,19 @@ export const setupSecurityQuestion = async (kidId, question, answer) => {
         securityAnswer: hashedAnswer,
       },
     },
-    { new: true, runValidators: true }
+    { new: true, runValidators: true },
   ).populate("parentId", "fullName phone email avatar");
 
   if (!updatedKid) {
     throw new NotFoundError("Không tìm thấy hồ sơ kid.");
   }
 
-  return updatedKid;
+  return { success: true, message: "Security question set", data: updatedKid };
 };
 
 export const getKidSecurityQuestion = async (kidId) => {
   const kid = await Kid.findById(kidId).select(
-    "fullName securityQuestion isActive"
+    "fullName securityQuestion isActive",
   );
 
   if (!kid || !kid.isActive) {
@@ -86,7 +90,7 @@ export const getKidSecurityQuestion = async (kidId) => {
   //   throw new NotFoundError("Kid này chưa thiết lập security question.");
   // }
 
-  return kid;
+  return { success: true, message: "Kid security question fetched", data: kid };
 };
 
 export const verifySecurityAnswer = async (kidId, answer) => {
@@ -100,5 +104,9 @@ export const verifySecurityAnswer = async (kidId, answer) => {
     throw new NotFoundError("Kid này chưa thiết lập security answer.");
   }
 
-  return bcrypt.compare(answer.toLowerCase().trim(), kid.securityAnswer);
+  const match = await bcrypt.compare(
+    answer.toLowerCase().trim(),
+    kid.securityAnswer,
+  );
+  return { success: true, message: "Security answer verified", data: match };
 };

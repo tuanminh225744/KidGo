@@ -48,7 +48,9 @@ export const driverStartPickup = async (tripId) => {
     };
     trip.securityQuestion = {
       required: !!kid?.securitySettings?.securityQuestion,
-      status: kid?.securitySettings?.securityQuestion ? "pending" : "not_required",
+      status: kid?.securitySettings?.securityQuestion
+        ? "pending"
+        : "not_required",
       data: null,
       verifiedAt: null,
     };
@@ -72,8 +74,7 @@ export const driverStartPickup = async (tripId) => {
     // Bắn Socket 1: Xe đang nổ máy di chuyển
     io.of("/parent").to(trip.parentId.toString()).emit("driver_is_coming", {
       title: "Tài xế đang quay xe tới!",
-      message:
-        "Tài xế đã bắt đầu di chuyển đến điểm đón bé.",
+      message: "Tài xế đã bắt đầu di chuyển đến điểm đón bé.",
       tripId: trip._id,
     });
 
@@ -88,21 +89,22 @@ export const driverStartPickup = async (tripId) => {
       });
     }
 
-    return trip;
+    return { success: true, message: "Driver started pickup", data: trip };
   } catch (error) {
     throw new Error(`Lỗi cập nhật chặng đường: ${error.message}`);
   }
 };
 
 /**
- * 2. Tài xế tới gặp mặt Bé 
+ * 2. Tài xế tới gặp mặt Bé
  */
 export const verifyTripOtp = async (tripId, enteredOtp) => {
   try {
     const trip = await Trip.findById(tripId);
     if (!trip) throw new Error("Hành trình không tồn tại.");
 
-    if (!trip.otp?.required) throw new Error("Chuyến đi này không yêu cầu OTP.");
+    if (!trip.otp?.required)
+      throw new Error("Chuyến đi này không yêu cầu OTP.");
 
     const storedOtp = await redisClient.get(`trip_otp:${trip._id}`);
     if (!storedOtp || storedOtp !== enteredOtp.toString()) {
@@ -112,7 +114,7 @@ export const verifyTripOtp = async (tripId, enteredOtp) => {
     await redisClient.del(`trip_otp:${trip._id}`);
 
     trip.otp = {
-      ...trip.otp.toObject?.() || trip.otp,
+      ...(trip.otp.toObject?.() || trip.otp),
       status: "passed",
       data: { otpVerified: true },
       verifiedAt: new Date(),
@@ -120,7 +122,7 @@ export const verifyTripOtp = async (tripId, enteredOtp) => {
 
     await trip.save();
     await trip.populate("routeId");
-    return trip;
+    return { success: true, message: "OTP verified", data: trip };
   } catch (error) {
     throw new Error(`Xác thực OTP thất bại: ${error.message}`);
   }
@@ -131,10 +133,11 @@ export const verifyTripPickupPhoto = async (tripId, photo) => {
     const trip = await Trip.findById(tripId);
     if (!trip) throw new Error("Hành trình không tồn tại.");
 
-    if (!trip.pickupPhoto?.required) throw new Error("Chuyến đi này không yêu cầu chụp ảnh đón.");
+    if (!trip.pickupPhoto?.required)
+      throw new Error("Chuyến đi này không yêu cầu chụp ảnh đón.");
 
     trip.pickupPhoto = {
-      ...trip.pickupPhoto.toObject?.() || trip.pickupPhoto,
+      ...(trip.pickupPhoto.toObject?.() || trip.pickupPhoto),
       status: "passed",
       data: { photo: photo || null },
       verifiedAt: new Date(),
@@ -142,7 +145,7 @@ export const verifyTripPickupPhoto = async (tripId, photo) => {
 
     await trip.save();
     await trip.populate("routeId");
-    return trip;
+    return { success: true, message: "Pickup photo verified", data: trip };
   } catch (error) {
     throw new Error(`Xác thực ảnh đón thất bại: ${error.message}`);
   }
@@ -153,10 +156,11 @@ export const verifyTripDropoffPhoto = async (tripId, photo) => {
     const trip = await Trip.findById(tripId);
     if (!trip) throw new Error("Hành trình không tồn tại.");
 
-    if (!trip.dropoffPhoto?.required) throw new Error("Chuyến đi này không yêu cầu chụp ảnh trả.");
+    if (!trip.dropoffPhoto?.required)
+      throw new Error("Chuyến đi này không yêu cầu chụp ảnh trả.");
 
     trip.dropoffPhoto = {
-      ...trip.dropoffPhoto.toObject?.() || trip.dropoffPhoto,
+      ...(trip.dropoffPhoto.toObject?.() || trip.dropoffPhoto),
       status: "passed",
       data: { photo: photo || null },
       verifiedAt: new Date(),
@@ -164,7 +168,7 @@ export const verifyTripDropoffPhoto = async (tripId, photo) => {
 
     await trip.save();
     await trip.populate("routeId");
-    return trip;
+    return { success: true, message: "Dropoff photo verified", data: trip };
   } catch (error) {
     throw new Error(`Xác thực ảnh trả thất bại: ${error.message}`);
   }
@@ -175,12 +179,11 @@ export const verifyTripSecurityQuestion = async (tripId, answer) => {
     const trip = await Trip.findById(tripId);
     if (!trip) throw new Error("Hành trình không tồn tại.");
 
-    if (!trip.securityQuestion?.required) throw new Error("Chuyến đi này không yêu cầu câu hỏi bảo mật.");
-
-
+    if (!trip.securityQuestion?.required)
+      throw new Error("Chuyến đi này không yêu cầu câu hỏi bảo mật.");
 
     trip.securityQuestion = {
-      ...trip.securityQuestion.toObject?.() || trip.securityQuestion,
+      ...(trip.securityQuestion.toObject?.() || trip.securityQuestion),
       status: "passed",
       data: {
         answer: answer || null,
@@ -190,7 +193,7 @@ export const verifyTripSecurityQuestion = async (tripId, answer) => {
 
     await trip.save();
     await trip.populate("routeId");
-    return trip;
+    return { success: true, message: "Security question verified", data: trip };
   } catch (error) {
     throw new Error(`Xác thực câu hỏi bảo mật thất bại: ${error.message}`);
   }
@@ -212,7 +215,10 @@ export const driverPickupKid = async (tripId) => {
       throw new Error("Chưa xác thực chụp ảnh đón.");
     }
 
-    if (trip.securityQuestion?.required && trip.securityQuestion?.status !== "passed") {
+    if (
+      trip.securityQuestion?.required &&
+      trip.securityQuestion?.status !== "passed"
+    ) {
       throw new Error("Chưa xác thực câu hỏi bảo mật.");
     }
 
@@ -231,7 +237,7 @@ export const driverPickupKid = async (tripId) => {
       tripId: trip._id,
     });
 
-    return trip;
+    return { success: true, message: "Kid picked up", data: trip };
   } catch (error) {
     throw new Error(`Lỗi quá trình tiếp nhận bé: ${error.message}`);
   }
@@ -255,10 +261,12 @@ export const driverDropoffKid = async (tripId) => {
 
     // Cập nhật tổng thu nhập cho tài xế nếu chuyến có payment
     if (trip.paymentId) {
-      const payment = await import("../models/operational/payment.model.js").then(m => m.default).then(Payment => Payment.findById(trip.paymentId));
+      const payment = await import("../models/operational/payment.model.js")
+        .then((m) => m.default)
+        .then((Payment) => Payment.findById(trip.paymentId));
       if (payment && payment.driverEarning) {
         await Driver.findByIdAndUpdate(trip.driverId, {
-          $inc: { totalEarnings: payment.driverEarning }
+          $inc: { totalEarnings: payment.driverEarning },
         });
       }
     }
@@ -274,7 +282,7 @@ export const driverDropoffKid = async (tripId) => {
       tripId: trip._id,
     });
 
-    return trip;
+    return { success: true, message: "Trip completed", data: trip };
   } catch (error) {
     throw new Error(`Lỗi ấn nút trả khách: ${error.message}`);
   }
@@ -283,7 +291,10 @@ export const driverDropoffKid = async (tripId) => {
 /**
  * 6. Lấy danh sách chuyến của phụ huynh (có thể filter theo status)
  */
-export const getParentTrips = async (parentId, { status, page = 1, limit = 20 } = {}) => {
+export const getParentTrips = async (
+  parentId,
+  { status, page = 1, limit = 20 } = {},
+) => {
   const query = { parentId };
   if (status) query.status = status;
 
@@ -297,7 +308,7 @@ export const getParentTrips = async (parentId, { status, page = 1, limit = 20 } 
       .populate({
         path: "driverId",
         select: "user licenseNumber rating",
-        populate: { path: "user", select: "fullName avatar phone" }
+        populate: { path: "user", select: "fullName avatar phone" },
       })
       .populate("kidId", "fullName avatar")
       .populate("vehicleId", "licensePlate model color")
@@ -306,10 +317,9 @@ export const getParentTrips = async (parentId, { status, page = 1, limit = 20 } 
   ]);
 
   return {
-    page,
-    total,
-    totalPages: Math.ceil(total / limit),
-    trips,
+    success: true,
+    message: "Parent trips fetched",
+    data: { page, total, totalPages: Math.ceil(total / limit), trips },
   };
 };
 
@@ -333,7 +343,7 @@ export const getTripsByDriver = async (
       .populate({
         path: "driverId",
         select: "user licenseNumber rating currentLocation isOnline",
-        populate: { path: "user", select: "fullName avatar phone" }
+        populate: { path: "user", select: "fullName avatar phone" },
       })
       .populate("kidId", "fullName avatar")
       .populate("vehicleId", "licensePlate model color")
@@ -342,10 +352,9 @@ export const getTripsByDriver = async (
   ]);
 
   return {
-    page,
-    total,
-    totalPages: Math.ceil(total / limit),
-    trips,
+    success: true,
+    message: "Driver trips fetched",
+    data: { page, total, totalPages: Math.ceil(total / limit), trips },
   };
 };
 
@@ -361,13 +370,13 @@ export const getActiveTrips = async (parentId) => {
     .populate({
       path: "driverId",
       select: "user licenseNumber rating currentLocation isOnline",
-      populate: { path: "user", select: "fullName avatar phone" }
+      populate: { path: "user", select: "fullName avatar phone" },
     })
     .populate("kidId", "fullName avatar")
     .populate("vehicleId", "licensePlate model color")
     .populate("paymentId");
 
-  return trips;
+  return { success: true, message: "Active trips fetched", data: trips };
 };
 
 /**
@@ -388,11 +397,14 @@ export const getTripDetail = async (tripId, userId, role) => {
   if (role === "parent" && trip.parentId.toString() !== userId.toString()) {
     throw new AppError("Bạn không có quyền xem chuyến này.", 403);
   }
-  if (role === "driver" && trip.driverId._id?.toString() !== userId.toString()) {
+  if (
+    role === "driver" &&
+    trip.driverId._id?.toString() !== userId.toString()
+  ) {
     throw new AppError("Bạn không có quyền xem chuyến này.", 403);
   }
 
-  return trip;
+  return { success: true, message: "Trip detail fetched", data: trip };
 };
 
 /**
@@ -425,13 +437,17 @@ export const cancelTrip = async (tripId, userId, role) => {
     cancelledBy: role,
   });
 
-  return trip;
+  return { success: true, message: "Trip cancelled", data: trip };
 };
 
 /**
  * 10. Ghi nhận GPS tick realtime từ tài xế
  */
-export const recordGpsTick = async (tripId, driverId, { lat, lng, speed, heading, accuracy }) => {
+export const recordGpsTick = async (
+  tripId,
+  driverId,
+  { lat, lng, speed, heading, accuracy },
+) => {
   const trip = await Trip.findById(tripId);
   if (!trip) throw new NotFoundError("Chuyến đi không tồn tại.");
   if (trip.status !== "in_progress") {
@@ -442,7 +458,7 @@ export const recordGpsTick = async (tripId, driverId, { lat, lng, speed, heading
   await redisClient.setex(
     `driver_location:${driverId}`,
     300,
-    JSON.stringify({ lat, lng, speed, heading, updatedAt: new Date() })
+    JSON.stringify({ lat, lng, speed, heading, updatedAt: new Date() }),
   );
 
   // Phát vị trí realtime qua Socket.IO cho parent
@@ -458,5 +474,5 @@ export const recordGpsTick = async (tripId, driverId, { lat, lng, speed, heading
     time: new Date(),
   });
 
-  return { ok: true };
+  return { success: true, message: "GPS tick recorded", data: { ok: true } };
 };

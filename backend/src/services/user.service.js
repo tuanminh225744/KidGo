@@ -1,20 +1,21 @@
-import User from '../models/core/user.model.js';
-import Driver from '../models/core/driver.model.js';
+import User from "../models/core/user.model.js";
+import Driver from "../models/core/driver.model.js";
 
 /**
  * Get user by ID including their role-specific details
- * @param {String} userId 
+ * @param {String} userId
  * @returns {Object} User document
  */
 export const getUserById = async (userId) => {
   try {
-    const user = await User.findById(userId).select("-password -deviceTokens")
-      .populate('driverId'); // Populate driver info if available
+    const user = await User.findById(userId)
+      .select("-password -deviceTokens")
+      .populate("driverId"); // Populate driver info if available
 
     if (!user || !user.isActive) {
-      throw new Error('User not found or is inactive');
+      throw new Error("User not found or is inactive");
     }
-    return user;
+    return { success: true, message: "User fetched", data: user };
   } catch (error) {
     throw new Error(`Error fetching user: ${error.message}`);
   }
@@ -22,8 +23,8 @@ export const getUserById = async (userId) => {
 
 /**
  * Update user details
- * @param {String} userId 
- * @param {Object} updateData 
+ * @param {String} userId
+ * @param {Object} updateData
  * @returns {Object} Updated user document
  */
 export const updateUser = async (userId, updateData) => {
@@ -31,12 +32,12 @@ export const updateUser = async (userId, updateData) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { $set: updateData },
-      { returnDocument: 'after', runValidators: true }
+      { returnDocument: "after", runValidators: true },
     ).select("-password -deviceTokens");
     if (!updatedUser) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
-    return updatedUser;
+    return { success: true, message: "User updated", data: updatedUser };
   } catch (error) {
     throw new Error(`Error updating user: ${error.message}`);
   }
@@ -44,7 +45,7 @@ export const updateUser = async (userId, updateData) => {
 
 /**
  * Soft delete a user by setting isActive to false
- * @param {String} userId 
+ * @param {String} userId
  * @returns {Object} Soft deleted user document
  */
 export const softDeleteUser = async (userId) => {
@@ -52,12 +53,12 @@ export const softDeleteUser = async (userId) => {
     const deletedUser = await User.findByIdAndUpdate(
       userId,
       { isActive: false },
-      { returnDocument: 'after' }
+      { returnDocument: "after" },
     ).select("-password -deviceTokens");
     if (!deletedUser) {
-      throw new Error('User not found');
+      throw new Error("User not found");
     }
-    return deletedUser;
+    return { success: true, message: "User soft deleted", data: deletedUser };
   } catch (error) {
     throw new Error(`Error soft deleting user: ${error.message}`);
   }
@@ -65,8 +66,8 @@ export const softDeleteUser = async (userId) => {
 
 /**
  * Toggle user active status and sync with Driver mapping if applicable
- * @param {String} userId 
- * @param {Boolean} isActive 
+ * @param {String} userId
+ * @param {Boolean} isActive
  * @returns {Object} Updated user document
  */
 export const toggleUserStatus = async (userId, isActive) => {
@@ -74,7 +75,7 @@ export const toggleUserStatus = async (userId, isActive) => {
     const updatedUser = await User.findByIdAndUpdate(
       userId,
       { isActive },
-      { returnDocument: "after", runValidators: true }
+      { returnDocument: "after", runValidators: true },
     ).select("-password -deviceTokens");
     if (!updatedUser) {
       throw new Error("User not found");
@@ -84,7 +85,7 @@ export const toggleUserStatus = async (userId, isActive) => {
       await Driver.findByIdAndUpdate(updatedUser.driverId, { isActive });
     }
 
-    return updatedUser;
+    return { success: true, message: "User status toggled", data: updatedUser };
   } catch (error) {
     throw new Error(`Error toggling user status: ${error.message}`);
   }
@@ -95,7 +96,12 @@ export const toggleUserStatus = async (userId, isActive) => {
 /**
  * Lấy danh sách phụ huynh (có filter + phân trang)
  */
-export const listParents = async ({ search, isActive, page = 1, limit = 20 } = {}) => {
+export const listParents = async ({
+  search,
+  isActive,
+  page = 1,
+  limit = 20,
+} = {}) => {
   const query = { role: "parent" };
   if (typeof isActive === "boolean") query.isActive = isActive;
   if (search) {
@@ -116,7 +122,11 @@ export const listParents = async ({ search, isActive, page = 1, limit = 20 } = {
     User.countDocuments(query),
   ]);
 
-  return { page, total, totalPages: Math.ceil(total / limit), users };
+  return {
+    success: true,
+    message: "Parents list fetched",
+    data: { page, total, totalPages: Math.ceil(total / limit), users },
+  };
 };
 
 /**
@@ -124,8 +134,9 @@ export const listParents = async ({ search, isActive, page = 1, limit = 20 } = {
  */
 export const getParentById = async (userId) => {
   const user = await User.findById(userId).select("-password -deviceTokens");
-  if (!user || user.role !== "parent") throw new Error("Phụ huynh không tồn tại.");
-  return user;
+  if (!user || user.role !== "parent")
+    throw new Error("Phụ huynh không tồn tại.");
+  return { success: true, message: "Parent fetched", data: user };
 };
 
 /**
@@ -135,10 +146,10 @@ export const suspendUser = async (userId) => {
   const user = await User.findByIdAndUpdate(
     userId,
     { isActive: false },
-    { new: true }
+    { new: true },
   ).select("-password -deviceTokens");
   if (!user) throw new Error("Người dùng không tồn tại.");
-  return user;
+  return { success: true, message: "User suspended", data: user };
 };
 
 /**
@@ -148,8 +159,8 @@ export const reactivateUser = async (userId) => {
   const user = await User.findByIdAndUpdate(
     userId,
     { isActive: true },
-    { new: true }
+    { new: true },
   ).select("-password -deviceTokens");
   if (!user) throw new Error("Người dùng không tồn tại.");
-  return user;
+  return { success: true, message: "User reactivated", data: user };
 };

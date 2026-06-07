@@ -52,7 +52,7 @@ export const sendOTP = async (email) => {
     return {
       success: true,
       message: "OTP đã được gửi thành công",
-      messageId: info.messageId,
+      data: { messageId: info.messageId },
     };
   } catch (error) {
     console.error("Lỗi khi gửi OTP:", error);
@@ -76,6 +76,7 @@ export const verifyOTP = async (email, otpCode) => {
       return {
         success: false,
         message: "Mã OTP không tồn tại hoặc đã hết hạn",
+        data: null,
       };
     }
 
@@ -83,9 +84,9 @@ export const verifyOTP = async (email, otpCode) => {
     if (storedOTP === otpCode.toString()) {
       // Xác thực thành công: Xóa OTP để tránh việc sử dụng lại
       await redisClient.del(`otp:${email}`);
-      return { success: true, message: "Xác nhận OTP thành công" };
+      return { success: true, message: "Xác nhận OTP thành công", data: null };
     } else {
-      return { success: false, message: "Mã OTP không chính xác" };
+      return { success: false, message: "Mã OTP không chính xác", data: null };
     }
   } catch (error) {
     console.error("Lỗi khi xác nhận OTP:", error);
@@ -144,7 +145,11 @@ export const register = async (userData) => {
     });
 
     await newUser.save();
-    return { success: true, user: newUser, message: "Đăng ký thành công" };
+    return {
+      success: true,
+      message: "Đăng ký thành công",
+      data: { user: newUser },
+    };
   } catch (error) {
     console.error("Lỗi khi đăng ký:", error);
     throw new Error("Đăng ký không thành công");
@@ -243,15 +248,17 @@ export const registerDriver = async (payload) => {
       result = {
         success: true,
         message: "Đăng ký tài xế thành công. Hồ sơ đang chờ duyệt.",
-        user: {
-          _id: newUser._id,
-          email: newUser.email,
-          phone: newUser.phone,
-          fullName: newUser.fullName,
-          role: newUser.role,
+        data: {
+          user: {
+            _id: newUser._id,
+            email: newUser.email,
+            phone: newUser.phone,
+            fullName: newUser.fullName,
+            role: newUser.role,
+          },
+          driver: newDriver,
+          vehicle: newVehicle,
         },
-        driver: newDriver,
-        vehicle: newVehicle,
       };
     });
 
@@ -261,6 +268,7 @@ export const registerDriver = async (payload) => {
     return {
       success: false,
       message: error.message || "Đăng ký tài xế không thành công",
+      data: null,
     };
   } finally {
     session.endSession();
@@ -330,13 +338,15 @@ export const login = async (email, password) => {
     return {
       success: true,
       message: "Đăng nhập thành công",
-      accessToken,
-      refreshToken,
-      user: {
-        _id: user._id,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role,
+      data: {
+        accessToken,
+        refreshToken,
+        user: {
+          _id: user._id,
+          email: user.email,
+          fullName: user.fullName,
+          role: user.role,
+        },
       },
     };
   } catch (error) {
@@ -351,7 +361,11 @@ export const login = async (email, password) => {
 export const refreshAccessToken = async (refreshToken) => {
   try {
     if (!refreshToken) {
-      return { success: false, message: "Không cung cấp refresh token" };
+      return {
+        success: false,
+        message: "Không cung cấp refresh token",
+        data: null,
+      };
     }
 
     // Verify token format/signature
@@ -362,6 +376,7 @@ export const refreshAccessToken = async (refreshToken) => {
       return {
         success: false,
         message: "Refresh token không hợp lệ hoặc đã hết hạn",
+        data: null,
       };
     }
 
@@ -373,6 +388,7 @@ export const refreshAccessToken = async (refreshToken) => {
       return {
         success: false,
         message: "Refresh token đã bị thu hồi hoặc không chính xác",
+        data: null,
       };
     }
 
@@ -389,8 +405,11 @@ export const refreshAccessToken = async (refreshToken) => {
 
     return {
       success: true,
-      accessToken: newTokens.accessToken,
-      refreshToken: newTokens.refreshToken,
+      message: "Cấp token thành công",
+      data: {
+        accessToken: newTokens.accessToken,
+        refreshToken: newTokens.refreshToken,
+      },
     };
   } catch (error) {
     console.error("Lỗi khi cấp lại token:", error);
@@ -409,6 +428,7 @@ export const forgotPassword = async (email) => {
       return {
         success: false,
         message: "Không tìm thấy người dùng với email này",
+        data: null,
       };
     }
 
@@ -434,7 +454,11 @@ export const resetPassword = async (email, otpCode, newPassword) => {
 
     const user = await User.findOne({ email });
     if (!user) {
-      return { success: false, message: "Người dùng không tồn tại" };
+      return {
+        success: false,
+        message: "Người dùng không tồn tại",
+        data: null,
+      };
     }
 
     // Hash new password
@@ -445,7 +469,11 @@ export const resetPassword = async (email, otpCode, newPassword) => {
     // Optional: revoke all current refresh tokens in redis
     await redisClient.del(`refreshToken:${user._id.toString()}`);
 
-    return { success: true, message: "Đặt lại mật khẩu thành công" };
+    return {
+      success: true,
+      message: "Đặt lại mật khẩu thành công",
+      data: null,
+    };
   } catch (error) {
     console.error("Lỗi đặt lại mật khẩu:", error);
     throw new Error("Lỗi hệ thống khi đặt lại mật khẩu");
@@ -459,10 +487,14 @@ export const resetPassword = async (email, otpCode, newPassword) => {
 export const logout = async (userId) => {
   try {
     if (!userId) {
-      return { success: false, message: "Không thể xác định người dùng" };
+      return {
+        success: false,
+        message: "Không thể xác định người dùng",
+        data: null,
+      };
     }
     await redisClient.del(`refreshToken:${userId}`);
-    return { success: true, message: "Đăng xuất thành công" };
+    return { success: true, message: "Đăng xuất thành công", data: null };
   } catch (error) {
     console.error("Lỗi khi đăng xuất:", error);
     throw new Error("Lỗi hệ thống khi đăng xuất");
@@ -487,6 +519,7 @@ export const verifyOTPAndLogin = async (email, otpCode) => {
       return {
         success: false,
         message: "Người dùng không tồn tại. Vui lòng đăng ký trước.",
+        data: null,
       };
     }
 
@@ -508,14 +541,16 @@ export const verifyOTPAndLogin = async (email, otpCode) => {
     return {
       success: true,
       message: "Xác thực OTP và đăng nhập thành công",
-      accessToken,
-      refreshToken,
-      user: {
-        _id: user._id,
-        email: user.email,
-        fullName: user.fullName,
-        role: user.role,
-        isVerified: user.isVerified,
+      data: {
+        accessToken,
+        refreshToken,
+        user: {
+          _id: user._id,
+          email: user.email,
+          fullName: user.fullName,
+          role: user.role,
+          isVerified: user.isVerified,
+        },
       },
     };
   } catch (error) {

@@ -7,6 +7,7 @@ import {
   updateCertification,
   getLiveDriverLocation,
 } from "../services/driver.service.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * GET /api/v1/admin/drivers
@@ -22,7 +23,7 @@ export const listDrivers = async (req, res, next) => {
       page: +page || 1,
       limit: +limit || 20,
     });
-    res.status(200).json({ success: true, ...result });
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -36,8 +37,8 @@ export const listDrivers = async (req, res, next) => {
 export const getDriverDetail = async (req, res, next) => {
   try {
     const { driverId } = req.params;
-    const driver = await getDriverDetailAdmin(driverId);
-    res.status(200).json({ success: true, data: driver });
+    const result = await getDriverDetailAdmin(driverId);
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -51,12 +52,13 @@ export const getDriverDetail = async (req, res, next) => {
 export const approveDriverHandler = async (req, res, next) => {
   try {
     const { driverId } = req.params;
-    const driver = await approveDriver(driverId);
-    res.status(200).json({
-      success: true,
-      message: "Hồ sơ tài xế đã được duyệt.",
-      data: driver,
-    });
+    const result = await approveDriver(driverId);
+    return success(
+      res,
+      result.data,
+      result.message || "Hồ sơ tài xế đã được duyệt.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -70,12 +72,13 @@ export const approveDriverHandler = async (req, res, next) => {
 export const rejectDriverHandler = async (req, res, next) => {
   try {
     const { driverId } = req.params;
-    const driver = await rejectDriver(driverId);
-    res.status(200).json({
-      success: true,
-      message: "Hồ sơ tài xế đã bị từ chối.",
-      data: driver,
-    });
+    const result = await rejectDriver(driverId);
+    return success(
+      res,
+      result.data,
+      result.message || "Hồ sơ tài xế đã bị từ chối.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -89,12 +92,13 @@ export const rejectDriverHandler = async (req, res, next) => {
 export const suspendDriverHandler = async (req, res, next) => {
   try {
     const { driverId } = req.params;
-    const driver = await suspendDriver(driverId);
-    res.status(200).json({
-      success: true,
-      message: "Tài xế đã bị tạm khóa.",
-      data: driver,
-    });
+    const result = await suspendDriver(driverId);
+    return success(
+      res,
+      result.data,
+      result.message || "Tài xế đã bị tạm khóa.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -112,15 +116,17 @@ export const updateCertificationHandler = async (req, res, next) => {
     const { certificationLevel } = req.body;
 
     if (certificationLevel === undefined || certificationLevel === null) {
-      return res.status(400).json({ success: false, message: "certificationLevel là bắt buộc." });
+      return error(res, "certificationLevel là bắt buộc.", 400);
     }
 
-    const driver = await updateCertification(driverId, +certificationLevel);
-    res.status(200).json({
-      success: true,
-      message: `Cấp chứng nhận đã cập nhật thành ${certificationLevel}.`,
-      data: driver,
-    });
+    const result = await updateCertification(driverId, +certificationLevel);
+    return success(
+      res,
+      result.data,
+      result.message ||
+        `Cấp chứng nhận đã cập nhật thành ${certificationLevel}.`,
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -135,7 +141,7 @@ export const getDriverLiveLocation = async (req, res, next) => {
   try {
     const { driverId } = req.params;
     const result = await getLiveDriverLocation(driverId);
-    res.status(200).json({ success: true, data: result });
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }

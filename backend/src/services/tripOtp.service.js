@@ -32,7 +32,7 @@ export const generateTripOtp = async (tripId) => {
     // Lưu ý logic gửi thông báo (Push Notification/SMS) tới phụ huynh sẽ được trigger từ đây
 
     // Trả về OTP gốc để hệ thống chuyển tiếp cho User
-    return otp;
+    return { success: true, message: "Trip OTP generated", data: { otp } };
   } catch (error) {
     console.error("Lỗi khi sinh Trip OTP:", error);
     throw new Error("Lỗi hệ thống khi tạo OTP chuyến xe");

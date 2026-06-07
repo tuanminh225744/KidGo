@@ -26,30 +26,30 @@ export const upsertReview = async (parentId, data) => {
       comment,
       tags: tags || [],
     },
-    { new: true, upsert: true, runValidators: true }
+    { new: true, upsert: true, runValidators: true },
   );
 
-  return review;
+  return { success: true, message: "Review upserted", data: review };
 };
 
 /**
  * Lấy danh sách đánh giá của một tài xế (có phân trang)
  */
-export const getDriverReviews = async (driverId, { page = 1, limit = 20 } = {}) => {
+export const getDriverReviews = async (
+  driverId,
+  { page = 1, limit = 20 } = {},
+) => {
   const skip = (page - 1) * limit;
   const mongoose = await import("mongoose");
   const driverObjectId = new mongoose.default.Types.ObjectId(driverId);
 
   const [reviews, total, avgResult] = await Promise.all([
-      Review.find({ driverId })
+    Review.find({ driverId })
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
       .populate("parentId", "fullName avatar")
-      .populate(
-        "tripId",
-        "createdAt status routeId",
-      ),
+      .populate("tripId", "createdAt status routeId"),
     Review.countDocuments({ driverId }),
     Review.aggregate([
       { $match: { driverId: driverObjectId } },
@@ -58,10 +58,14 @@ export const getDriverReviews = async (driverId, { page = 1, limit = 20 } = {}) 
   ]);
 
   return {
-    page,
-    total,
-    totalPages: Math.ceil(total / limit),
-    averageRating: avgResult[0]?.averageRating ?? null,
-    reviews,
+    success: true,
+    message: "Driver reviews fetched",
+    data: {
+      page,
+      total,
+      totalPages: Math.ceil(total / limit),
+      averageRating: avgResult[0]?.averageRating ?? null,
+      reviews,
+    },
   };
 };

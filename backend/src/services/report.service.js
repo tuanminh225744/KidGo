@@ -1,6 +1,10 @@
 import Report from "../models/support/report.model.js";
 import Trip from "../models/operational/trip.model.js";
-import { AppError, AuthorizationError, NotFoundError } from "../utils/AppError.js";
+import {
+  AppError,
+  AuthorizationError,
+  NotFoundError,
+} from "../utils/AppError.js";
 
 const assertTripAccess = async (tripId, user) => {
   const query = { _id: tripId };
@@ -10,7 +14,9 @@ const assertTripAccess = async (tripId, user) => {
 
   const trip = await Trip.findOne(query).select("_id parentId");
   if (!trip) {
-    throw new NotFoundError("Chuyến đi không tồn tại hoặc bạn không có quyền truy cập.");
+    throw new NotFoundError(
+      "Chuyến đi không tồn tại hoặc bạn không có quyền truy cập.",
+    );
   }
 
   return trip;
@@ -35,8 +41,8 @@ export const createReport = async (parentId, data) => {
     parentId,
     status: "PENDING",
   });
-
-  return report.populate("parentId", "fullName avatar");
+  const populated = await report.populate("parentId", "fullName avatar");
+  return { success: true, message: "Report created", data: populated };
 };
 
 export const getReportsByTripId = async (tripId, user) => {
@@ -45,8 +51,11 @@ export const getReportsByTripId = async (tripId, user) => {
   const reports = await Report.find({ tripId })
     .sort({ createdAt: -1 })
     .populate("parentId", "fullName avatar");
-
-  return { tripId, reports };
+  return {
+    success: true,
+    message: "Reports fetched",
+    data: { tripId, reports },
+  };
 };
 
 export const deleteReport = async (reportId, user) => {
@@ -63,5 +72,5 @@ export const deleteReport = async (reportId, user) => {
   }
 
   await report.deleteOne();
-  return report;
+  return { success: true, message: "Report deleted", data: report };
 };

@@ -35,7 +35,11 @@ export const createTripSchedule = async (scheduleData) => {
 
     const newSchedule = new TripSchedule(scheduleData);
     await newSchedule.save();
-    return newSchedule;
+    return {
+      success: true,
+      message: "Trip schedule created",
+      data: newSchedule,
+    };
   } catch (error) {
     throw new Error(`Lỗi lưu lịch cố định: ${error.message}`);
   }
@@ -48,7 +52,7 @@ export const getTripScheduleById = async (scheduleId) => {
   try {
     const schedule = await TripSchedule.findById(scheduleId);
     if (!schedule) throw new Error("Không tìm thấy bản ghi lịch trình.");
-    return schedule;
+    return { success: true, message: "Trip schedule fetched", data: schedule };
   } catch (error) {
     throw new Error(`Lỗi truy xuất lịch trình: ${error.message}`);
   }
@@ -70,7 +74,11 @@ export const updateTripSchedule = async (scheduleId, updateData) => {
       { returnDocument: "after", runValidators: true },
     );
     if (!updatedSched) throw new Error("Căn cứ Lịch trình không tồn tại!");
-    return updatedSched;
+    return {
+      success: true,
+      message: "Trip schedule updated",
+      data: updatedSched,
+    };
   } catch (error) {
     throw new Error(`Lỗi cập nhật dữ liệu lịch: ${error.message}`);
   }
@@ -88,7 +96,11 @@ export const cancelTripSchedule = async (scheduleId) => {
     );
     if (!cancelledSched)
       throw new Error("Không tra ra lịch trình cần khóa nòng.");
-    return cancelledSched;
+    return {
+      success: true,
+      message: "Trip schedule cancelled",
+      data: cancelledSched,
+    };
   } catch (error) {
     throw new Error(`Lỗi hủy lịch trình Database: ${error.message}`);
   }
@@ -107,7 +119,11 @@ export const getSchedulesByParent = async (parentId) => {
       )
       .populate("preferredDriverId", "user")
       .sort({ createdAt: -1 });
-    return schedules;
+    return {
+      success: true,
+      message: "Trip schedules fetched",
+      data: schedules,
+    };
   } catch (error) {
     throw new Error(`Lỗi lấy danh sách lịch trình: ${error.message}`);
   }
@@ -151,7 +167,11 @@ export const getSchedulesByParentAndDate = async (parentId, date) => {
       .populate("preferredDriverId", "user")
       .sort({ pickupTime: 1, createdAt: -1 });
 
-    return schedules;
+    return {
+      success: true,
+      message: "Trip schedules by date fetched",
+      data: schedules,
+    };
   } catch (error) {
     throw new Error(`Lỗi lấy lịch trình theo ngày: ${error.message}`);
   }

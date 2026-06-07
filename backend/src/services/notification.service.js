@@ -27,7 +27,7 @@ export const createNotification = async (data) => {
     readAt,
   });
   await notification.save();
-  return notification;
+  return { success: true, message: "Notification created", data: notification };
 };
 
 /**
@@ -40,14 +40,15 @@ export const getNotifications = async (user, { page = 1, limit = 30 } = {}) => {
   const skip = (page - 1) * limit;
 
   const [notifications, total] = await Promise.all([
-    Notification.find(query)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit),
+    Notification.find(query).sort({ createdAt: -1 }).skip(skip).limit(limit),
     Notification.countDocuments(query),
   ]);
 
-  return { page, total, totalPages: Math.ceil(total / limit), notifications };
+  return {
+    success: true,
+    message: "Notifications fetched",
+    data: { page, total, totalPages: Math.ceil(total / limit), notifications },
+  };
 };
 
 /**
@@ -63,7 +64,7 @@ export const markOneRead = async (notifId, userId) => {
   notif.isRead = true;
   notif.readAt = new Date();
   await notif.save();
-  return notif;
+  return { success: true, message: "Notification marked read", data: notif };
 };
 
 /**
@@ -72,9 +73,13 @@ export const markOneRead = async (notifId, userId) => {
 export const markAllRead = async (userId) => {
   const result = await Notification.updateMany(
     { recipientId: userId, isRead: false },
-    { $set: { isRead: true, readAt: new Date() } }
+    { $set: { isRead: true, readAt: new Date() } },
   );
-  return { updatedCount: result.modifiedCount };
+  return {
+    success: true,
+    message: "Notifications marked read",
+    data: { updatedCount: result.modifiedCount },
+  };
 };
 
 /**
@@ -85,5 +90,9 @@ export const getUnreadCount = async (userId) => {
     recipientId: userId,
     isRead: false,
   });
-  return { unreadCount: count };
+  return {
+    success: true,
+    message: "Unread count fetched",
+    data: { unreadCount: count },
+  };
 };

@@ -1,9 +1,10 @@
 import * as dashboardService from "../services/dashboard.service.js";
+import { success } from "../utils/response.js";
 
 export const getAdminStats = async (req, res, next) => {
   try {
-    const stats = await dashboardService.getAdminDashboardStats();
-    res.status(200).json({ success: true, data: stats });
+    const result = await dashboardService.getAdminDashboardStats();
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -11,8 +12,8 @@ export const getAdminStats = async (req, res, next) => {
 
 export const getReports = async (req, res, next) => {
   try {
-    const reports = await dashboardService.getAdvancedReports();
-    res.status(200).json({ success: true, data: reports });
+    const result = await dashboardService.getAdvancedReports();
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }

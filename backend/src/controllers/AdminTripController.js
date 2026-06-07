@@ -1,5 +1,6 @@
 import Trip from "../models/operational/trip.model.js";
 import { NotFoundError } from "../utils/AppError.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * GET /api/v1/admin/trips
@@ -28,13 +29,17 @@ export const getAllTrips = async (req, res, next) => {
       Trip.countDocuments(query),
     ]);
 
-    res.status(200).json({
-      success: true,
-      page: +page,
-      total,
-      totalPages: Math.ceil(total / +limit),
-      data: trips,
-    });
+    return success(
+      res,
+      {
+        page: +page,
+        total,
+        totalPages: Math.ceil(total / +limit),
+        data: trips,
+      },
+      "Trips fetched",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -57,7 +62,12 @@ export const getLiveTrips = async (req, res, next) => {
       .populate("kidId", "fullName")
       .populate("vehicleId", "licensePlate model color");
 
-    res.status(200).json({ success: true, count: trips.length, data: trips });
+    return success(
+      res,
+      { count: trips.length, data: trips },
+      "Live trips fetched",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -80,7 +90,7 @@ export const getTripDetailAdmin = async (req, res, next) => {
       .populate("bookingId");
 
     if (!trip) return next(new NotFoundError("Chuyến đi không tồn tại."));
-    res.status(200).json({ success: true, data: trip });
+    return success(res, trip, "Trip fetched", 200);
   } catch (error) {
     next(error);
   }

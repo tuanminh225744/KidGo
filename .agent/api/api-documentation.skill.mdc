@@ -1,0 +1,55 @@
+# API Documentation Skill
+
+Khi viết tài liệu API:
+
+Sử dụng Markdown.
+
+Format chuẩn:
+
+## Endpoint
+
+### Description
+
+Mô tả mục đích endpoint.
+
+### Request
+
+Method:
+POST
+
+URL:
+/api/example
+
+Headers:
+Authorization: Bearer <token>
+
+### Request Body
+
+| Field | Type | Required | Description |
+| ----- | ---- | -------- | ----------- |
+
+### Success Response
+
+Status Code: 200
+
+{
+"success": true,
+"message": "Success",
+"data": {}
+}
+
+### Error Responses
+
+400 Bad Request
+
+401 Unauthorized
+
+403 Forbidden
+
+404 Not Found
+
+500 Internal Server Error
+
+### Notes
+
+Thông tin bổ sung nếu cần.

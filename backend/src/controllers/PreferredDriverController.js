@@ -1,5 +1,6 @@
 import * as preferredDriverService from "../services/preferredDriver.service.js";
 import { AppError } from "../utils/AppError.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * GET /api/v1/preferred-drivers
@@ -7,15 +8,15 @@ import { AppError } from "../utils/AppError.js";
  */
 export const getPreferredDrivers = async (req, res, next) => {
   try {
-    const drivers = await preferredDriverService.getPreferredDrivers(
+    const result = await preferredDriverService.getPreferredDrivers(
       req.user.id,
     );
-
-    res.status(200).json({
-      success: true,
-      count: drivers.length,
-      data: drivers,
-    });
+    return success(
+      res,
+      { count: result.data.length, data: result.data },
+      result.message,
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -29,18 +30,18 @@ export const addPreferredDriver = async (req, res, next) => {
   try {
     const { driverId, nickname, priority } = req.body;
 
-    const preferredDriver = await preferredDriverService.addPreferredDriver({
+    const result = await preferredDriverService.addPreferredDriver({
       parentId: req.user.id,
       driverId,
       nickname,
       priority,
     });
-
-    res.status(201).json({
-      success: true,
-      message: "Thêm tài xế vào danh sách ưu tiên thành công.",
-      data: preferredDriver,
-    });
+    return success(
+      res,
+      result.data,
+      result.message || "Thêm tài xế vào danh sách ưu tiên thành công.",
+      201,
+    );
   } catch (error) {
     next(error);
   }
@@ -66,17 +67,17 @@ export const updatePreferredDriver = async (req, res, next) => {
       throw new AppError("Phải cung cấp ít nhất một trường để cập nhật.", 400);
     }
 
-    const updated = await preferredDriverService.updatePreferredDriver(
+    const result = await preferredDriverService.updatePreferredDriver(
       req.user.id,
       req.params.driverId,
       updateData,
     );
-
-    res.status(200).json({
-      success: true,
-      message: "Cập nhật tài xế ưu tiên thành công.",
-      data: updated,
-    });
+    return success(
+      res,
+      result.data,
+      result.message || "Cập nhật tài xế ưu tiên thành công.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -92,11 +93,12 @@ export const removePreferredDriver = async (req, res, next) => {
       req.user.id,
       req.params.driverId,
     );
-
-    res.status(200).json({
-      success: true,
-      message: "Xóa tài xế khỏi danh sách ưu tiên thành công.",
-    });
+    return success(
+      res,
+      null,
+      "Xóa tài xế khỏi danh sách ưu tiên thành công.",
+      200,
+    );
   } catch (error) {
     next(error);
   }

@@ -1,6 +1,7 @@
 import Confirmation from "../models/safetyAndLogs/confirmation.model.js";
 import Trip from "../models/operational/trip.model.js";
 import { AppError, NotFoundError } from "../utils/AppError.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * GET /api/v1/trips/:tripId/confirmations
@@ -19,8 +20,15 @@ export const getTripConfirmations = async (req, res, next) => {
       return next(new AppError("Bạn không có quyền xem chuyến này.", 403));
     }
 
-    const confirmations = await Confirmation.find({ tripId }).sort({ confirmedAt: 1 });
-    res.status(200).json({ success: true, count: confirmations.length, data: confirmations });
+    const confirmations = await Confirmation.find({ tripId }).sort({
+      confirmedAt: 1,
+    });
+    return success(
+      res,
+      { count: confirmations.length, data: confirmations },
+      "Confirmations fetched",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -38,7 +46,9 @@ export const uploadConfirmationPhoto = async (req, res, next) => {
     const { tripId, type } = req.body;
 
     if (!tripId || !type) {
-      return next(new AppError("Thiếu tripId hoặc type (pickup/dropoff).", 400));
+      return next(
+        new AppError("Thiếu tripId hoặc type (pickup/dropoff).", 400),
+      );
     }
     if (!["pickup", "dropoff"].includes(type)) {
       return next(new AppError("type phải là 'pickup' hoặc 'dropoff'.", 400));
@@ -63,7 +73,7 @@ export const uploadConfirmationPhoto = async (req, res, next) => {
         confirmedAt: new Date(),
         confirmedByDriverId: driverId,
       },
-      { new: true, upsert: true }
+      { new: true, upsert: true },
     );
 
     // Cập nhật trường ảnh trên Trip luôn
@@ -84,11 +94,12 @@ export const uploadConfirmationPhoto = async (req, res, next) => {
     }
     await trip.save();
 
-    res.status(200).json({
-      success: true,
-      message: `Đã upload ảnh ${type} thành công.`,
-      data: { photoUrl, confirmation },
-    });
+    return success(
+      res,
+      { photoUrl, confirmation },
+      `Đã upload ảnh ${type} thành công.`,
+      200,
+    );
   } catch (error) {
     next(error);
   }
