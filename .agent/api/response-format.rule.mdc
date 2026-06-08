@@ -1,6 +1,6 @@
 Response Format Rule
 
-Mọi tài liệu API phải giả định response chuẩn của dự án:
+Mọi tài liệu API phải theo response chuẩn của dự án:
 
 Success:
 

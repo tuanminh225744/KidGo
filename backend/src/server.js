@@ -27,7 +27,6 @@ import SubscriptionRoutes from "./routes/SubscriptionRoutes.js";
 import TripScheduleRoutes from "./routes/TripScheduleRoutes.js";
 import TripRoutes from "./routes/TripRoutes.js";
 import DriverRoutes from "./routes/DriverRoutes.js";
-import ConfirmationRoutes from "./routes/ConfirmationRoutes.js";
 import ReportRoutes from "./routes/ReportRoutes.js";
 import {
   loggerMiddleware,
@@ -93,7 +92,6 @@ app.use("/api/v1/payments", PaymentRoutes);
 app.use("/api/v1/subscriptions", SubscriptionRoutes);
 app.use("/api/v1/drivers", DriverRoutes);
 app.use("/api/v1/trips", TripRoutes);
-app.use("/api/v1", ConfirmationRoutes); // /api/v1/trips/:tripId/confirmations + /api/v1/upload/confirmation-photo
 app.use("/api/v1/reviews", ReviewRoutes);
 app.use("/api/v1/reports", ReportRoutes);
 app.use("/api/v1/notifications", NotificationRoutes);

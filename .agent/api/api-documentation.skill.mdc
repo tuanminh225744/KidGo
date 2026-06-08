@@ -1,55 +1,27 @@
-# API Documentation Skill
+Skill: Tự động tạo tài liệu API từ mã nguồn hiện có
+Mục tiêu: Phân tích mã nguồn backend hiện tại và tự động tạo tài liệu API
+Tài liệu được tạo phải phản ánh chính xác API đang tồn tại trong hệ thống, không được tự suy đoán hoặc tạo dữ liệu không có trong mã nguồn.
+Các bước bao gồm:
+Phân tích Router: Xác định tất cả endpoint.
+Phân tích Controller: Kiểm tra hàm controller tương ứng.
+Phân tích Service: Kiểm tra logic nghiệp vụ
+Phân tích Validator: Kiểm tra yêu cầu đầu vào của api
+Phân tích Model: Kiểm tra model tương ứng
+Tất cả respose đều cùng 1 format đầu ra theo file response-format
+Các api có dùng route sẽ được viết ra cùng 1 file trong thư mục docs/api
+Mẫu kết quả đầu ra: 
 
-Khi viết tài liệu API:
+Endpoint: POST /api/v1/kids
+Mô tả: API tạo mới thông tin bé.
+Request Body:
+Field		Type		Required
+name		string		yes
+birthday	string		yes
+gender		enum		no		
+Success Response (data):
+Field		Type		
+id		    Object		
+name		string		
+birthday	string
+gender		enum			
 
-Sử dụng Markdown.
-
-Format chuẩn:
-
-## Endpoint
-
-### Description
-
-Mô tả mục đích endpoint.
-
-### Request
-
-Method:
-POST
-
-URL:
-/api/example
-
-Headers:
-Authorization: Bearer <token>
-
-### Request Body
-
-| Field | Type | Required | Description |
-| ----- | ---- | -------- | ----------- |
-
-### Success Response
-
-Status Code: 200
-
-{
-"success": true,
-"message": "Success",
-"data": {}
-}
-
-### Error Responses
-
-400 Bad Request
-
-401 Unauthorized
-
-403 Forbidden
-
-404 Not Found
-
-500 Internal Server Error
-
-### Notes
-
-Thông tin bổ sung nếu cần.
