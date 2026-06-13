@@ -67,7 +67,6 @@ export const driverStartPickup = async (tripId) => {
     trip.markModified("securityQuestion");
 
     await trip.save();
-    await trip.populate("routeId");
 
     const io = getIo();
 
@@ -121,7 +120,6 @@ export const verifyTripOtp = async (tripId, enteredOtp) => {
     };
 
     await trip.save();
-    await trip.populate("routeId");
     return { success: true, message: "OTP verified", data: trip };
   } catch (error) {
     throw new Error(`Xác thực OTP thất bại: ${error.message}`);
@@ -144,7 +142,6 @@ export const verifyTripPickupPhoto = async (tripId, photo) => {
     };
 
     await trip.save();
-    await trip.populate("routeId");
     return { success: true, message: "Pickup photo verified", data: trip };
   } catch (error) {
     throw new Error(`Xác thực ảnh đón thất bại: ${error.message}`);
@@ -167,7 +164,6 @@ export const verifyTripDropoffPhoto = async (tripId, photo) => {
     };
 
     await trip.save();
-    await trip.populate("routeId");
     return { success: true, message: "Dropoff photo verified", data: trip };
   } catch (error) {
     throw new Error(`Xác thực ảnh trả thất bại: ${error.message}`);
@@ -192,7 +188,6 @@ export const verifyTripSecurityQuestion = async (tripId, answer) => {
     };
 
     await trip.save();
-    await trip.populate("routeId");
     return { success: true, message: "Security question verified", data: trip };
   } catch (error) {
     throw new Error(`Xác thực câu hỏi bảo mật thất bại: ${error.message}`);
@@ -224,7 +219,6 @@ export const driverPickupKid = async (tripId) => {
 
     trip.status = "in_progress";
     await trip.save();
-    await trip.populate("routeId");
 
     // Nâng cấp trạng thái ông xế lên "Đang bon bon trên cầu"
     await Driver.findByIdAndUpdate(trip.driverId, { rideStatus: "in_trip" });
@@ -257,7 +251,6 @@ export const driverDropoffKid = async (tripId) => {
 
     trip.status = "completed";
     await trip.save();
-    await trip.populate("routeId");
 
     // Cập nhật tổng thu nhập cho tài xế nếu chuyến có payment
     if (trip.paymentId) {
@@ -425,7 +418,6 @@ export const cancelTrip = async (tripId, userId, role) => {
 
   trip.status = "cancelled";
   await trip.save();
-  await trip.populate("routeId");
 
   // Giải phóng tài xế
   await Driver.findByIdAndUpdate(trip.driverId, { rideStatus: "free" });

@@ -364,7 +364,7 @@ export const driverAcceptBooking = async (bookingId, userId) => {
     return {
       success: true,
       message: "Driver accepted booking",
-      data: { booking: booking, trip: updatedTrip },
+      data: { booking: booking, trip: updatedTrip, route: route },
     };
   } catch (error) {
     throw new Error(`Lỗi tài xế nhận chuyến: ${error.message}`);

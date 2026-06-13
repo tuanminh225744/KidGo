@@ -4,6 +4,7 @@ import { acceptBooking, rejectBooking } from "../../services/driver.service";
 import { useState } from "react";
 import { useTripStore } from "../../store/useTripStore";
 import { useBookingStoreDriver } from "../../store/useBookingStoreDriver";
+import { useRouteStore } from "../../store/useRouteStore";
 import { useNavigate } from "react-router-dom";
 
 export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
@@ -11,7 +12,8 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
   const navigate = useNavigate();
   const data = tripRequest || {};
   const bookingId = data._id || data.bookingId;
-  const title = data.name || data.kidName || data.kidId?.fullName || "Khách mới";
+  const title =
+    data.name || data.kidName || data.kidId?.fullName || "Khách mới";
   const subtitle = data.message || "Bạn có một chuyến mới đang chờ phản hồi.";
   const pickupText =
     data.pickupLocation?.address ||
@@ -35,8 +37,9 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
       const response = await acceptBooking(bookingId);
       if (response.success) {
         console.log("Booking accepted:", response);
-        useTripStore.getState().setTripData(response.data.trip);
+        useTripStore.getState().setTrip(response.data.trip);
         useBookingStoreDriver.getState().setBooking(response.data.booking);
+        useRouteStore.getState().setRoute(response.data.route);
         navigate("/driver/in-trip");
       }
       onAccept();
@@ -101,9 +104,7 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
                 )}
               </div>
               <div>
-                <h3 className="font-bold text-lg leading-tight">
-                  {title}
-                </h3>
+                <h3 className="font-bold text-lg leading-tight">{title}</h3>
                 <div className="text-xs text-gray-500">{subtitle}</div>
               </div>
             </div>

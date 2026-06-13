@@ -1,6 +1,7 @@
 import Driver from "../models/core/driver.model.js";
 import User from "../models/core/user.model.js";
 import redisClient from "../config/redisClient.js";
+import * as routeService from "./route.service.js";
 
 // CRUD Driver *******************************************************************
 /**
@@ -96,14 +97,47 @@ export const softDeleteDriver = async (driverId) => {
  * @param {String} driverId
  * @param {Number} lat
  * @param {Number} lng
+ * @param {String} [routeId] optional route id to write waypoint into
  */
-export const updateLocationInRedis = async (driverId, lat, lng) => {
+export const updateLocationInRedis = async (
+  driverId,
+  lat,
+  lng,
+  routeId = null,
+) => {
   try {
     const geoJsonPoint = {
       type: "Point",
       coordinates: [lng, lat], // GeoJSON chuẩn: [longitude, latitude]
       updatedAt: new Date().toISOString(),
     };
+
+    // Decide whether to append the latest point to DB every ~30s.
+    // IMPORTANT: only consider writing to DB when `routeId` is provided.
+    let shouldAppendWaypoint = false;
+    if (routeId) {
+      try {
+        const lastSavedStr = await redisClient.hget(
+          "driver_last_db_save",
+          driverId.toString(),
+        );
+        const nowTime = Date.now();
+        if (!lastSavedStr) {
+          // first time saving to DB for this driver
+          shouldAppendWaypoint = true;
+        } else {
+          const lastSaved = Number(lastSavedStr);
+          if (Number.isNaN(lastSaved) || nowTime - lastSaved >= 30 * 1000) {
+            shouldAppendWaypoint = true;
+          }
+        }
+      } catch (err) {
+        console.error("Error reading driver_last_db_save from Redis:", err);
+      }
+    } else {
+      // No routeId => never write to DB here (only keep Redis buffer)
+      shouldAppendWaypoint = false;
+    }
 
     // 1. Lưu vào hash map để giữ metadata (thời gian update) truy cập O(1)
     await redisClient.hset(
@@ -120,12 +154,35 @@ export const updateLocationInRedis = async (driverId, lat, lng) => {
       driverId.toString(),
     );
 
+    console.log(
+      `[Redis] Updated location for driver ${driverId}: lat=${lat}, lng=${lng}, shouldAppendWaypoint=${shouldAppendWaypoint}`,
+    );
+
     // 3. Đẩy vào Buffer ngắn hạn (trip_buffer) phục vụ riêng cho Cảnh Sát Bản Đồ (CronJob Monitor) tính toán
     const payloadStr = JSON.stringify({ lat, lng, time: Date.now() });
     await redisClient.lpush(`trip_buffer:${driverId.toString()}`, payloadStr);
     // Cắt ngọn, chỉ xài RAM lưu kho lưu đúng 6 điểm gần nhất (60 giây vòng đời)
     await redisClient.ltrim(`trip_buffer:${driverId.toString()}`, 0, 5);
     // console.log("[Redis] Lưu địa điểm thành công");
+
+    // Nếu đủ 30s kể từ lần ghi trước, append waypoint vào Route.actualWaypoints
+    if (shouldAppendWaypoint) {
+      try {
+        await routeService.appendActualWaypoint(driverId, lat, lng, routeId);
+        // Update last DB save timestamp
+        try {
+          await redisClient.hset(
+            "driver_last_db_save",
+            driverId.toString(),
+            Date.now().toString(),
+          );
+        } catch (e) {
+          console.error("Error updating driver_last_db_save in Redis:", e);
+        }
+      } catch (err) {
+        console.error("Error appending waypoint to routes:", err);
+      }
+    }
   } catch (error) {
     console.error(`Lỗi cập nhật Redis cho tài xế ${driverId}:`, error);
   }

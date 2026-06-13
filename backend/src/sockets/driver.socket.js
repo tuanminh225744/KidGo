@@ -22,6 +22,10 @@ export default function setupDriverSockets(io) {
     socket.on("authenticate", authenticateDriver);
 
     const handleLocationUpdate = async (data) => {
+      // console.log(
+      //   `[Socket] Received location update from driver ${currentDriverId}:`,
+      //   data,
+      // );
       if (!currentDriverId && data?.driverId) {
         currentDriverId = data.driverId;
       }
@@ -39,10 +43,8 @@ export default function setupDriverSockets(io) {
           message: "lat và lng phải là số hợp lệ.",
         });
       }
-      // console.log(
-      //   `[Socket] Driver ${currentDriverId}: update location lat:${lat}, lng:${lng}`,
-      // );
-      await updateLocationInRedis(currentDriverId, lat, lng);
+
+      await updateLocationInRedis(currentDriverId, lat, lng, data?.routeId);
     };
 
     socket.on("update_location", handleLocationUpdate);
