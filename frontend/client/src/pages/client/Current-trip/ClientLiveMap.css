@@ -1,0 +1,8 @@
+.driver-live-map-current-location-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(0, 133, 255, 0.85);
+  border: 3px solid #fff;
+  box-shadow: 0 0 0 2px rgba(0, 133, 255, 0.45);
+}

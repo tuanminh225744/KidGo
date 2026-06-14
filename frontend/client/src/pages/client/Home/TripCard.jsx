@@ -56,7 +56,12 @@ export default function TripCard({ trip, navigate }) {
 
         <div className="grid grid-cols-2 gap-3 mt-4">
           <button
-            onClick={() => navigate("/client/tracking")}
+            onClick={() => {
+              // Navigate to current-trip by tripId; CurrentTrip will fetch trip details and driver info
+              const params = new URLSearchParams();
+              if (trip._id) params.set("tripId", trip._id);
+              navigate(`/client/current-trip?${params.toString()}`);
+            }}
             className="bg-primary-container text-white rounded-xl py-3 flex items-center justify-center gap-2 font-bold active:scale-95 transition-transform"
           >
             <Map size={18} /> Xem bản đồ

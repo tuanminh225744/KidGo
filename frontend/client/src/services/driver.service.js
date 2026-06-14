@@ -55,3 +55,7 @@ export const rejectBooking = async (bookingId) => {
 export const getDriverById = async (driverId) => {
   return api.get(`/drivers/${driverId}`);
 };
+
+export const getDriverLocation = async (driverId) => {
+  return api.get(`/drivers/${driverId}/location`);
+};

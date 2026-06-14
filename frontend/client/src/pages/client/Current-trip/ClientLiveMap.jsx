@@ -1,20 +1,14 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   MapContainer,
   Marker,
   TileLayer,
-  CircleMarker,
   Polyline,
   useMap,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "./DriverLiveMap.css";
-import { useDriverStore } from "../store/useDriverStore.js";
-import {
-  clearDriverLocationProvider,
-  connectDriverSocket,
-} from "../socket/driverSocket.js";
+import "./ClientLiveMap.css";
 import axios from "axios";
 import polyline from "@mapbox/polyline";
 
@@ -57,13 +51,8 @@ const MapCenter = ({ position }) => {
   return null;
 };
 
-const DriverLiveMap = ({ className = "", startPointProp, endPointProp }) => {
-  const [position, setPosition] = useState(null);
-  const watchIdRef = useRef(null);
-  const positionRef = useRef(null);
-  const driverInfo = useDriverStore((state) => state.driverInfo);
-  const driverId = driverInfo?._id || null;
-
+const ClientLiveMap = ({ className = "", startPointProp, endPointProp }) => {
+  // Client map expects positions passed in via props. No geolocation or socket here.
   const [route, setRoute] = useState(null);
 
   const decodePolyline = (geometry) => {
@@ -114,61 +103,22 @@ const DriverLiveMap = ({ className = "", startPointProp, endPointProp }) => {
   };
 
   useEffect(() => {
-    const start = startPointProp === "current" ? position : startPointProp;
+    const start = startPointProp;
     if (start && endPointProp) {
       calculateRoute(start, endPointProp);
     } else {
       setRoute(null);
     }
-  }, [startPointProp, endPointProp, position]);
-
-  useEffect(() => {
-    positionRef.current = position;
-  }, [position]);
-
-  useEffect(() => {
-    connectDriverSocket({
-      driverId,
-      getPosition: () => positionRef.current,
-    });
-
-    return () => {
-      clearDriverLocationProvider();
-    };
-  }, [driverId]);
-
-  useEffect(() => {
-    if (!navigator.geolocation) {
-      console.error("Trình duyệt không hỗ trợ định vị.");
-      return undefined;
-    }
-
-    watchIdRef.current = navigator.geolocation.watchPosition(
-      (pos) => {
-        setPosition({
-          lat: pos.coords.latitude,
-          lng: pos.coords.longitude,
-        });
-      },
-      (error) => {
-        console.error("Không thể lấy vị trí hiện tại:", error);
-      },
-      {
-        enableHighAccuracy: true,
-        maximumAge: 5000,
-        timeout: 10000,
-      },
-    );
-
-    return () => {
-      if (watchIdRef.current !== null) {
-        navigator.geolocation.clearWatch(watchIdRef.current);
-      }
-    };
-  }, []);
+  }, [startPointProp, endPointProp]);
 
   const fallbackCenter = [21.028511, 105.804817];
-  const center = position ? [position.lat, position.lng] : fallbackCenter;
+  // Client view: center on provided startPointProp when available
+  const center =
+    startPointProp &&
+    Number.isFinite(startPointProp.lat) &&
+    Number.isFinite(startPointProp.lng)
+      ? [startPointProp.lat, startPointProp.lng]
+      : fallbackCenter;
 
   return (
     <div className={`relative overflow-hidden rounded-3xl ${className}`}>
@@ -184,31 +134,24 @@ const DriverLiveMap = ({ className = "", startPointProp, endPointProp }) => {
           attribution="&copy; OpenStreetMap"
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {position && <MapCenter position={center} />}
-        {position && (
-          <>
-            <CircleMarker
-              center={center}
-              radius={16}
-              interactive={false}
-              bubblingMouseEvents={false}
-              pathOptions={{
-                color: "#0099ff",
-                weight: 5,
-                fillColor: "#79c5ff",
-                fillOpacity: 0.35,
-              }}
+        <MapCenter position={center} />
+        {startPointProp &&
+          Number.isFinite(startPointProp.lat) &&
+          Number.isFinite(startPointProp.lng) && (
+            <Marker
+              position={[startPointProp.lat, startPointProp.lng]}
+              icon={currentLocationIcon}
             />
-            <Marker position={center} icon={currentLocationIcon} />
-          </>
-        )}
+          )}
 
-        {endPointProp && (
-          <Marker
-            position={[endPointProp.lat, endPointProp.lng]}
-            icon={startMarkerIcon}
-          />
-        )}
+        {endPointProp &&
+          Number.isFinite(endPointProp.lat) &&
+          Number.isFinite(endPointProp.lng) && (
+            <Marker
+              position={[endPointProp.lat, endPointProp.lng]}
+              icon={startMarkerIcon}
+            />
+          )}
 
         {route && route.length > 0 && (
           <Polyline
@@ -221,13 +164,8 @@ const DriverLiveMap = ({ className = "", startPointProp, endPointProp }) => {
       </MapContainer>
 
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/10" />
-      {!position && (
-        <div className="absolute inset-x-4 bottom-4 rounded-2xl bg-white/95 p-3 text-xs text-gray-600 shadow-lg backdrop-blur">
-          Đang chờ quyền vị trí hoặc đang xác định vị trí hiện tại...
-        </div>
-      )}
     </div>
   );
 };
 
-export default DriverLiveMap;
+export default ClientLiveMap;

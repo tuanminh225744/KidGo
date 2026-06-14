@@ -49,7 +49,7 @@ export default function ParentSocketManager() {
       : JSON.stringify(payload).slice(0, 120));
 
   return (
-    <div className="fixed left-5 right-5 z-50 top-5 max-w-[420px] mx-auto">
+    <div className="fixed left-5 right-5 z-500 top-5 max-w-[420px] mx-auto">
       <div className="bg-white border-2 border-outline-variant rounded-3xl p-4 flex items-start gap-3 shadow-lg">
         <div className="flex-1">
           <p className="text-sm font-bold text-on-surface">{title}</p>

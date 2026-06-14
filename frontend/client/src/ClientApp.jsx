@@ -19,6 +19,7 @@ import Notifications from "./pages/client/Notifications.jsx";
 import BottomNav from "./pages/client/BottomNav.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import ParentSocketManager from "./components/ParentSocketManager.jsx";
+import CurrentTrip from "./pages/client/Current-trip/CurrentTrip.jsx";
 
 export default function ClientApp() {
   const user = useAuthStore((state) => state.user);
@@ -55,6 +56,7 @@ export default function ClientApp() {
             <Route path="tracking" element={<Tracking />} />
             <Route path="schedules" element={<Schedules />} />
             <Route path="notifications" element={<Notifications />} />
+            <Route path="current-trip" element={<CurrentTrip />} />
           </Route>
         </Routes>
       </div>
