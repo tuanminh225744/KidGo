@@ -362,7 +362,7 @@ export const getActiveTrips = async (parentId) => {
     .populate("routeId")
     .populate({
       path: "driverId",
-      select: "user licenseNumber rating currentLocation isOnline",
+      select: "user licenseNumber certificationLevel currentLocation isOnline",
       populate: { path: "user", select: "fullName avatar phone" },
     })
     .populate("kidId", "fullName avatar")

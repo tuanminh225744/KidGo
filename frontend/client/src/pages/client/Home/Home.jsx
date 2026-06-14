@@ -1,25 +1,19 @@
-import {
-  Phone,
-  Map,
-  History,
-  CalendarDays,
-  MoreVertical,
-  AlertTriangle,
-  ChevronRight,
-  Car,
-  Info,
-  UserCircle2,
-} from "lucide-react";
+import { History, CalendarDays } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { motion } from "motion/react";
-import { getKidsByParent } from "../../services/kid.service.js";
-import { getCurrentProfile } from "../../services/user.service.js";
-import { getActiveTripsList, getTrips } from "../../services/trip.service.js";
-import { getUnreadCount } from "../../services/notification.service.js";
-import { getTripSchedulesByDate } from "../../services/booking.service.js";
-import { useAuthStore } from "../../store/useAuthStore.js";
-import { TripDetailsModal } from "../../components/modal/TripDetailsModal.jsx";
+import { getKidsByParent } from "../../../services/kid.service.js";
+import { getCurrentProfile } from "../../../services/user.service.js";
+import {
+  getActiveTripsList,
+  getTrips,
+} from "../../../services/trip.service.js";
+import { getUnreadCount } from "../../../services/notification.service.js";
+import { getTripSchedulesByDate } from "../../../services/booking.service.js";
+import { useAuthStore } from "../../../store/useAuthStore.js";
+import { TripDetailsModal } from "../../../components/modal/TripDetailsModal.jsx";
+import { useSocketStore } from "../../../store/useSocketStore.js";
+import TripCard from "./TripCard.jsx";
+import KidCard from "./KidCard.jsx";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -33,10 +27,11 @@ export default function Home() {
   const [selectedTrip, setSelectedTrip] = useState(null);
   const { user, setUser } = useAuthStore();
   const displayProfile = profile || user;
+  const events = useSocketStore((s) => s.events);
 
   useEffect(() => {
     loadAllData();
-  }, []);
+  }, [events]);
 
   const loadAllData = async () => {
     setLoading(true);
@@ -81,6 +76,7 @@ export default function Home() {
     if (result.success) {
       setActiveTrips(result.data || []);
     }
+    console.log("Active trips:", result);
   };
 
   const loadTodaySchedules = async () => {
@@ -211,104 +207,7 @@ export default function Home() {
         {/* Active Trip Card */}
         {activeTrips.length > 0 &&
           activeTrips.map((trip) => (
-            <section key={trip._id}>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="bg-white border-2 border-primary-container rounded-[24px] p-5 shadow-xl active-shadow relative overflow-hidden"
-              >
-                <div className="flex justify-between items-start mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-surface-variant">
-                      <img
-                        src={
-                          trip.kid?.avatar ||
-                          `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.kid?.fullName || "Kid"}`
-                        }
-                        alt={trip.kid?.fullName || "Kid"}
-                      />
-                    </div>
-                    <div>
-                      <h3 className="font-bold text-on-surface">
-                        Bé {trip.kid?.fullName || "của bạn"} đang trên đường
-                      </h3>
-                      <div className="flex items-center gap-1.5 py-0.5 px-2 bg-green-50 text-green-700 text-[10px] font-bold rounded-full w-fit mt-1">
-                        <span className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
-                        {trip.status === "in_progress"
-                          ? "ĐANG CHẠY"
-                          : "SẮP ĐÓN"}
-                      </div>
-                    </div>
-                  </div>
-                  <button>
-                    <MoreVertical
-                      size={20}
-                      className="text-on-surface-variant"
-                    />
-                  </button>
-                </div>
-
-                <div className="bg-surface-container-low p-3 rounded-2xl flex items-center gap-3 mb-6">
-                  <div className="w-10 h-10 rounded-full overflow-hidden">
-                    <img
-                      src={
-                        trip.driverId?.user?.avatar ||
-                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${trip.driverId?.user?.fullName || "Driver"}`
-                      }
-                      alt="Driver"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-sm text-on-surface">
-                      {trip.driverId?.user?.fullName || "Tài xế"}{" "}
-                      <span className="text-orange-500 ml-1">
-                        ★ {trip.driverId?.rating || "4.8"}
-                      </span>
-                    </p>
-                    <span className="text-[10px] text-primary bg-primary/10 px-2 py-0.5 rounded font-bold">
-                      Tài xế
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => navigate("/client/tracking")}
-                    className="w-10 h-10 bg-white rounded-full flex items-center justify-center text-primary shadow-sm"
-                  >
-                    <Phone size={18} fill="currentColor" />
-                  </button>
-                </div>
-
-                {/* Simulated Progress - In real app, calculate ETA based on trip logs */}
-                <div className="relative pt-2 pb-6 px-4">
-                  <div className="absolute top-1/2 left-0 w-full h-1 bg-surface-variant -translate-y-1/2 rounded-full" />
-                  <div className="absolute top-1/2 left-0 w-3/5 h-1 bg-primary-container -translate-y-1/2 rounded-full" />
-                  <div className="relative flex justify-between">
-                    <div className="w-4 h-4 bg-primary-container rounded-full ring-4 ring-white" />
-                    <div className="relative -top-3">
-                      <div className="w-8 h-8 bg-primary-container text-white rounded-full flex items-center justify-center shadow-lg ring-4 ring-white animate-bounce-slow">
-                        <Car size={16} fill="currentColor" />
-                      </div>
-                    </div>
-                    <div className="w-4 h-4 bg-surface-variant rounded-full ring-4 ring-white" />
-                  </div>
-                  <div className="flex justify-between mt-3 text-[10px] font-bold text-on-surface-variant">
-                    <span>Nhà</span>
-                    <span>Trường</span>
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 mt-4">
-                  <button
-                    onClick={() => navigate("/client/tracking")}
-                    className="bg-primary-container text-white rounded-xl py-3 flex items-center justify-center gap-2 font-bold active:scale-95 transition-transform"
-                  >
-                    <Map size={18} /> Xem bản đồ
-                  </button>
-                  <button className="border-2 border-outline-variant text-on-surface rounded-xl py-3 flex items-center justify-center gap-2 font-bold active:scale-95 transition-transform">
-                    <Phone size={18} /> Gọi tài xế
-                  </button>
-                </div>
-              </motion.div>
-            </section>
+            <TripCard key={trip._id} trip={trip} navigate={navigate} />
           ))}
 
         {/* Kids Section */}
@@ -337,30 +236,7 @@ export default function Home() {
           ) : (
             <div className="grid grid-cols-2 gap-4">
               {kids?.map((kid) => (
-                <button
-                  key={kid._id}
-                  onClick={() =>
-                    navigate(`/client/kid-profile?kidId=${kid._id}`)
-                  }
-                  className="bg-white p-4 rounded-3xl soft-shadow flex flex-col items-center text-center border border-outline-variant/30 hover:shadow-lg active:scale-95 transition-all"
-                >
-                  <div className="w-16 h-16 rounded-full overflow-hidden mb-3 border-2 border-primary-fixed">
-                    <img
-                      src={
-                        kid.avatar ||
-                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${kid.fullName}`
-                      }
-                      alt={kid.fullName}
-                      className="w-full h-full object-cover"
-                    />
-                  </div>
-                  <h3 className="font-bold text-on-surface text-sm">
-                    {kid.fullName}
-                  </h3>
-                  <p className="text-[10px] text-on-surface-variant">
-                    {kid.school || "Chưa cập nhật"}
-                  </p>
-                </button>
+                <KidCard key={kid._id} kid={kid} navigate={navigate} />
               ))}
             </div>
           )}

@@ -104,9 +104,6 @@ export default function SetKidAndType() {
                 >
                   {kid.fullName}
                 </h3>
-                <p className="text-[10px] text-on-surface-variant font-bold leading-tight">
-                  {kid.school || "Chưa cập nhật trường"}
-                </p>
               </div>
             ))
           )}

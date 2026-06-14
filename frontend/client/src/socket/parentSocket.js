@@ -32,7 +32,7 @@ export const connectParentSocket = ({ parentId }) => {
   socket.on("connect_error", (error) => {
     console.error("Không thể kết nối socket phụ huynh:", error);
   });
-  
+
   return socket;
 };
 

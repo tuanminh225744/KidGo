@@ -196,6 +196,20 @@ export const getDriverVehicles = async (req, res, next) => {
 };
 
 /**
+ * GET /api/v1/drivers/:driverId
+ * Lấy thông tin tài xế (dành cho parent hoặc admin)
+ */
+export const getDriverByIdPublic = async (req, res, next) => {
+  try {
+    const { driverId } = req.params;
+    const result = await driverService.getDriverById(driverId);
+    return success(res, result.data, result.message, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * PATCH /api/v1/drivers/me/vehicles/:vehicleId/active
  * Chọn xe đang dùng
  */

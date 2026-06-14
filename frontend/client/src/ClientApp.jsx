@@ -1,9 +1,12 @@
 import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { useAuthStore } from "./store/useAuthStore.js";
-import { connectParentSocket, disconnectParentSocket } from "./socket/parentSocket.js";
+import {
+  connectParentSocket,
+  disconnectParentSocket,
+} from "./socket/parentSocket.js";
 
-import HomeView from "./pages/client/Home.jsx";
+import HomeView from "./pages/client/Home/Home.jsx";
 import Login from "./pages/client/Login.jsx";
 import Register from "./pages/client/Register.jsx";
 import OTP from "./pages/client/OTP.jsx";
@@ -15,6 +18,7 @@ import Schedules from "./pages/client/Schedules.jsx";
 import Notifications from "./pages/client/Notifications.jsx";
 import BottomNav from "./pages/client/BottomNav.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import ParentSocketManager from "./components/ParentSocketManager.jsx";
 
 export default function ClientApp() {
   const user = useAuthStore((state) => state.user);
@@ -55,6 +59,7 @@ export default function ClientApp() {
         </Routes>
       </div>
       <BottomNav />
+      <ParentSocketManager />
     </div>
   );
 }
