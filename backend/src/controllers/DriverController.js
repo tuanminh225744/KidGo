@@ -210,6 +210,20 @@ export const getDriverByIdPublic = async (req, res, next) => {
 };
 
 /**
+ * GET /api/v1/drivers/:driverId/location
+ * Lấy vị trí real-time của tài xế từ Redis (dành cho parent theo dõi)
+ */
+export const getDriverLocationPublic = async (req, res, next) => {
+  try {
+    const { driverId } = req.params;
+    const result = await driverService.getDriverLocation(driverId);
+    return success(res, result.data, result.message, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * PATCH /api/v1/drivers/me/vehicles/:vehicleId/active
  * Chọn xe đang dùng
  */

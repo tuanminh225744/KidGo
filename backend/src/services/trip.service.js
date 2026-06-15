@@ -225,9 +225,9 @@ export const driverPickupKid = async (tripId) => {
 
     const io = getIo();
     io.of("/parent").to(trip.parentId.toString()).emit("kid_picked_up", {
-      title: "Đã đón bé - Rất An Toàn!",
+      title: "Đã đón bé",
       message:
-        "Xác thực MÃ PIN thành công. Hành khách nhí đã yên vị trên ghế và bắt đầu di chuyển.",
+        "Xác thực thành công. Hành khách nhí đã yên vị trên ghế và bắt đầu di chuyển.",
       tripId: trip._id,
     });
 
