@@ -9,37 +9,9 @@ const initialState = {
   kidId: null,
   parentId: null,
   vehicleId: null,
+  routeId: null,
 
   status: "scheduled",
-
-  plannedRoute: {
-    pickupAddress: null,
-
-    pickupCoords: {
-      type: "Point",
-      coordinates: [],
-    },
-
-    dropoffAddress: null,
-
-    dropoffCoords: {
-      type: "Point",
-      coordinates: [],
-    },
-
-    waypoints: [],
-
-    estimatedDuration: null,
-    estimatedDistance: null,
-  },
-
-  actualRoute: [],
-
-  scheduledPickupTime: null,
-  actualPickupTime: null,
-
-  scheduledDropoffTime: null,
-  actualDropoffTime: null,
 
   otp: {
     required: false,
@@ -69,8 +41,6 @@ const initialState = {
     verifiedAt: null,
   },
 
-  distance: null,
-
   createdAt: null,
 };
 
@@ -79,47 +49,58 @@ export const useTripStore = create(
     (set) => ({
       ...initialState,
 
-      setTripData: (tripData) =>
-        set((state) => ({
-          ...state,
-          ...tripData,
+      setTrip: (trip) =>
+        set(() => ({
+          ...initialState,
+          ...trip,
         })),
 
-      resetTrip: () => set(initialState),
+      updateTrip: (payload) =>
+        set((state) => ({
+          ...state,
+          ...payload,
+        })),
+
+      updateOtp: (payload) =>
+        set((state) => ({
+          otp: {
+            ...state.otp,
+            ...payload,
+          },
+        })),
+
+      updatePickupPhoto: (payload) =>
+        set((state) => ({
+          pickupPhoto: {
+            ...state.pickupPhoto,
+            ...payload,
+          },
+        })),
+
+      updateDropoffPhoto: (payload) =>
+        set((state) => ({
+          dropoffPhoto: {
+            ...state.dropoffPhoto,
+            ...payload,
+          },
+        })),
+
+      updateSecurityQuestion: (payload) =>
+        set((state) => ({
+          securityQuestion: {
+            ...state.securityQuestion,
+            ...payload,
+          },
+        })),
+
+      resetTrip: () =>
+        set(() => ({
+          ...initialState,
+        })),
     }),
     {
-      name: "kidgo_trip",
+      name: "trip-storage",
       storage: createJSONStorage(() => localStorage),
-
-      partialize: (state) => ({
-        _id: state._id,
-
-        bookingId: state.bookingId,
-        driverId: state.driverId,
-        kidId: state.kidId,
-        parentId: state.parentId,
-        vehicleId: state.vehicleId,
-
-        status: state.status,
-
-        plannedRoute: state.plannedRoute,
-        actualRoute: state.actualRoute,
-
-        scheduledPickupTime: state.scheduledPickupTime,
-        actualPickupTime: state.actualPickupTime,
-
-        scheduledDropoffTime: state.scheduledDropoffTime,
-        actualDropoffTime: state.actualDropoffTime,
-
-        otp: state.otp,
-        pickupPhoto: state.pickupPhoto,
-        dropoffPhoto: state.dropoffPhoto,
-        securityQuestion: state.securityQuestion,
-
-        distance: state.distance,
-
-        createdAt: state.createdAt,
-      }),
     },
   ),
 );

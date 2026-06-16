@@ -1,5 +1,6 @@
 import Trip from "../models/operational/trip.model.js";
 import { NotFoundError } from "../utils/AppError.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * GET /api/v1/admin/trips
@@ -20,6 +21,7 @@ export const getAllTrips = async (req, res, next) => {
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(+limit)
+        .populate("routeId")
         .populate("driverId", "user licenseNumber rating")
         .populate("parentId", "fullName email phone")
         .populate("kidId", "fullName")
@@ -27,13 +29,17 @@ export const getAllTrips = async (req, res, next) => {
       Trip.countDocuments(query),
     ]);
 
-    res.status(200).json({
-      success: true,
-      page: +page,
-      total,
-      totalPages: Math.ceil(total / +limit),
-      data: trips,
-    });
+    return success(
+      res,
+      {
+        page: +page,
+        total,
+        totalPages: Math.ceil(total / +limit),
+        data: trips,
+      },
+      "Trips fetched",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -50,12 +56,13 @@ export const getLiveTrips = async (req, res, next) => {
     const trips = await Trip.find({
       status: { $in: ["picking_up", "in_progress"] },
     })
+      .populate("routeId")
       .populate("driverId", "user licenseNumber currentLocation rideStatus")
       .populate("parentId", "fullName phone")
       .populate("kidId", "fullName")
       .populate("vehicleId", "licensePlate model color");
 
-    res.status(200).json({ success: true, count: trips.length, data: trips });
+    return success(res, trips, "Live trips fetched", 200);
   } catch (error) {
     next(error);
   }
@@ -70,6 +77,7 @@ export const getTripDetailAdmin = async (req, res, next) => {
   try {
     const { tripId } = req.params;
     const trip = await Trip.findById(tripId)
+      .populate("routeId")
       .populate("driverId", "user licenseNumber rating currentLocation")
       .populate("parentId", "fullName email phone")
       .populate("kidId", "fullName avatar")
@@ -77,7 +85,7 @@ export const getTripDetailAdmin = async (req, res, next) => {
       .populate("bookingId");
 
     if (!trip) return next(new NotFoundError("Chuyến đi không tồn tại."));
-    res.status(200).json({ success: true, data: trip });
+    return success(res, trip, "Trip fetched", 200);
   } catch (error) {
     next(error);
   }

@@ -1,4 +1,5 @@
 import * as notificationService from "../services/notification.service.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * GET /api/v1/notifications
@@ -12,7 +13,7 @@ export const getNotifications = async (req, res, next) => {
       page: +page || 1,
       limit: +limit || 30,
     });
-    res.status(200).json({ success: true, ...result });
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -26,12 +27,13 @@ export const getNotifications = async (req, res, next) => {
 export const markOneRead = async (req, res, next) => {
   try {
     const { notifId } = req.params;
-    const notif = await notificationService.markOneRead(notifId, req.user.id);
-    res.status(200).json({
-      success: true,
-      message: "Đã đánh dấu thông báo là đã đọc.",
-      data: notif,
-    });
+    const result = await notificationService.markOneRead(notifId, req.user.id);
+    return success(
+      res,
+      result.data,
+      result.message || "Đã đánh dấu thông báo là đã đọc.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -46,11 +48,13 @@ export const markOneRead = async (req, res, next) => {
 export const markAllRead = async (req, res, next) => {
   try {
     const result = await notificationService.markAllRead(req.user.id);
-    res.status(200).json({
-      success: true,
-      message: `Đã đánh dấu ${result.updatedCount} thông báo là đã đọc.`,
-      data: result,
-    });
+    return success(
+      res,
+      result.data,
+      result.message ||
+        `Đã đánh dấu ${result.data.updatedCount} thông báo là đã đọc.`,
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -64,7 +68,7 @@ export const markAllRead = async (req, res, next) => {
 export const getUnreadCount = async (req, res, next) => {
   try {
     const result = await notificationService.getUnreadCount(req.user.id);
-    res.status(200).json({ success: true, data: result });
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -76,8 +80,8 @@ export const getUnreadCount = async (req, res, next) => {
  */
 export const createNotification = async (req, res, next) => {
   try {
-    const notification = await notificationService.createNotification(req.body);
-    res.status(201).json({ success: true, data: notification });
+    const result = await notificationService.createNotification(req.body);
+    return success(res, result.data, result.message, 201);
   } catch (error) {
     next(error);
   }

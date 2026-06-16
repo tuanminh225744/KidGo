@@ -1,5 +1,6 @@
 import { io } from "socket.io-client";
 import { setupDriverSocketReceiver } from "./driverSocketReceiver.js";
+import { useTripStore } from "../store/useTripStore.js";
 
 let socket = null;
 let intervalId = null;
@@ -26,11 +27,17 @@ const sendLocation = () => {
     return;
   }
 
-  socket.emit("update_location", {
+  const tripState = useTripStore.getState();
+  const routeId = tripState?.routeId ?? null;
+
+  const payload = {
     driverId: currentDriverId,
     lat: position.lat,
     lng: position.lng,
-  });
+    routeId: routeId || null,
+  };
+
+  socket.emit("update_location", payload);
 };
 
 const startLocationUpdates = () => {
@@ -42,10 +49,7 @@ const startLocationUpdates = () => {
   intervalId = window.setInterval(sendLocation, 10000);
 };
 
-export const connectDriverSocket = ({
-  driverId,
-  getPosition,
-}) => {
+export const connectDriverSocket = ({ driverId, getPosition }) => {
   if (!driverId) {
     return;
   }

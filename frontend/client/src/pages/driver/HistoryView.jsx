@@ -21,14 +21,14 @@ export default function HistoryView() {
           const tripsData = res.data?.trips || res.trips || [];
           const formatted = tripsData.map(t => ({
             id: t._id,
-            time: new Date(t.actualDropoffTime || t.createdAt).toLocaleString(),
+            time: new Date(t.createdAt).toLocaleString(),
             status: t.status === 'completed' ? 'HOÀN THÀNH' : t.status === 'cancelled' ? 'HUỶ' : t.status === 'deviated' ? 'LỆCH LỘ TRÌNH' : t.status,
             name: t.kidId?.fullName || 'Unknown',
-            from: t.plannedRoute?.pickupAddress || 'N/A',
-            to: t.plannedRoute?.dropoffAddress || 'N/A',
+            from: t.routeId?.estimatedPickupAddress || t.routeId?.actualPickupAddress || 'N/A',
+            to: t.routeId?.estimatedDropoffAddress || t.routeId?.actualDropoffAddress || 'N/A',
             price: t.paymentId?.amount ? `${t.paymentId.amount.toLocaleString()}đ` : '0đ',
-            dist: t.distance ? `${t.distance}km` : '0.0km',
-            duration: t.plannedRoute?.estimatedDuration ? `${t.plannedRoute.estimatedDuration} phút` : '0 phút',
+            dist: t.routeId?.estimatedDistance ? `${t.routeId.estimatedDistance}km` : t.routeId?.actualDistance ? `${t.routeId.actualDistance}km` : '0.0km',
+            duration: t.routeId?.estimatedDuration ? `${t.routeId.estimatedDuration} phút` : t.routeId?.actualDuration ? `${t.routeId.actualDuration} phút` : '0 phút',
             rating: t.rating || null,
             hasAlert: t.status === 'deviated',
             cancelled: t.status === 'cancelled'

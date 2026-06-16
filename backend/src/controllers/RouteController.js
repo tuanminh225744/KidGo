@@ -1,4 +1,5 @@
 import * as routeService from "../services/route.service.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * GET /api/v1/routes
@@ -6,13 +7,8 @@ import * as routeService from "../services/route.service.js";
  */
 export const getRoutes = async (req, res, next) => {
   try {
-    const routes = await routeService.getRoutesByParent(req.user.id);
-
-    res.status(200).json({
-      success: true,
-      count: routes.length,
-      data: routes,
-    });
+    const result = await routeService.getRoutesByParent(req.user.id);
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -29,13 +25,13 @@ export const createRoute = async (req, res, next) => {
       parentId: req.user.id,
     };
 
-    const route = await routeService.createRoute(routeData);
-
-    res.status(201).json({
-      success: true,
-      message: "Tạo lộ trình thành công.",
-      data: route,
-    });
+    const result = await routeService.createRoute(routeData);
+    return success(
+      res,
+      result.data,
+      result.message || "Tạo lộ trình thành công.",
+      201,
+    );
   } catch (error) {
     next(error);
   }
@@ -47,20 +43,13 @@ export const createRoute = async (req, res, next) => {
  */
 export const getRouteDetail = async (req, res, next) => {
   try {
-    const route = await routeService.getRouteById(req.params.routeId);
-
+    const result = await routeService.getRouteById(req.params.routeId);
+    const route = result.data;
     // Verify route belongs to user
     if (route.parentId.toString() !== req.user.id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "Bạn không có quyền truy cập lộ trình này.",
-      });
+      return error(res, "Bạn không có quyền truy cập lộ trình này.", 403);
     }
-
-    res.status(200).json({
-      success: true,
-      data: route,
-    });
+    return success(res, route, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -72,26 +61,22 @@ export const getRouteDetail = async (req, res, next) => {
  */
 export const updateRoute = async (req, res, next) => {
   try {
-    const route = await routeService.getRouteById(req.params.routeId);
-
+    const fetch = await routeService.getRouteById(req.params.routeId);
+    const route = fetch.data;
     // Verify route belongs to user
     if (route.parentId.toString() !== req.user.id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "Bạn không có quyền cập nhật lộ trình này.",
-      });
+      return error(res, "Bạn không có quyền cập nhật lộ trình này.", 403);
     }
-
-    const updatedRoute = await routeService.updateRoute(
+    const updated = await routeService.updateRoute(
       req.params.routeId,
       req.body,
     );
-
-    res.status(200).json({
-      success: true,
-      message: "Cập nhật lộ trình thành công.",
-      data: updatedRoute,
-    });
+    return success(
+      res,
+      updated.data,
+      updated.message || "Cập nhật lộ trình thành công.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -103,22 +88,14 @@ export const updateRoute = async (req, res, next) => {
  */
 export const deleteRoute = async (req, res, next) => {
   try {
-    const route = await routeService.getRouteById(req.params.routeId);
-
+    const fetch = await routeService.getRouteById(req.params.routeId);
+    const route = fetch.data;
     // Verify route belongs to user
     if (route.parentId.toString() !== req.user.id.toString()) {
-      return res.status(403).json({
-        success: false,
-        message: "Bạn không có quyền xóa lộ trình này.",
-      });
+      return error(res, "Bạn không có quyền xóa lộ trình này.", 403);
     }
-
     await routeService.deleteRoute(req.params.routeId);
-
-    res.status(200).json({
-      success: true,
-      message: "Xóa lộ trình thành công.",
-    });
+    return success(res, null, "Xóa lộ trình thành công.", 200);
   } catch (error) {
     next(error);
   }

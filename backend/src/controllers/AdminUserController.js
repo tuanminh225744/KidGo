@@ -1,4 +1,5 @@
 import * as userService from "../services/user.service.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * GET /api/v1/admin/users
@@ -14,7 +15,7 @@ export const listParents = async (req, res, next) => {
       page: +page || 1,
       limit: +limit || 20,
     });
-    res.status(200).json({ success: true, ...result });
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -28,8 +29,8 @@ export const listParents = async (req, res, next) => {
 export const getParentDetail = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const user = await userService.getParentById(userId);
-    res.status(200).json({ success: true, data: user });
+    const result = await userService.getParentById(userId);
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -43,12 +44,13 @@ export const getParentDetail = async (req, res, next) => {
 export const suspendUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const user = await userService.suspendUser(userId);
-    res.status(200).json({
-      success: true,
-      message: "Tài khoản đã bị khóa.",
-      data: user,
-    });
+    const result = await userService.suspendUser(userId);
+    return success(
+      res,
+      result.data,
+      result.message || "Tài khoản đã bị khóa.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -62,12 +64,13 @@ export const suspendUser = async (req, res, next) => {
 export const reactivateUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const user = await userService.reactivateUser(userId);
-    res.status(200).json({
-      success: true,
-      message: "Tài khoản đã được mở khóa.",
-      data: user,
-    });
+    const result = await userService.reactivateUser(userId);
+    return success(
+      res,
+      result.data,
+      result.message || "Tài khoản đã được mở khóa.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -81,16 +84,17 @@ export const toggleUserStatus = async (req, res, next) => {
     const { id } = req.params;
     const { isActive } = req.body;
     if (typeof isActive !== "boolean") {
-      return res.status(400).json({ success: false, message: "isActive phải là boolean." });
+      return error(res, "isActive phải là boolean.", 400);
     }
-    const updatedUser = isActive
+    const result = isActive
       ? await userService.reactivateUser(id)
       : await userService.suspendUser(id);
-    res.status(200).json({
-      success: true,
-      message: `Tài khoản đã được ${isActive ? "mở khóa" : "khóa"}.`,
-      data: updatedUser,
-    });
+    return success(
+      res,
+      result.data,
+      result.message || `Tài khoản đã được ${isActive ? "mở khóa" : "khóa"}.`,
+      200,
+    );
   } catch (error) {
     next(error);
   }

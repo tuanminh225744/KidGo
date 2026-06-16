@@ -1,11 +1,12 @@
-import { create } from 'zustand';
+import { create } from "zustand";
 
 export const useSocketStore = create((set, get) => ({
   events: [],
-  
+
   // Hàm thêm event vào store
   addEvent: (namespace, type, payload) => {
-    const id = Date.now().toString() + Math.random().toString(36).substring(2, 9);
+    const id =
+      Date.now().toString() + Math.random().toString(36).substring(2, 9);
     const newEvent = {
       id,
       namespace,
@@ -14,18 +15,20 @@ export const useSocketStore = create((set, get) => ({
       isRead: false,
       timestamp: new Date(),
     };
-    
-    set((state) => ({ 
-      events: [...state.events, newEvent] 
+
+    set((state) => ({
+      events: [...state.events, newEvent],
     }));
-    
+
     return newEvent;
   },
 
   // Hàm đánh dấu event đã được xử lý/đọc
   markAsRead: (id) => {
     set((state) => ({
-      events: state.events.map((e) => (e.id === id ? { ...e, isRead: true } : e)),
+      events: state.events.map((e) =>
+        e.id === id ? { ...e, isRead: true } : e,
+      ),
     }));
   },
 
@@ -42,5 +45,5 @@ export const useSocketStore = create((set, get) => ({
       }
       return match;
     });
-  }
+  },
 }));

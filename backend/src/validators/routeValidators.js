@@ -6,179 +6,113 @@ export const validateRouteIdParam = [
     .withMessage("routeId phải là định dạng ObjectID hợp lệ"),
 ];
 
-export const validateCreateRoute = [
-  body("name")
+const validatePointField = (fieldName) =>
+  body(fieldName).optional().custom((value) => {
+    if (!value || typeof value !== "object") {
+      throw new Error(`${fieldName} phải là một object GeoJSON Point hợp lệ`);
+    }
+    if (value.type !== "Point") {
+      throw new Error(`${fieldName} phải có type: "Point"`);
+    }
+    if (!Array.isArray(value.coordinates) || value.coordinates.length !== 2) {
+      throw new Error(`${fieldName}.coordinates phải là mảng [lng, lat]`);
+    }
+    return true;
+  });
+
+const validateWaypointArray = (fieldName) =>
+  body(fieldName).optional().isArray().withMessage(`${fieldName} phải là mảng`)
+    .custom((value) => {
+      if (!Array.isArray(value)) return true;
+
+      value.forEach((point, idx) => {
+        if (!point || typeof point !== "object") {
+          throw new Error(`${fieldName}[${idx}] phải là object GeoJSON Point`);
+        }
+        if (point.type !== "Point") {
+          throw new Error(`${fieldName}[${idx}] phải có type: "Point"`);
+        }
+        if (
+          !Array.isArray(point.coordinates) ||
+          point.coordinates.length !== 2
+        ) {
+          throw new Error(
+            `${fieldName}[${idx}].coordinates phải là mảng [lng, lat]`,
+          );
+        }
+      });
+
+      return true;
+    });
+
+const commonRouteBodyValidators = [
+  body("actualPickupAddress")
     .optional()
     .isString()
-    .withMessage("name phải là chuỗi văn bản")
+    .withMessage("actualPickupAddress phải là chuỗi văn bản")
     .trim(),
-
-  body("pickupAddress")
-    .notEmpty()
-    .withMessage("pickupAddress là bắt buộc")
-    .bail()
-    .isString()
-    .withMessage("pickupAddress phải là chuỗi văn bản")
-    .trim(),
-
-  body("pickupCoords")
-    .notEmpty()
-    .withMessage("pickupCoords là bắt buộc")
-    .bail()
-    .custom((value) => {
-      if (!value.type || value.type !== "Point") {
-        throw new Error('pickupCoords phải có type: "Point"');
-      }
-      if (!Array.isArray(value.coordinates) || value.coordinates.length !== 2) {
-        throw new Error("pickupCoords.coordinates phải là mảng [lng, lat]");
-      }
-      return true;
-    }),
-
-  body("dropoffAddress")
-    .notEmpty()
-    .withMessage("dropoffAddress là bắt buộc")
-    .bail()
-    .isString()
-    .withMessage("dropoffAddress phải là chuỗi văn bản")
-    .trim(),
-
-  body("dropoffCoords")
-    .notEmpty()
-    .withMessage("dropoffCoords là bắt buộc")
-    .bail()
-    .custom((value) => {
-      if (!value.type || value.type !== "Point") {
-        throw new Error('dropoffCoords phải có type: "Point"');
-      }
-      if (!Array.isArray(value.coordinates) || value.coordinates.length !== 2) {
-        throw new Error("dropoffCoords.coordinates phải là mảng [lng, lat]");
-      }
-      return true;
-    }),
-
-  body("estimatedDuration")
+  body("actualDropoffAddress")
     .optional()
-    .isInt({ min: 0 })
-    .withMessage("estimatedDuration phải là số nguyên dương"),
-
+    .isString()
+    .withMessage("actualDropoffAddress phải là chuỗi văn bản")
+    .trim(),
+  body("actualDistance")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("actualDistance phải là số dương"),
+  body("actualDuration")
+    .optional()
+    .isFloat({ min: 0 })
+    .withMessage("actualDuration phải là số dương"),
+  body("estimatedPickupAddress")
+    .optional()
+    .isString()
+    .withMessage("estimatedPickupAddress phải là chuỗi văn bản")
+    .trim(),
+  body("estimatedDropoffAddress")
+    .optional()
+    .isString()
+    .withMessage("estimatedDropoffAddress phải là chuỗi văn bản")
+    .trim(),
   body("estimatedDistance")
     .optional()
     .isFloat({ min: 0 })
     .withMessage("estimatedDistance phải là số dương"),
-
-  body("isDefault")
+  body("estimatedDuration")
     .optional()
-    .isBoolean()
-    .withMessage("isDefault phải là boolean"),
-
-  body("waypoints")
+    .isFloat({ min: 0 })
+    .withMessage("estimatedDuration phải là số dương"),
+  body("scheduledPickupTime")
     .optional()
-    .isArray()
-    .withMessage("waypoints phải là mảng")
-    .custom((value) => {
-      if (Array.isArray(value)) {
-        value.forEach((wp, idx) => {
-          if (!wp.type || wp.type !== "Point") {
-            throw new Error(`waypoints[${idx}] phải có type: "Point"`);
-          }
-          if (!Array.isArray(wp.coordinates) || wp.coordinates.length !== 2) {
-            throw new Error(
-              `waypoints[${idx}].coordinates phải là mảng [lng, lat]`,
-            );
-          }
-        });
-      }
-      return true;
-    }),
+    .isISO8601()
+    .withMessage("scheduledPickupTime phải là ngày hợp lệ")
+    .toDate(),
+  body("actualPickupTime")
+    .optional()
+    .isISO8601()
+    .withMessage("actualPickupTime phải là ngày hợp lệ")
+    .toDate(),
+  body("scheduledDropoffTime")
+    .optional()
+    .isISO8601()
+    .withMessage("scheduledDropoffTime phải là ngày hợp lệ")
+    .toDate(),
+  body("actualDropoffTime")
+    .optional()
+    .isISO8601()
+    .withMessage("actualDropoffTime phải là ngày hợp lệ")
+    .toDate(),
+  validatePointField("actualPickupCoords"),
+  validatePointField("actualDropoffCoords"),
+  validatePointField("estimatedPickupCoords"),
+  validatePointField("estimatedDropoffCoords"),
+  validateWaypointArray("estimatedWaypoints"),
+  validateWaypointArray("actualWaypoints"),
 ];
+
+export const validateCreateRoute = [...commonRouteBodyValidators];
 
 export const validateUpdateRoute = [
   ...validateRouteIdParam,
-
-  body("name")
-    .optional()
-    .isString()
-    .withMessage("name phải là chuỗi văn bản")
-    .bail()
-    .notEmpty()
-    .withMessage("name không được để trống")
-    .trim(),
-
-  body("pickupAddress")
-    .optional()
-    .isString()
-    .withMessage("pickupAddress phải là chuỗi văn bản")
-    .bail()
-    .notEmpty()
-    .withMessage("pickupAddress không được để trống")
-    .trim(),
-
-  body("pickupCoords")
-    .optional()
-    .custom((value) => {
-      if (!value.type || value.type !== "Point") {
-        throw new Error('pickupCoords phải có type: "Point"');
-      }
-      if (!Array.isArray(value.coordinates) || value.coordinates.length !== 2) {
-        throw new Error("pickupCoords.coordinates phải là mảng [lng, lat]");
-      }
-      return true;
-    }),
-
-  body("dropoffAddress")
-    .optional()
-    .isString()
-    .withMessage("dropoffAddress phải là chuỗi văn bản")
-    .bail()
-    .notEmpty()
-    .withMessage("dropoffAddress không được để trống")
-    .trim(),
-
-  body("dropoffCoords")
-    .optional()
-    .custom((value) => {
-      if (!value.type || value.type !== "Point") {
-        throw new Error('dropoffCoords phải có type: "Point"');
-      }
-      if (!Array.isArray(value.coordinates) || value.coordinates.length !== 2) {
-        throw new Error("dropoffCoords.coordinates phải là mảng [lng, lat]");
-      }
-      return true;
-    }),
-
-  body("estimatedDuration")
-    .optional()
-    .isInt({ min: 0 })
-    .withMessage("estimatedDuration phải là số nguyên dương"),
-
-  body("estimatedDistance")
-    .optional()
-    .isFloat({ min: 0 })
-    .withMessage("estimatedDistance phải là số dương"),
-
-  body("isDefault")
-    .optional()
-    .isBoolean()
-    .withMessage("isDefault phải là boolean"),
-
-  body("waypoints")
-    .optional()
-    .isArray()
-    .withMessage("waypoints phải là mảng")
-    .custom((value) => {
-      if (Array.isArray(value)) {
-        value.forEach((wp, idx) => {
-          if (!wp.type || wp.type !== "Point") {
-            throw new Error(`waypoints[${idx}] phải có type: "Point"`);
-          }
-          if (!Array.isArray(wp.coordinates) || wp.coordinates.length !== 2) {
-            throw new Error(
-              `waypoints[${idx}].coordinates phải là mảng [lng, lat]`,
-            );
-          }
-        });
-      }
-      return true;
-    }),
+  ...commonRouteBodyValidators,
 ];

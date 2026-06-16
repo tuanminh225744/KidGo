@@ -15,7 +15,7 @@ export const startScheduleScanner = () => {
     try {
       // Bước 1: Suy ra thời điểm cần đón theo độ trễ
       const targetMoment = new Date(Date.now() + LEAD_TIME_MINUTES * 60 * 1000);
-      console.log("[CronJob] Đang quét Lịch vào thời điểm: ", targetMoment);
+      // console.log("[CronJob] Đang quét Lịch vào thời điểm: ", targetMoment);
       // Format ra chuỗi thời gian chuẩn "HH:mm" trong Database (VD: 07:30)
       const hh = String(targetMoment.getHours()).padStart(2, "0");
       const mm = String(targetMoment.getMinutes()).padStart(2, "0");

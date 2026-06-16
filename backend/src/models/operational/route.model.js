@@ -10,20 +10,31 @@ const RouteSchema = new Schema(
       required: true,
       index: true,
     },
-    name: { type: String }, // VD: "Đi học sáng"
-    pickupAddress: { type: String },
-    pickupCoords: { type: PointSchema },
-    dropoffAddress: { type: String },
-    dropoffCoords: { type: PointSchema },
-    waypoints: { type: [PointSchema], default: [] },
-    estimatedDuration: { type: Number }, // phút
-    estimatedDistance: { type: Number }, // km
-    isDefault: { type: Boolean, default: false },
+    actualPickupAddress: { type: String },
+    actualDropoffAddress: { type: String },
+    actualPickupCoords: { type: PointSchema },
+    actualDropoffCoords: { type: PointSchema },
+    actualDistance: { type: Number },
+    actualDuration: { type: Number },
+    estimatedPickupAddress: { type: String },
+    estimatedDropoffAddress: { type: String },
+    estimatedPickupCoords: { type: PointSchema },
+    estimatedDropoffCoords: { type: PointSchema },
+    estimatedDistance: { type: Number },
+    estimatedDuration: { type: Number },
+    estimatedWaypoints: { type: [PointSchema], default: [] },
+    actualWaypoints: { type: [PointSchema], default: [] },
+    scheduledPickupTime: { type: Date },
+    actualPickupTime: { type: Date },
+    scheduledDropoffTime: { type: Date },
+    actualDropoffTime: { type: Date },
   },
   { timestamps: { createdAt: true, updatedAt: true } },
 );
 
-RouteSchema.index({ pickupCoords: "2dsphere" });
-RouteSchema.index({ dropoffCoords: "2dsphere" });
+RouteSchema.index({ actualPickupCoords: "2dsphere" });
+RouteSchema.index({ actualDropoffCoords: "2dsphere" });
+RouteSchema.index({ estimatedPickupCoords: "2dsphere" });
+RouteSchema.index({ estimatedDropoffCoords: "2dsphere" });
 
 export default models.Route || model("Route", RouteSchema);

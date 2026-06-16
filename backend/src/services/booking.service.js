@@ -6,7 +6,7 @@ import Vehicle from "../models/core/vehicle.model.js";
 import Notification from "../models/support/notification.model.js";
 import mongoose from "mongoose";
 import { getIo } from "../sockets/socketManager.js";
-import { getNearbyDrivers } from "./driver.service.js";
+import { getNearbyDrivers, getDriverByUserId } from "./driver.service.js";
 import { driverStartPickup } from "./trip.service.js";
 
 // Memory Object lưu trữ luồng hệ thống để có thể ngắt bất kì lúc nào
@@ -22,15 +22,20 @@ const clearBookingTimer = (bookingId) => {
   }
 };
 
-const sendParentBookingNotification = async (booking, title, body, type) => {
+const sendParentBookingNotification = async (
+  booking,
+  title,
+  body,
+  type,
+  tripId = null,
+) => {
   const notification = new Notification({
     recipientId: booking.parentId,
     recipientType: "parent",
     type,
     title,
     body,
-    channel: "push",
-    refId: booking._id,
+    tripId,
   });
   await notification.save();
   return notification;
@@ -46,10 +51,14 @@ const isDriverRelatedToBooking = (booking, driverId) => {
 
 const findAndAssignNearbyDriver = async (booking) => {
   const route = await Route.findById(booking.routeId);
-  if (!route?.pickupCoords?.coordinates) return null;
+  const pickupCoords =
+    route?.estimatedPickupCoords?.coordinates ||
+    route?.actualPickupCoords?.coordinates;
+  if (!pickupCoords) return null;
 
-  const [lng, lat] = route.pickupCoords.coordinates;
-  const nearby = await getNearbyDrivers(lat, lng, 10, "km");
+  const [lng, lat] = pickupCoords;
+  const nearbyRes = await getNearbyDrivers(lat, lng, 10, "km");
+  const nearby = nearbyRes && nearbyRes.data ? nearbyRes.data : [];
   const freeDriverIds = await filterFreeDrivers(nearby);
   if (freeDriverIds.length === 0) return null;
 
@@ -125,7 +134,9 @@ const startGenericMatchingCycle = async (bookingId, lat, lng) => {
     const checkBooking = await Booking.findById(bookingId);
     if (!checkBooking || checkBooking.status !== "pending") return;
 
-    const rawNearby = await getNearbyDrivers(lat, lng, radius, "km");
+    const rawNearbyRes = await getNearbyDrivers(lat, lng, radius, "km");
+    const rawNearby =
+      rawNearbyRes && rawNearbyRes.data ? rawNearbyRes.data : [];
     const freeDriverIds = await filterFreeDrivers(rawNearby);
 
     const io = getIo();
@@ -184,24 +195,27 @@ export const createBooking = async (bookingData) => {
         setTimeout(() => triggerTimeoutCancel(booking._id), 300 * 1000),
       ];
     } else {
-      console.log("tim tai xe xung quan voi", booking)
+      console.log("tim tai xe xung quan voi", booking);
       const matchedDriverId = await findAndAssignNearbyDriver(booking);
       if (!matchedDriverId) {
         // Lấy tọa độ điểm đón từ Route để tiến hành dô sóng
         const route = await Route.findById(booking.routeId);
-        if (!route || !route.pickupCoords || !route.pickupCoords.coordinates) {
+        const pickupCoords =
+          route?.estimatedPickupCoords?.coordinates ||
+          route?.actualPickupCoords?.coordinates;
+        if (!route || !pickupCoords) {
           throw new Error(
             "Không đủ tọa độ để khởi động Rada dò tìm cuốc (Route ID thiếu/sai).",
           );
         }
 
-        const [lng, lat] = route.pickupCoords.coordinates;
+        const [lng, lat] = pickupCoords;
         // Tiến hành mở máy dò
         await startGenericMatchingCycle(booking._id, lat, lng);
       }
     }
 
-    return booking;
+    return { success: true, message: "Booking created", data: booking };
   } catch (error) {
     throw new Error(`Lỗi tạo booking: ${error.message}`);
   }
@@ -239,7 +253,7 @@ export const editBooking = async (bookingId, parentId, updateData) => {
         });
     }
 
-    return booking;
+    return { success: true, message: "Booking updated", data: booking };
   } catch (error) {
     throw new Error(`Lỗi sửa booking: ${error.message}`);
   }
@@ -274,14 +288,23 @@ export const parentCancelBooking = async (bookingId, parentId) => {
       });
     }
 
-    return booking;
+    return {
+      success: true,
+      message: "Booking cancelled by parent",
+      data: booking,
+    };
   } catch (error) {
     throw new Error(`Lỗi hủy booking: ${error.message}`);
   }
 };
 
-export const driverAcceptBooking = async (bookingId, driverId) => {
+export const driverAcceptBooking = async (bookingId, userId) => {
   try {
+    const driverRes = await getDriverByUserId(userId);
+    const driver = driverRes?.data;
+    if (!driver) throw new Error("Không tìm thấy tài xế.");
+    const driverId = driver._id;
+
     const booking = await Booking.findById(bookingId);
     if (!booking) throw new Error("Không có booking này.");
     if (!isDriverRelatedToBooking(booking, driverId)) {
@@ -310,6 +333,9 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
       isActive: true,
     });
     const route = await Route.findById(booking.routeId);
+    if (!route) {
+      throw new Error("Không tìm thấy lộ trình cho booking này.");
+    }
 
     const newTrip = new Trip({
       bookingId: booking._id,
@@ -317,36 +343,41 @@ export const driverAcceptBooking = async (bookingId, driverId) => {
       kidId: booking.kidId,
       parentId: booking.parentId,
       vehicleId: vehicle ? vehicle._id : new mongoose.Types.ObjectId(), // Dùng mock ID nếu test data chưa có xe
+      routeId: route._id,
       paymentId: booking.paymentId,
       status: "picking_up",
-      plannedRoute: route
-        ? {
-          pickupAddress: route.pickupAddress,
-          dropoffAddress: route.dropoffAddress,
-          pickupCoords: route.pickupCoords,
-          dropoffCoords: route.dropoffCoords,
-        }
-        : {},
     });
     await newTrip.save();
 
-    const updatedTrip = await driverStartPickup(newTrip._id);
+    const updatedTripRes = await driverStartPickup(newTrip._id);
+    const updatedTrip =
+      updatedTripRes && updatedTripRes.data ? updatedTripRes.data : null;
 
     await sendParentBookingNotification(
       booking,
       "Tài xế đã xác nhận chuyến",
       "Đã có tài xế xác nhận nhận chuyến của bạn.",
       "booking_confirmed",
+      updatedTrip ? updatedTrip._id : null,
     );
 
-    return { booking: booking, trip: updatedTrip };
+    return {
+      success: true,
+      message: "Driver accepted booking",
+      data: { booking: booking, trip: updatedTrip, route: route },
+    };
   } catch (error) {
     throw new Error(`Lỗi tài xế nhận chuyến: ${error.message}`);
   }
 };
 
-export const driverCancelBooking = async (bookingId, driverId) => {
+export const driverCancelBooking = async (bookingId, userId) => {
   try {
+    const driverRes = await getDriverByUserId(userId);
+    const driver = driverRes?.data;
+    if (!driver) throw new Error("Không tìm thấy tài xế.");
+    const driverId = driver._id;
+
     const booking = await Booking.findById(bookingId);
     if (!booking) throw new Error("Không thể hủy lệnh đón không tồn tại.");
     if (!isDriverRelatedToBooking(booking, driverId)) {
@@ -380,7 +411,11 @@ export const driverCancelBooking = async (bookingId, driverId) => {
       "booking_rejected",
     );
 
-    return booking;
+    return {
+      success: true,
+      message: "Driver cancelled booking",
+      data: booking,
+    };
   } catch (error) {
     throw new Error(`Lỗi tài xế hủy cuộc: ${error.message}`);
   }
@@ -393,10 +428,13 @@ export const getBookingsByParent = async (parentId) => {
   try {
     const bookings = await Booking.find({ parentId })
       .populate("kidId", "fullName avatar")
-      .populate("routeId", "name pickupAddress dropoffAddress")
+      .populate(
+        "routeId",
+        "estimatedPickupAddress estimatedDropoffAddress estimatedDistance estimatedDuration actualPickupAddress actualDropoffAddress actualDistance actualDuration",
+      )
       .populate("assignedDriverId", "user")
       .sort({ createdAt: -1 });
-    return bookings;
+    return { success: true, message: "Bookings fetched", data: bookings };
   } catch (error) {
     throw new Error(`Lỗi lấy danh sách booking: ${error.message}`);
   }
@@ -409,13 +447,16 @@ export const getBookingById = async (bookingId) => {
   try {
     const booking = await Booking.findById(bookingId)
       .populate("kidId", "fullName avatar")
-      .populate("routeId", "name pickupAddress dropoffAddress")
+      .populate(
+        "routeId",
+        "estimatedPickupAddress estimatedDropoffAddress estimatedDistance estimatedDuration actualPickupAddress actualDropoffAddress actualDistance actualDuration",
+      )
       .populate("assignedDriverId", "user");
 
     if (!booking) {
       throw new Error("Không tìm thấy booking.");
     }
-    return booking;
+    return { success: true, message: "Booking fetched", data: booking };
   } catch (error) {
     throw new Error(`Lỗi lấy chi tiết booking: ${error.message}`);
   }

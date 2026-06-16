@@ -18,8 +18,8 @@ export const useAuthStore = create((set) => ({
     }
     set({ user: userData });
   },
-  clearUser: () => {
-    localStorage.removeItem('kidgo_user');
+  logout: () => {
+    localStorage.clear();
     useDriverStore.getState().clearDriverData();
     set({ user: null });
   }

@@ -12,10 +12,6 @@ export const getTripDetails = async (tripId) => {
   return api.get(`/trips/${tripId}`);
 };
 
-export const getLocationLog = async (tripId) => {
-  return api.get(`/trips/${tripId}/location-log`);
-};
-
 export const startTrip = async (tripId) => {
   return api.post(`/trips/${tripId}/start`);
 };

@@ -10,7 +10,7 @@ import {
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import MapRouting from "../../../components/MapRouting";
+import MapRouting from "../../../components/MapRouting.jsx";
 import { useBookingStore } from "../../../store/useBookingStore.js";
 
 export default function SetLocation() {

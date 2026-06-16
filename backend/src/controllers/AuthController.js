@@ -1,13 +1,14 @@
 import * as authService from "../services/authentication.service.js";
+import { success, error } from "../utils/response.js";
 
 // POST /api/v1/auth/register
 export const registerUser = async (req, res, next) => {
   try {
     const result = await authService.register(req.body);
     if (!result.success) {
-      return res.status(400).json(result);
+      return error(res, result.message, 400);
     }
-    res.status(201).json(result);
+    return success(res, result.data, result.message, 201);
   } catch (error) {
     next(error);
   }
@@ -18,9 +19,9 @@ export const registerDriver = async (req, res, next) => {
   try {
     const result = await authService.registerDriver(req.body);
     if (!result.success) {
-      return res.status(400).json(result);
+      return error(res, result.message, 400);
     }
-    res.status(201).json(result);
+    return success(res, result.data, result.message, 201);
   } catch (error) {
     next(error);
   }
@@ -32,9 +33,9 @@ export const loginUser = async (req, res, next) => {
     const { email, password } = req.body;
     const result = await authService.login(email, password);
     if (!result.success) {
-      return res.status(401).json(result);
+      return error(res, result.message, 401);
     }
-    res.status(200).json(result);
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -45,7 +46,8 @@ export const sendOtp = async (req, res, next) => {
   try {
     const { email } = req.body;
     const result = await authService.sendOTP(email);
-    res.status(200).json(result);
+    if (!result.success) return error(res, result.message, 400);
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -57,9 +59,9 @@ export const verifyOtp = async (req, res, next) => {
     const { email, otp } = req.body;
     const result = await authService.verifyOTPAndLogin(email, otp);
     if (!result.success) {
-      return res.status(400).json(result);
+      return error(res, result.message, 400);
     }
-    res.status(200).json(result);
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -71,9 +73,9 @@ export const refreshToken = async (req, res, next) => {
     const { refreshToken } = req.body;
     const result = await authService.refreshAccessToken(refreshToken);
     if (!result.success) {
-      return res.status(401).json(result);
+      return error(res, result.message, 401);
     }
-    res.status(200).json(result);
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -84,7 +86,8 @@ export const logout = async (req, res, next) => {
   try {
     const userId = req.user.id;
     const result = await authService.logout(userId);
-    res.status(200).json(result);
+    if (!result.success) return error(res, result.message, 400);
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }

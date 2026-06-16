@@ -158,20 +158,23 @@ export default function ConfirmBooking() {
 
     setIsSubmitting(true);
     try {
-      const routeRes = await createRoute({
-        pickupAddress: pickupText || "Điểm đón",
-        pickupCoords: {
+      const routePayload = {
+        estimatedPickupAddress: pickupText || "Điểm đón",
+        estimatedPickupCoords: {
           type: "Point",
           coordinates: [startPoint.lng, startPoint.lat],
         },
-        dropoffAddress: dropoffText || "Điểm trả",
-        dropoffCoords: {
+        estimatedDropoffAddress: dropoffText || "Điểm trả",
+        estimatedDropoffCoords: {
           type: "Point",
           coordinates: [endPoint.lng, endPoint.lat],
         },
         estimatedDistance: parseFloat(routeInfo?.distance) || 0,
         estimatedDuration: parseInt(routeInfo?.duration) || 0,
-      });
+        ...(bookingDateTime ? { scheduledPickupTime: bookingDateTime } : {}),
+      };
+
+      const routeRes = await createRoute(routePayload);
 
       if (!routeRes.success)
         throw new Error(routeRes.message || "Lỗi tạo lộ trình");

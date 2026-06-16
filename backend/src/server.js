@@ -11,7 +11,6 @@ import { syncLocationsToDB } from "./services/driver.service.js";
 import { initSocketConfig, getIo } from "./sockets/socketManager.js";
 import { startScheduleScanner } from "./cronjobs/scheduleScanner.js";
 import { startTripMonitor } from "./cronjobs/tripMonitor.js";
-import AlertRoutes from "./routes/AlertRoutes.js";
 import ReviewRoutes from "./routes/ReviewRoutes.js";
 import NotificationRoutes from "./routes/NotificationRoutes.js";
 import DashboardRoutes from "./routes/DashboardRoutes.js";
@@ -28,7 +27,7 @@ import SubscriptionRoutes from "./routes/SubscriptionRoutes.js";
 import TripScheduleRoutes from "./routes/TripScheduleRoutes.js";
 import TripRoutes from "./routes/TripRoutes.js";
 import DriverRoutes from "./routes/DriverRoutes.js";
-import ConfirmationRoutes from "./routes/ConfirmationRoutes.js";
+import ReportRoutes from "./routes/ReportRoutes.js";
 import {
   loggerMiddleware,
   errorLoggerMiddleware,
@@ -93,9 +92,8 @@ app.use("/api/v1/payments", PaymentRoutes);
 app.use("/api/v1/subscriptions", SubscriptionRoutes);
 app.use("/api/v1/drivers", DriverRoutes);
 app.use("/api/v1/trips", TripRoutes);
-app.use("/api/v1", ConfirmationRoutes); // /api/v1/trips/:tripId/confirmations + /api/v1/upload/confirmation-photo
-app.use("/api/v1/alerts", AlertRoutes);
 app.use("/api/v1/reviews", ReviewRoutes);
+app.use("/api/v1/reports", ReportRoutes);
 app.use("/api/v1/notifications", NotificationRoutes);
 app.use("/api/v1/admin", DashboardRoutes);
 app.use("/api/v1/admin/drivers", AdminDriverRoutes);

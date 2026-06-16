@@ -4,6 +4,7 @@ import { acceptBooking, rejectBooking } from "../../services/driver.service";
 import { useState } from "react";
 import { useTripStore } from "../../store/useTripStore";
 import { useBookingStoreDriver } from "../../store/useBookingStoreDriver";
+import { useRouteStore } from "../../store/useRouteStore";
 import { useNavigate } from "react-router-dom";
 
 export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
@@ -11,17 +12,18 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
   const navigate = useNavigate();
   const data = tripRequest || {};
   const bookingId = data._id || data.bookingId;
-  const title = data.name || data.kidName || data.kidId?.fullName || "Khách mới";
+  const title =
+    data.name || data.kidName || data.kidId?.fullName || "Khách mới";
   const subtitle = data.message || "Bạn có một chuyến mới đang chờ phản hồi.";
-  const pickupAddress =
+  const pickupText =
     data.pickupLocation?.address ||
-    data.routeId?.pickupAddress ||
-    data.pickupAddress ||
+    data.routeId?.estimatedPickupAddress ||
+    data.routeId?.actualPickupAddress ||
     "Điểm đón sẽ được cập nhật";
-  const dropoffAddress =
+  const dropoffText =
     data.dropoffLocation?.address ||
-    data.routeId?.dropoffAddress ||
-    data.destination ||
+    data.routeId?.estimatedDropoffAddress ||
+    data.routeId?.actualDropoffAddress ||
     "Điểm đến sẽ được cập nhật";
 
   const handleAccept = async () => {
@@ -35,8 +37,9 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
       const response = await acceptBooking(bookingId);
       if (response.success) {
         console.log("Booking accepted:", response);
-        useTripStore.getState().setTripData(response.data.trip);
+        useTripStore.getState().setTrip(response.data.trip);
         useBookingStoreDriver.getState().setBooking(response.data.booking);
+        useRouteStore.getState().setRoute(response.data.route);
         navigate("/driver/in-trip");
       }
       onAccept();
@@ -101,9 +104,7 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
                 )}
               </div>
               <div>
-                <h3 className="font-bold text-lg leading-tight">
-                  {title}
-                </h3>
+                <h3 className="font-bold text-lg leading-tight">{title}</h3>
                 <div className="text-xs text-gray-500">{subtitle}</div>
               </div>
             </div>
@@ -119,7 +120,7 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
               <div className="w-6 h-6 bg-green-500 rounded-full border-4 border-green-100 flex-shrink-0 z-10"></div>
               <div className="flex-1 -mt-1">
                 <div className="text-xs text-gray-500 leading-none mb-1">
-                  {pickupAddress}
+                  {pickupText}
                 </div>
                 <div className="font-bold text-sm">
                   {data.distFromDriver
@@ -135,7 +136,7 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
               </div>
               <div className="flex-1 -mt-1">
                 <div className="font-bold text-sm leading-tight line-clamp-2">
-                  {dropoffAddress}
+                  {dropoffText}
                 </div>
               </div>
             </div>
@@ -158,7 +159,9 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
                 ~{data.estTime || "N/A"}
               </div>
               <div className="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1.5 rounded-lg border border-gray-200">
-                {data.distance ? `${data.distance}km` : "N/A"}
+                {data.routeId?.estimatedDistance || data.routeId?.actualDistance
+                  ? `${data.routeId?.estimatedDistance || data.routeId?.actualDistance}km`
+                  : "N/A"}
               </div>
             </div>
             <div className="text-2xl font-black text-primary leading-none">

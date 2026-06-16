@@ -63,7 +63,7 @@ const DriverLiveMap = ({ className = "", startPointProp, endPointProp }) => {
   const positionRef = useRef(null);
   const driverInfo = useDriverStore((state) => state.driverInfo);
   const driverId = driverInfo?._id || null;
-  
+
   const [route, setRoute] = useState(null);
 
   const decodePolyline = (geometry) => {
@@ -202,7 +202,7 @@ const DriverLiveMap = ({ className = "", startPointProp, endPointProp }) => {
             <Marker position={center} icon={currentLocationIcon} />
           </>
         )}
-        
+
         {endPointProp && (
           <Marker
             position={[endPointProp.lat, endPointProp.lng]}
@@ -211,7 +211,12 @@ const DriverLiveMap = ({ className = "", startPointProp, endPointProp }) => {
         )}
 
         {route && route.length > 0 && (
-          <Polyline positions={route} color="#4F46C8" weight={5} opacity={0.8} />
+          <Polyline
+            positions={route}
+            color="#4F46C8"
+            weight={5}
+            opacity={0.8}
+          />
         )}
       </MapContainer>
 

@@ -14,7 +14,7 @@ import {
   getNotifications,
   markAllRead,
 } from "../../services/notification.service.js";
-import { getAlertDetail, escalateAlert } from "../../services/alert.service.js";
+import { getTripDetails } from "../../services/trip.service.js";
 
 const typeMeta = {
   alert: {
@@ -50,7 +50,6 @@ export default function Notifications() {
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [detail, setDetail] = useState(null);
   const [detailLoading, setDetailLoading] = useState(false);
-  const [actionLoading, setActionLoading] = useState(false);
 
   useEffect(() => {
     loadNotifications();
@@ -70,7 +69,7 @@ export default function Notifications() {
           body: item.body || item.message || "",
           isRead: Boolean(item.isRead),
           createdAt: item.createdAt,
-          refId: item.refId || null,
+          tripId: item.tripId || null,
         })),
       );
     } catch (error) {
@@ -86,8 +85,8 @@ export default function Notifications() {
     setDetailLoading(true);
 
     try {
-      if (notification.type === "alert" && notification.refId) {
-        const res = await getAlertDetail(notification.refId);
+      if (notification.tripId) {
+        const res = await getTripDetails(notification.tripId);
         setDetail(res?.data?.data || res?.data || null);
       }
     } catch (error) {
@@ -107,51 +106,6 @@ export default function Notifications() {
       setDetail(null);
     } catch (error) {
       console.error("Lỗi khi xóa tất cả thông báo:", error);
-    }
-  };
-
-  const handleSendReport = async () => {
-    if (!selectedNotification?.refId || selectedNotification.type !== "alert") {
-      return;
-    }
-
-    try {
-      setActionLoading(true);
-      await escalateAlert(selectedNotification.refId);
-      setNotifications((prev) =>
-        prev.map((item) =>
-          item.id === selectedNotification.id
-            ? { ...item, isRead: true }
-            : item,
-        ),
-      );
-    } catch (error) {
-      console.error("Lỗi khi gửi báo cáo:", error);
-    } finally {
-      setActionLoading(false);
-    }
-  };
-
-  const handleSendReportForItem = async (notification) => {
-    if (!notification?.refId || notification.type !== "alert") {
-      return;
-    }
-
-    setSelectedNotification(notification);
-    setDetail(null);
-
-    try {
-      setActionLoading(true);
-      await escalateAlert(notification.refId);
-      setNotifications((prev) =>
-        prev.map((item) =>
-          item.id === notification.id ? { ...item, isRead: true } : item,
-        ),
-      );
-    } catch (error) {
-      console.error("Lỗi khi gửi báo cáo:", error);
-    } finally {
-      setActionLoading(false);
     }
   };
 
@@ -250,16 +204,6 @@ export default function Notifications() {
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => handleSendReportForItem(item)}
-                        disabled={item.type !== "alert" || actionLoading}
-                        className="flex h-10 w-10 items-center justify-center rounded-2xl border border-slate-200 bg-rose-600 text-white active:scale-95 transition-transform disabled:cursor-not-allowed disabled:opacity-40"
-                        aria-label="Gửi báo cáo"
-                        title="Gửi báo cáo"
-                      >
-                        <Send size={16} />
-                      </button>
-                      <button
-                        type="button"
                         onClick={() => openDetail(item)}
                         className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white active:scale-95 transition-transform"
                         aria-label="Xem chi tiết"
@@ -349,21 +293,17 @@ export default function Notifications() {
                     </button>
                     <button
                       type="button"
-                      disabled={
-                        selectedNotification.type !== "alert" || actionLoading
-                      }
-                      onClick={handleSendReport}
-                      className="rounded-2xl bg-rose-600 px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-rose-300"
+                      onClick={() => {
+                        if (selectedNotification.tripId) {
+                          openDetail(selectedNotification);
+                        }
+                      }}
+                      className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"
+                      disabled={!selectedNotification.tripId}
                     >
-                      {actionLoading ? "Đang gửi..." : "Gửi báo cáo"}
+                      Xem chuyến
                     </button>
                   </div>
-                  {/* {selectedNotification.type !== "alert" && (
-                    <p className="text-xs text-slate-400">
-                      Báo cáo chỉ áp dụng cho thông báo cảnh báo có liên kết đến
-                      alert.
-                    </p>
-                  )} */}
                 </div>
               )}
             </div>

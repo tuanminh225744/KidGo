@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getPreferredDrivers } from "../../../services/preferredDriver.service";
+import { getPreferredDrivers } from "../../../services/preferredDriver.service.js";
 import { useBookingStore } from "../../../store/useBookingStore.js";
 
 export default function SelectDriver() {

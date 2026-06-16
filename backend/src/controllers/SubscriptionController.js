@@ -4,6 +4,7 @@ import {
   NotFoundError,
   AuthorizationError,
 } from "../utils/AppError.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * GET /api/v1/subscriptions/me
@@ -11,13 +12,10 @@ import {
  */
 export const getCurrentSubscription = async (req, res, next) => {
   try {
-    const subscription =
-      await subscriptionService.getActiveSubscriptionByParent(req.user.id);
-
-    res.status(200).json({
-      success: true,
-      data: subscription,
-    });
+    const result = await subscriptionService.getActiveSubscriptionByParent(
+      req.user.id,
+    );
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -52,14 +50,14 @@ export const createSubscription = async (req, res, next) => {
       usedTrips: 0,
     };
 
-    const subscription =
+    const result =
       await subscriptionService.createSubscription(subscriptionData);
-
-    res.status(201).json({
-      success: true,
-      message: "Đăng ký gói tháng thành công.",
-      data: subscription,
-    });
+    return success(
+      res,
+      result.data,
+      result.message || "Đăng ký gói tháng thành công.",
+      201,
+    );
   } catch (error) {
     next(error);
   }
@@ -71,9 +69,10 @@ export const createSubscription = async (req, res, next) => {
  */
 export const cancelSubscription = async (req, res, next) => {
   try {
-    const subscription = await subscriptionService.getSubscriptionById(
+    const fetchResult = await subscriptionService.getSubscriptionById(
       req.params.subId,
     );
+    const subscription = fetchResult.data;
 
     // Verify ownership
     if (subscription.parentId.toString() !== req.user.id.toString()) {
@@ -89,21 +88,18 @@ export const cancelSubscription = async (req, res, next) => {
 
     const updated = await subscriptionService.updateSubscription(
       req.params.subId,
-      {
-        status: "cancelled",
-      },
+      { status: "cancelled" },
     );
-
-    res.status(200).json({
-      success: true,
-      message: "Hủy gói tháng thành công.",
-      data: updated,
-    });
+    return success(
+      res,
+      updated.data,
+      updated.message || "Hủy gói tháng thành công.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
 };
-
 
 /**
  * GET /api/v1/subscriptions/:subId/usage
@@ -111,23 +107,26 @@ export const cancelSubscription = async (req, res, next) => {
  */
 export const getSubscriptionUsage = async (req, res, next) => {
   try {
-    const subscription = await subscriptionService.getSubscriptionById(
+    const fetchResult = await subscriptionService.getSubscriptionById(
       req.params.subId,
     );
+    const subscription = fetchResult.data;
 
     // Verify ownership
     if (subscription.parentId.toString() !== req.user.id.toString()) {
       throw new AuthorizationError("Bạn không có quyền xem thông tin gói này.");
     }
 
-    res.status(200).json({
-      success: true,
-      data: {
+    return success(
+      res,
+      {
         subscriptionId: subscription._id,
         usedTrips: subscription.usedTrips,
         status: subscription.status,
       },
-    });
+      "Subscription usage fetched",
+      200,
+    );
   } catch (error) {
     next(error);
   }

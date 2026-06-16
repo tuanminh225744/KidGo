@@ -1,5 +1,6 @@
 import * as tripScheduleService from "../services/tripSchedule.service.js";
 import { AppError, AuthorizationError } from "../utils/AppError.js";
+import { success, error } from "../utils/response.js";
 
 /**
  * GET /api/v1/bookings/schedules
@@ -8,15 +9,10 @@ import { AppError, AuthorizationError } from "../utils/AppError.js";
 export const getSchedules = async (req, res, next) => {
   try {
     const { date } = req.query;
-    const schedules = date
+    const result = date
       ? await tripScheduleService.getSchedulesByParentAndDate(req.user.id, date)
       : await tripScheduleService.getSchedulesByParent(req.user.id);
-
-    res.status(200).json({
-      success: true,
-      count: schedules.length,
-      data: schedules,
-    });
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -52,13 +48,13 @@ export const createSchedule = async (req, res, next) => {
       isActive: false,
     };
 
-    const schedule = await tripScheduleService.createTripSchedule(scheduleData);
-
-    res.status(201).json({
-      success: true,
-      message: "Tạo lịch định kỳ thành công.",
-      data: schedule,
-    });
+    const result = await tripScheduleService.createTripSchedule(scheduleData);
+    return success(
+      res,
+      result.data,
+      result.message || "Tạo lịch định kỳ thành công.",
+      201,
+    );
   } catch (error) {
     next(error);
   }
@@ -70,19 +66,15 @@ export const createSchedule = async (req, res, next) => {
  */
 export const getScheduleDetail = async (req, res, next) => {
   try {
-    const schedule = await tripScheduleService.getTripScheduleById(
+    const result = await tripScheduleService.getTripScheduleById(
       req.params.scheduleId,
     );
-
+    const schedule = result.data;
     // Verify ownership
     if (schedule.parentId.toString() !== req.user.id.toString()) {
       throw new AuthorizationError("Bạn không có quyền truy cập lịch này.");
     }
-
-    res.status(200).json({
-      success: true,
-      data: schedule,
-    });
+    return success(res, schedule, result.message, 200);
   } catch (error) {
     next(error);
   }
@@ -94,25 +86,24 @@ export const getScheduleDetail = async (req, res, next) => {
  */
 export const updateSchedule = async (req, res, next) => {
   try {
-    const schedule = await tripScheduleService.getTripScheduleById(
+    const fetch = await tripScheduleService.getTripScheduleById(
       req.params.scheduleId,
     );
-
+    const schedule = fetch.data;
     // Verify ownership
     if (schedule.parentId.toString() !== req.user.id.toString()) {
       throw new AuthorizationError("Bạn không có quyền cập nhật lịch này.");
     }
-
     const updated = await tripScheduleService.updateTripSchedule(
       req.params.scheduleId,
       req.body,
     );
-
-    res.status(200).json({
-      success: true,
-      message: "Cập nhật lịch định kỳ thành công.",
-      data: updated,
-    });
+    return success(
+      res,
+      updated.data,
+      updated.message || "Cập nhật lịch định kỳ thành công.",
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -126,25 +117,24 @@ export const toggleSchedule = async (req, res, next) => {
   try {
     const { isActive } = req.body;
 
-    const schedule = await tripScheduleService.getTripScheduleById(
+    const fetch = await tripScheduleService.getTripScheduleById(
       req.params.scheduleId,
     );
-
+    const schedule = fetch.data;
     // Verify ownership
     if (schedule.parentId.toString() !== req.user.id.toString()) {
       throw new AuthorizationError("Bạn không có quyền thay đổi lịch này.");
     }
-
     const updated = await tripScheduleService.updateTripSchedule(
       req.params.scheduleId,
       { isActive },
     );
-
-    res.status(200).json({
-      success: true,
-      message: `${isActive ? "Bật" : "Tắt"} lịch định kỳ thành công.`,
-      data: updated,
-    });
+    return success(
+      res,
+      updated.data,
+      updated.message || `${isActive ? "Bật" : "Tắt"} lịch định kỳ thành công.`,
+      200,
+    );
   } catch (error) {
     next(error);
   }
@@ -156,21 +146,16 @@ export const toggleSchedule = async (req, res, next) => {
  */
 export const deleteSchedule = async (req, res, next) => {
   try {
-    const schedule = await tripScheduleService.getTripScheduleById(
+    const fetch = await tripScheduleService.getTripScheduleById(
       req.params.scheduleId,
     );
-
+    const schedule = fetch.data;
     // Verify ownership
     if (schedule.parentId.toString() !== req.user.id.toString()) {
       throw new AuthorizationError("Bạn không có quyền xóa lịch này.");
     }
-
     await tripScheduleService.cancelTripSchedule(req.params.scheduleId);
-
-    res.status(200).json({
-      success: true,
-      message: "Xóa lịch định kỳ thành công.",
-    });
+    return success(res, null, "Xóa lịch định kỳ thành công.", 200);
   } catch (error) {
     next(error);
   }

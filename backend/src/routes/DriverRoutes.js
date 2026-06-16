@@ -29,6 +29,11 @@ import {
   validateAddVehicle,
   validateBookingIdParam,
 } from "../validators/driverValidators.js";
+import { validateDriverIdParam } from "../validators/adminDriverValidators.js";
+import {
+  getDriverByIdPublic,
+  getDriverLocationPublic,
+} from "../controllers/DriverController.js";
 
 const router = express.Router();
 
@@ -153,6 +158,26 @@ router.post(
   validateBookingIdParam,
   validate,
   rejectBooking,
+);
+
+/**
+ * GET /api/v1/drivers/:driverId
+ * Lấy thông tin tài xế (parent & admin)
+ */
+router.get(
+  "/:driverId/location",
+  authorize("parent", "admin"),
+  validateDriverIdParam,
+  validate,
+  getDriverLocationPublic,
+);
+
+router.get(
+  "/:driverId",
+  authorize("parent", "admin"),
+  validateDriverIdParam,
+  validate,
+  getDriverByIdPublic,
 );
 
 export default router;

@@ -24,24 +24,24 @@ export default function Login() {
     try {
       const result = await loginUser(email, password);
 
-      if (!result?.success) {
+      if (!result.success) {
         setError(result?.message || "Đăng nhập thất bại. Vui lòng thử lại.");
         setLoading(false);
         return;
       }
 
-      if (result?.user?.role !== "driver") {
+      if (result.data.user.role !== "driver") {
         setError("Đăng nhập thất bại. Sai email hoặc mật khẩu!");
         setLoading(false);
         return;
       }
 
       setAuthTokens({
-        accessToken: result.accessToken,
-        refreshToken: result.refreshToken,
+        accessToken: result.data.accessToken,
+        refreshToken: result.data.refreshToken,
       });
 
-      useAuthStore.getState().setUser(result.user);
+      useAuthStore.getState().setUser(result.data.user);
       try {
         const [profileRes, vehiclesRes] = await Promise.all([
           getDriverProfile(),

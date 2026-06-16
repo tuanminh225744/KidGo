@@ -7,7 +7,7 @@ export const createSubscription = async (data) => {
   try {
     const newSub = new Subscription(data);
     await newSub.save();
-    return newSub;
+    return { success: true, message: "Subscription created", data: newSub };
   } catch (error) {
     throw new Error(`Lỗi tạo gói dịch vụ: ${error.message}`);
   }
@@ -20,7 +20,7 @@ export const getSubscriptionById = async (subId) => {
   try {
     const sub = await Subscription.findById(subId);
     if (!sub) throw new Error("Không tìm thấy thông tin gói dịch vụ này.");
-    return sub;
+    return { success: true, message: "Subscription fetched", data: sub };
   } catch (error) {
     throw new Error(`Lỗi tra cứu gói: ${error.message}`);
   }
@@ -37,7 +37,7 @@ export const updateSubscription = async (subId, updateData) => {
       { returnDocument: "after", runValidators: true },
     );
     if (!updatedSub) throw new Error("Gói dịch vụ không tồn tại.");
-    return updatedSub;
+    return { success: true, message: "Subscription updated", data: updatedSub };
   } catch (error) {
     throw new Error(`Lỗi chỉnh sửa gói dịch vụ: ${error.message}`);
   }
@@ -57,7 +57,7 @@ export const getActiveSubscriptionByParent = async (parentId) => {
       throw new Error("Phụ huynh không có gói dịch vụ nào đang hoạt động.");
     }
 
-    return sub;
+    return { success: true, message: "Active subscription fetched", data: sub };
   } catch (error) {
     throw new Error(error.message || `Lỗi lấy gói dịch vụ: ${error.message}`);
   }

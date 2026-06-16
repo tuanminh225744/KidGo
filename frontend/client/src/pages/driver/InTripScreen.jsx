@@ -1,21 +1,29 @@
-import { useState, useRef } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { ChevronLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import DriverLiveMap from '../../components/DriverLiveMap';
+import { useState, useRef } from "react";
+import { motion, AnimatePresence } from "motion/react";
+import { ChevronLeft } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import DriverLiveMap from "../../components/DriverLiveMap";
 import { useTripStore } from "../../store/useTripStore";
-import { verifyOtp, verifyPickupPhoto, verifyDropoffPhoto, verifySecurityQuestion, confirmPickup, confirmDropoff } from "../../services/trip.service";
+import { useRouteStore } from "../../store/useRouteStore";
+import {
+  verifyOtp,
+  verifyPickupPhoto,
+  verifyDropoffPhoto,
+  verifySecurityQuestion,
+  confirmPickup,
+  confirmDropoff,
+} from "../../services/trip.service";
 import { verifySecurityAnswer } from "../../services/kid.service";
-import { PickingUpModal } from '../../components/modal/PickingUpModal';
-import { WaitingModal } from '../../components/modal/WaitingModal';
-import { OtpVerificationModal } from '../../components/modal/OtpVerificationModal';
-import { PhotoVerificationModal } from '../../components/modal/PhotoVerificationModal';
-import { SecurityQuestionModal } from '../../components/modal/SecurityQuestionModal';
-import { OnTripModal } from '../../components/modal/OnTripModal';
-import { DroppingOffModal } from '../../components/modal/DroppingOffModal';
-import { DropoffPhotoModal } from '../../components/modal/DropoffPhotoModal';
-import { CashPaymentModal } from '../../components/modal/CashPaymentModal';
-import { confirmCashPayment, getPayment } from '../../services/payment.service';
+import { PickingUpModal } from "../../components/modal/PickingUpModal";
+import { WaitingModal } from "../../components/modal/WaitingModal";
+import { OtpVerificationModal } from "../../components/modal/OtpVerificationModal";
+import { PhotoVerificationModal } from "../../components/modal/PhotoVerificationModal";
+import { SecurityQuestionModal } from "../../components/modal/SecurityQuestionModal";
+import { OnTripModal } from "../../components/modal/OnTripModal";
+import { DroppingOffModal } from "../../components/modal/DroppingOffModal";
+import { DropoffPhotoModal } from "../../components/modal/DropoffPhotoModal";
+import { CashPaymentModal } from "../../components/modal/CashPaymentModal";
+import { confirmCashPayment, getPayment } from "../../services/payment.service";
 
 export const InTripScreen = () => {
   const navigate = useNavigate();
@@ -26,17 +34,20 @@ export const InTripScreen = () => {
   const [errorMsg, setErrorMsg] = useState("");
 
   const trip = useTripStore((state) => state);
-  const setTripData = useTripStore((state) => state.setTripData);
+  const setTripData = useTripStore((state) => state.setTrip);
+  const route = useRouteStore((state) => state);
 
-  const rawCoords = trip?.plannedRoute?.pickupCoords?.coordinates;
-  const formattedPickupLocation = rawCoords && rawCoords.length === 2
-    ? { lat: rawCoords[1], lng: rawCoords[0] }
-    : undefined;
+  const rawCoords = route?.estimatedPickupCoords?.coordinates;
+  const formattedPickupLocation =
+    rawCoords && rawCoords.length === 2
+      ? { lat: rawCoords[1], lng: rawCoords[0] }
+      : undefined;
 
-  const dropoffRawCoords = trip?.plannedRoute?.dropoffCoords?.coordinates;
-  const formattedDropoffLocation = dropoffRawCoords && dropoffRawCoords.length === 2
-    ? { lat: dropoffRawCoords[1], lng: dropoffRawCoords[0] }
-    : undefined;
+  const dropoffRawCoords = route?.estimatedDropoffCoords?.coordinates;
+  const formattedDropoffLocation =
+    dropoffRawCoords && dropoffRawCoords.length === 2
+      ? { lat: dropoffRawCoords[1], lng: dropoffRawCoords[0] }
+      : undefined;
 
   const [otpInput, setOtpInput] = useState("");
   const [photoInput, setPhotoInput] = useState(null);
@@ -53,15 +64,24 @@ export const InTripScreen = () => {
   };
 
   const checkNextVerification = (currentTripState) => {
-    if (currentTripState.otp?.required && currentTripState.otp?.status !== "passed") {
+    if (
+      currentTripState.otp?.required &&
+      currentTripState.otp?.status !== "passed"
+    ) {
       setCurrentVerificationStep("otp");
       return;
     }
-    if (currentTripState.pickupPhoto?.required && currentTripState.pickupPhoto?.status !== "passed") {
+    if (
+      currentTripState.pickupPhoto?.required &&
+      currentTripState.pickupPhoto?.status !== "passed"
+    ) {
       setCurrentVerificationStep("photo");
       return;
     }
-    if (currentTripState.securityQuestion?.required && currentTripState.securityQuestion?.status !== "passed") {
+    if (
+      currentTripState.securityQuestion?.required &&
+      currentTripState.securityQuestion?.status !== "passed"
+    ) {
       setCurrentVerificationStep("security_question");
       return;
     }
@@ -109,13 +129,13 @@ export const InTripScreen = () => {
       // In a real scenario, you would upload the file to S3/Cloudinary and get a URL, then pass it here.
       const fakePhotoUrl = "https://example.com/mock-photo.jpg";
       const res = await verifyPickupPhoto(trip._id, { photo: fakePhotoUrl });
-      console.log(res.data)
+      console.log(res.data);
       if (res.success) {
         setTripData(res.data);
         checkNextVerification(res.data);
       }
     } catch (err) {
-      setErrorMsg(err.response?.message || "Lỗi xác thực ảnh");
+      setErrorMsg(err.message || "Lỗi xác thực ảnh");
     } finally {
       setLoading(false);
     }
@@ -133,7 +153,9 @@ export const InTripScreen = () => {
       await verifySecurityAnswer(trip.kidId, securityAnswer);
 
       // 2. Mark trip verification as passed
-      const res = await verifySecurityQuestion(trip._id, { answer: securityAnswer });
+      const res = await verifySecurityQuestion(trip._id, {
+        answer: securityAnswer,
+      });
       if (res?.success) {
         setTripData(res.data);
         checkNextVerification(res.data);
@@ -184,8 +206,10 @@ export const InTripScreen = () => {
   };
 
   const handleArrivedAtDropoff = () => {
-    const currentTripState = useTripStore.getState();
-    if (currentTripState?.dropoffPhoto?.required && currentTripState.dropoffPhoto?.status !== "passed") {
+    if (
+      trip?.dropoffPhoto?.required &&
+      trip.dropoffPhoto?.status !== "passed"
+    ) {
       setTripStatus("verifying_dropoff");
       setCurrentVerificationStep("dropoff_photo");
     } else {
@@ -199,12 +223,18 @@ export const InTripScreen = () => {
     if (trip.paymentId) {
       setLoading(true);
       try {
-        const paymentIdStr = typeof trip.paymentId === 'object' ? trip.paymentId._id : trip.paymentId;
+        const paymentIdStr =
+          typeof trip.paymentId === "object"
+            ? trip.paymentId._id
+            : trip.paymentId;
         const res = await getPayment(paymentIdStr);
         if (res?.success) {
           const paymentData = res.data;
           setPaymentInfo(paymentData);
-          if (paymentData.method === 'cash' && paymentData.status !== 'completed') {
+          if (
+            paymentData.method === "cash" &&
+            paymentData.status !== "completed"
+          ) {
             setTripStatus("collect_cash");
             setLoading(false);
             return;
@@ -223,11 +253,17 @@ export const InTripScreen = () => {
   const handleCashConfirmed = async () => {
     setLoading(true);
     try {
-      const paymentIdStr = typeof trip.paymentId === 'object' ? trip.paymentId._id : trip.paymentId;
+      const paymentIdStr =
+        typeof trip.paymentId === "object"
+          ? trip.paymentId._id
+          : trip.paymentId;
       await confirmCashPayment(paymentIdStr);
       await finishTrip(paymentInfo);
     } catch (err) {
-      alert("Lỗi xác nhận thu tiền mặt: " + (err.response?.data?.message || err.message));
+      alert(
+        "Lỗi xác nhận thu tiền mặt: " +
+          (err.response?.data?.message || err.message),
+      );
       setLoading(false);
     }
   };
@@ -238,12 +274,19 @@ export const InTripScreen = () => {
       const res = await confirmDropoff(trip._id);
       if (res?.success) {
         const fare = fetchedPayment?.driverEarning || 0;
-        const distance = trip.distance || trip.plannedRoute?.estimatedDistance || 0;
-        const duration = trip.plannedRoute?.estimatedDuration || 0;
-        navigate("/driver/summary", { state: { tripData: { fare, distance, duration } } });
+        const distance =
+          trip.routeId?.estimatedDistance || trip.routeId?.actualDistance || 0;
+        const duration =
+          trip.routeId?.estimatedDuration || trip.routeId?.actualDuration || 0;
+        navigate("/driver/summary", {
+          state: { tripData: { fare, distance, duration } },
+        });
       }
     } catch (err) {
-      alert("Lỗi xác nhận hoàn thành chuyến đi: " + (err.response?.message || err.message));
+      alert(
+        "Lỗi xác nhận hoàn thành chuyến đi: " +
+          (err.response?.message || err.message),
+      );
     } finally {
       setLoading(false);
     }
@@ -253,21 +296,37 @@ export const InTripScreen = () => {
     <div className="bg-[#f0f4f8] min-h-screen relative overflow-hidden">
       {/* Map Header */}
       <div className="absolute top-10 left-6 right-6 z-10 flex justify-between items-center">
-        <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md"><ChevronLeft size={24} className="text-gray-400" /></button>
+        <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md">
+          <ChevronLeft size={24} className="text-gray-400" />
+        </button>
         <div className="bg-white/95 backdrop-blur px-6 py-2.5 rounded-full shadow-md border border-gray-100">
           <h2 className="font-bold text-sm">
-            {tripStatus === "picking_up" ? "Đang đến điểm đón" : tripStatus === "waiting" ? "Chờ bé" : tripStatus === "on_trip" ? "Đang chở" : "Hành trình"}
+            {tripStatus === "picking_up"
+              ? "Đang đến điểm đón"
+              : tripStatus === "waiting"
+                ? "Chờ bé"
+                : tripStatus === "on_trip"
+                  ? "Đang chở"
+                  : "Hành trình"}
           </h2>
         </div>
-        <button className="px-5 py-2.5 bg-white rounded-full font-black text-red-500 shadow-md border-2 border-red-50">SOS</button>
+        <button className="px-5 py-2.5 bg-white rounded-full font-black text-red-500 shadow-md border-2 border-red-50">
+          SOS
+        </button>
       </div>
 
       <div className="absolute inset-0 z-0">
         <DriverLiveMap
           className="h-full w-full"
-          startPointProp={(tripStatus === "picking_up" || tripStatus === "waiting" || tripStatus === "on_trip") ? "current" : undefined}
+          startPointProp={
+            tripStatus === "picking_up" ||
+            tripStatus === "waiting" ||
+            tripStatus === "on_trip"
+              ? "current"
+              : undefined
+          }
           endPointProp={
-            (tripStatus === "picking_up" || tripStatus === "waiting")
+            tripStatus === "picking_up" || tripStatus === "waiting"
               ? formattedPickupLocation
               : tripStatus === "on_trip"
                 ? formattedDropoffLocation
@@ -283,9 +342,7 @@ export const InTripScreen = () => {
         )}
 
         {/* Waiting state UI */}
-        {tripStatus === "waiting" && (
-          <WaitingModal onMetKid={handleMetKid} />
-        )}
+        {tripStatus === "waiting" && <WaitingModal onMetKid={handleMetKid} />}
 
         {/* Verification Modals */}
         {tripStatus === "verifying" && currentVerificationStep === "otp" && (
@@ -309,16 +366,17 @@ export const InTripScreen = () => {
           />
         )}
 
-        {tripStatus === "verifying" && currentVerificationStep === "security_question" && (
-          <SecurityQuestionModal
-            kidId={trip.kidId}
-            securityAnswer={securityAnswer}
-            setSecurityAnswer={setSecurityAnswer}
-            submitSecurityQuestion={submitSecurityQuestion}
-            errorMsg={errorMsg}
-            loading={loading}
-          />
-        )}
+        {tripStatus === "verifying" &&
+          currentVerificationStep === "security_question" && (
+            <SecurityQuestionModal
+              kidId={trip.kidId}
+              securityAnswer={securityAnswer}
+              setSecurityAnswer={setSecurityAnswer}
+              submitSecurityQuestion={submitSecurityQuestion}
+              errorMsg={errorMsg}
+              loading={loading}
+            />
+          )}
 
         {/* On Trip state UI (already existing logic adapted) */}
         {tripStatus === "on_trip" && (
@@ -327,20 +385,24 @@ export const InTripScreen = () => {
 
         {/* Dropping off state UI */}
         {tripStatus === "dropping_off" && (
-          <DroppingOffModal onConfirmDropoff={handleConfirmDropoff} loading={loading} />
-        )}
-
-        {/* Verifying dropoff UI */}
-        {tripStatus === "verifying_dropoff" && currentVerificationStep === "dropoff_photo" && (
-          <DropoffPhotoModal
-            fileInputRef={fileInputRef}
-            handlePhotoChange={handlePhotoChange}
-            photoInput={photoInput}
-            submitPhoto={submitDropoffPhoto}
-            errorMsg={errorMsg}
+          <DroppingOffModal
+            onConfirmDropoff={handleConfirmDropoff}
             loading={loading}
           />
         )}
+
+        {/* Verifying dropoff UI */}
+        {tripStatus === "verifying_dropoff" &&
+          currentVerificationStep === "dropoff_photo" && (
+            <DropoffPhotoModal
+              fileInputRef={fileInputRef}
+              handlePhotoChange={handlePhotoChange}
+              photoInput={photoInput}
+              submitPhoto={submitDropoffPhoto}
+              errorMsg={errorMsg}
+              loading={loading}
+            />
+          )}
 
         {/* Collect Cash UI */}
         {tripStatus === "collect_cash" && (

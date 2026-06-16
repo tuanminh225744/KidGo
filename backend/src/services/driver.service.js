@@ -1,6 +1,7 @@
 import Driver from "../models/core/driver.model.js";
 import User from "../models/core/user.model.js";
 import redisClient from "../config/redisClient.js";
+import * as routeService from "./route.service.js";
 
 // CRUD Driver *******************************************************************
 /**
@@ -19,7 +20,7 @@ export const createDriver = async (driverData) => {
       role: "driver", // Optionally upgrade their role
     });
 
-    return newDriver;
+    return { success: true, message: "Driver created", data: newDriver };
   } catch (error) {
     throw new Error(`Error creating driver: ${error.message}`);
   }
@@ -36,7 +37,7 @@ export const getDriverById = async (driverId) => {
     if (!driver || !driver.isActive) {
       throw new Error("Driver not found or is inactive");
     }
-    return driver;
+    return { success: true, message: "Driver fetched", data: driver };
   } catch (error) {
     throw new Error(`Error fetching driver: ${error.message}`);
   }
@@ -58,7 +59,7 @@ export const updateDriver = async (driverId, updateData) => {
     if (!updatedDriver) {
       throw new Error("Driver not found");
     }
-    return updatedDriver;
+    return { success: true, message: "Driver updated", data: updatedDriver };
   } catch (error) {
     throw new Error(`Error updating driver: ${error.message}`);
   }
@@ -79,7 +80,11 @@ export const softDeleteDriver = async (driverId) => {
     if (!deletedDriver) {
       throw new Error("Driver not found");
     }
-    return deletedDriver;
+    return {
+      success: true,
+      message: "Driver soft-deleted",
+      data: deletedDriver,
+    };
   } catch (error) {
     throw new Error(`Error soft deleting driver: ${error.message}`);
   }
@@ -92,14 +97,47 @@ export const softDeleteDriver = async (driverId) => {
  * @param {String} driverId
  * @param {Number} lat
  * @param {Number} lng
+ * @param {String} [routeId] optional route id to write waypoint into
  */
-export const updateLocationInRedis = async (driverId, lat, lng) => {
+export const updateLocationInRedis = async (
+  driverId,
+  lat,
+  lng,
+  routeId = null,
+) => {
   try {
     const geoJsonPoint = {
       type: "Point",
       coordinates: [lng, lat], // GeoJSON chuẩn: [longitude, latitude]
       updatedAt: new Date().toISOString(),
     };
+
+    // Decide whether to append the latest point to DB every ~30s.
+    // IMPORTANT: only consider writing to DB when `routeId` is provided.
+    let shouldAppendWaypoint = false;
+    if (routeId) {
+      try {
+        const lastSavedStr = await redisClient.hget(
+          "driver_last_db_save",
+          driverId.toString(),
+        );
+        const nowTime = Date.now();
+        if (!lastSavedStr) {
+          // first time saving to DB for this driver
+          shouldAppendWaypoint = true;
+        } else {
+          const lastSaved = Number(lastSavedStr);
+          if (Number.isNaN(lastSaved) || nowTime - lastSaved >= 30 * 1000) {
+            shouldAppendWaypoint = true;
+          }
+        }
+      } catch (err) {
+        console.error("Error reading driver_last_db_save from Redis:", err);
+      }
+    } else {
+      // No routeId => never write to DB here (only keep Redis buffer)
+      shouldAppendWaypoint = false;
+    }
 
     // 1. Lưu vào hash map để giữ metadata (thời gian update) truy cập O(1)
     await redisClient.hset(
@@ -116,12 +154,35 @@ export const updateLocationInRedis = async (driverId, lat, lng) => {
       driverId.toString(),
     );
 
+    // console.log(
+    //   `[Redis] Updated location for driver ${driverId}: lat=${lat}, lng=${lng}, shouldAppendWaypoint=${shouldAppendWaypoint}`,
+    // );
+
     // 3. Đẩy vào Buffer ngắn hạn (trip_buffer) phục vụ riêng cho Cảnh Sát Bản Đồ (CronJob Monitor) tính toán
     const payloadStr = JSON.stringify({ lat, lng, time: Date.now() });
     await redisClient.lpush(`trip_buffer:${driverId.toString()}`, payloadStr);
     // Cắt ngọn, chỉ xài RAM lưu kho lưu đúng 6 điểm gần nhất (60 giây vòng đời)
     await redisClient.ltrim(`trip_buffer:${driverId.toString()}`, 0, 5);
     // console.log("[Redis] Lưu địa điểm thành công");
+
+    // Nếu đủ 30s kể từ lần ghi trước, append waypoint vào Route.actualWaypoints
+    if (shouldAppendWaypoint) {
+      try {
+        await routeService.appendActualWaypoint(driverId, lat, lng, routeId);
+        // Update last DB save timestamp
+        try {
+          await redisClient.hset(
+            "driver_last_db_save",
+            driverId.toString(),
+            Date.now().toString(),
+          );
+        } catch (e) {
+          console.error("Error updating driver_last_db_save in Redis:", e);
+        }
+      } catch (err) {
+        console.error("Error appending waypoint to routes:", err);
+      }
+    }
   } catch (error) {
     console.error(`Lỗi cập nhật Redis cho tài xế ${driverId}:`, error);
   }
@@ -137,11 +198,15 @@ export const getDriverLocation = async (driverId) => {
       "driver_locations",
       driverId.toString(),
     );
-    if (!dataStr) return null;
-    return JSON.parse(dataStr);
+    if (!dataStr) return { success: true, message: "No location", data: null };
+    return {
+      success: true,
+      message: "Driver location fetched",
+      data: JSON.parse(dataStr),
+    };
   } catch (error) {
     console.error(`Lỗi lấy tọa độ tài xế ${driverId}:`, error);
-    return null;
+    return { success: false, message: "Error fetching driver location" };
   }
 };
 
@@ -167,10 +232,10 @@ export const getNearbyDrivers = async (lat, lng, radius = 5, unit = "km") => {
       "ASC", // Tài xế gần nhất hiện lên đầu
     );
     console.log("da tim thay driver trong pham vi:", nearby);
-    return nearby;
+    return { success: true, message: "Nearby drivers fetched", data: nearby };
   } catch (error) {
     console.error("Lỗi tìm tài xế qua Redis GEO:", error);
-    return [];
+    return { success: false, message: "Error fetching nearby drivers" };
   }
 };
 
@@ -184,10 +249,14 @@ export const getRealtimeLocations = async () => {
     for (const [driverId, dataStr] of Object.entries(rawData)) {
       locations[driverId] = JSON.parse(dataStr);
     }
-    return locations;
+    return {
+      success: true,
+      message: "Realtime locations fetched",
+      data: locations,
+    };
   } catch (error) {
     console.error("Lỗi lấy danh sách tọa độ thực:", error);
-    return {};
+    return { success: false, message: "Error fetching realtime locations" };
   }
 };
 
@@ -199,7 +268,8 @@ export const syncLocationsToDB = async () => {
     const rawData = await redisClient.hgetall("driver_locations");
     const driverIds = Object.keys(rawData);
 
-    if (driverIds.length === 0) return; // Không có dữ liệu để Update
+    if (driverIds.length === 0)
+      return { success: true, message: "No locations to sync", data: null }; // Không có dữ liệu để Update
 
     const bulkOps = [];
     for (const driverId of driverIds) {
@@ -245,7 +315,7 @@ export const getDriverByUserId = async (userId) => {
     if (!driver) {
       throw new Error("Tài xế không tồn tại.");
     }
-    return driver;
+    return { success: true, message: "Driver fetched by user", data: driver };
   } catch (error) {
     throw new Error(`Lỗi lấy thông tin tài xế: ${error.message}`);
   }
@@ -307,7 +377,11 @@ export const listDriversAdmin = async ({
   const drivers = result[0].data;
   const total = result[0].total[0]?.count ?? 0;
 
-  return { page, total, totalPages: Math.ceil(total / limit), drivers };
+  return {
+    success: true,
+    message: "Drivers listed",
+    data: { page, total, totalPages: Math.ceil(total / limit), drivers },
+  };
 };
 
 /**
@@ -318,7 +392,7 @@ export const getDriverDetailAdmin = async (driverId) => {
     .populate("user", "-password -deviceTokens")
     .populate("vehicles");
   if (!driver) throw new Error("Tài xế không tồn tại.");
-  return driver;
+  return { success: true, message: "Driver detail fetched", data: driver };
 };
 
 /**
@@ -331,7 +405,7 @@ export const approveDriver = async (driverId) => {
     { new: true },
   );
   if (!driver) throw new Error("Tài xế không tồn tại.");
-  return driver;
+  return { success: true, message: "Driver approved", data: driver };
 };
 
 /**
@@ -344,7 +418,7 @@ export const rejectDriver = async (driverId) => {
     { new: true },
   );
   if (!driver) throw new Error("Tài xế không tồn tại.");
-  return driver;
+  return { success: true, message: "Driver rejected", data: driver };
 };
 
 /**
@@ -359,7 +433,7 @@ export const suspendDriver = async (driverId) => {
   if (!driver) throw new Error("Tài xế không tồn tại.");
   // Đồng bộ khóa user
   await User.findByIdAndUpdate(driver.user, { isActive: false });
-  return driver;
+  return { success: true, message: "Driver suspended", data: driver };
 };
 
 /**
@@ -375,7 +449,7 @@ export const updateCertification = async (driverId, certificationLevel) => {
     { new: true },
   );
   if (!driver) throw new Error("Tài xế không tồn tại.");
-  return driver;
+  return { success: true, message: "Certification updated", data: driver };
 };
 
 /**
@@ -383,5 +457,9 @@ export const updateCertification = async (driverId, certificationLevel) => {
  */
 export const getLiveDriverLocation = async (driverId) => {
   const location = await getDriverLocation(driverId);
-  return { driverId, location };
+  return {
+    success: true,
+    message: "Live driver location",
+    data: { driverId, location },
+  };
 };

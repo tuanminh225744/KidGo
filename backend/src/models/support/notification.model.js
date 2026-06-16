@@ -12,15 +12,9 @@ const NotificationSchema = new Schema(
     type: { type: String }, // 'trip_start' | 'alert' | 'booking_confirm'…
     title: { type: String },
     body: { type: String },
-    channel: { type: String, enum: ["push", "sms", "call"] },
-    status: {
-      type: String,
-      enum: ["sent", "delivered", "failed"],
-      default: "sent",
-    },
+    tripId: { type: Schema.Types.ObjectId, ref: "Trip" },
     isRead: { type: Boolean, default: false, index: true },
     readAt: { type: Date },
-    refId: { type: Schema.Types.ObjectId }, // ID của Trip / Alert liên quan
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );

@@ -3,7 +3,6 @@ import {
   getTrips,
   getActiveTripsList,
   getTripDetails,
-  getLocationLog,
   startTrip,
   verifyOtpHandler,
   verifyPickupPhotoHandler,
@@ -68,19 +67,6 @@ router.get(
   validateTripIdParam,
   validate,
   getTripDetails
-);
-
-/**
- * GET /api/v1/trips/:tripId/location-log
- * Log GPS toàn bộ chuyến
- * Role: parent
- */
-router.get(
-  "/:tripId/location-log",
-  authorize("parent"),
-  validateTripIdParam,
-  validate,
-  getLocationLog
 );
 
 /**

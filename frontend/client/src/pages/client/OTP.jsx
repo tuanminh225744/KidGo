@@ -116,10 +116,10 @@ export default function OTP() {
               return;
             }
             setAuthTokens({
-              accessToken: result.accessToken,
-              refreshToken: result.refreshToken,
+              accessToken: result.data?.accessToken,
+              refreshToken: result.data?.refreshToken,
             });
-            useAuthStore.getState().setUser(result.user);
+            useAuthStore.getState().setUser(result.data?.user);
             clearPendingEmail();
             navigate("/client/home");
           }}

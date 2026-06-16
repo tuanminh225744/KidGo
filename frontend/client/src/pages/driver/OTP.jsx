@@ -67,11 +67,11 @@ export default function OTP() {
     }
 
     setAuthTokens({
-      accessToken: result.accessToken,
-      refreshToken: result.refreshToken,
+      accessToken: result.data?.accessToken,
+      refreshToken: result.data?.refreshToken,
     });
-    useAuthStore.getState().setUser(result.user);
-    if (result?.user?.role === "driver") {
+    useAuthStore.getState().setUser(result.data?.user);
+    if (result?.data?.user?.role === "driver") {
       try {
         const [profileRes, vehiclesRes] = await Promise.all([
           getDriverProfile(),

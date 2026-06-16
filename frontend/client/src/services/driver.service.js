@@ -51,3 +51,11 @@ export const acceptBooking = async (bookingId) => {
 export const rejectBooking = async (bookingId) => {
   return api.post(`/drivers/me/booking-requests/${bookingId}/reject`);
 };
+
+export const getDriverById = async (driverId) => {
+  return api.get(`/drivers/${driverId}`);
+};
+
+export const getDriverLocation = async (driverId) => {
+  return api.get(`/drivers/${driverId}/location`);
+};

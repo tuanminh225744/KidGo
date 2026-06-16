@@ -1,7 +1,10 @@
 import { motion, AnimatePresence } from "motion/react";
 import { X, MapPin, Clock, Car, Wallet, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
+  const navigate = useNavigate();
+
   if (!isOpen || !trip) return null;
 
   return (
@@ -11,7 +14,7 @@ export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm sm:p-4"
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm sm:p-4"
           onClick={onClose}
         >
           <motion.div
@@ -19,7 +22,7 @@ export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl flex flex-col relative max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-[400px] bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl flex flex-col relative max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -43,10 +46,10 @@ export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
                 <div className="text-right">
                   <p className="text-xs text-gray-500 font-medium mb-1">Trạng thái</p>
                   <span className={`text-xs px-2 py-1 rounded-full font-bold ${trip.status === 'HOÀN THÀNH' || trip.status === 'completed'
-                      ? 'bg-green-100 text-green-700'
-                      : trip.status === 'HUỶ' || trip.status === 'cancelled'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-orange-100 text-orange-700'
+                    ? 'bg-green-100 text-green-700'
+                    : trip.status === 'HUỶ' || trip.status === 'cancelled'
+                      ? 'bg-red-100 text-red-700'
+                      : 'bg-orange-100 text-orange-700'
                     }`}>
                     {trip.status === 'completed' ? 'HOÀN THÀNH' : trip.status === 'cancelled' ? 'HUỶ' : trip.status}
                   </span>
@@ -84,14 +87,14 @@ export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
                   <div className="w-4 h-4 rounded-full bg-green-500 ring-4 ring-gray-50 mt-1 shrink-0"></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-500 font-medium">Điểm đón</p>
-                    <p className="text-sm font-medium text-gray-800 break-words line-clamp-2">{trip.from || trip.plannedRoute?.pickupAddress || 'N/A'}</p>
+                    <p className="text-sm font-medium text-gray-800 break-words line-clamp-2">{trip.from || trip.routeId?.estimatedPickupAddress || trip.routeId?.actualPickupAddress || 'N/A'}</p>
                   </div>
                 </div>
                 <div className="flex gap-4 relative z-10">
                   <div className="w-4 h-4 rounded-full bg-primary ring-4 ring-gray-50 mt-1 shrink-0"></div>
                   <div className="flex-1 min-w-0">
                     <p className="text-xs text-gray-500 font-medium">Điểm trả</p>
-                    <p className="text-sm font-medium text-gray-800 break-words line-clamp-2">{trip.to || trip.plannedRoute?.dropoffAddress || 'N/A'}</p>
+                    <p className="text-sm font-medium text-gray-800 break-words line-clamp-2">{trip.to || trip.routeId?.estimatedDropoffAddress || trip.routeId?.actualDropoffAddress || 'N/A'}</p>
                   </div>
                 </div>
               </div>
@@ -102,7 +105,7 @@ export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
                   <div className="p-2 bg-white rounded-full shadow-sm"><MapPin size={16} className="text-primary" /></div>
                   <div>
                     <p className="text-[10px] text-gray-500 font-medium">Quãng đường</p>
-                    <p className="font-bold text-sm text-gray-800">{trip.dist || (trip.distance ? `${trip.distance} km` : 'N/A')}</p>
+                    <p className="font-bold text-sm text-gray-800">{trip.dist || (trip.routeId?.estimatedDistance ? `${trip.routeId.estimatedDistance} km` : trip.routeId?.actualDistance ? `${trip.routeId.actualDistance} km` : 'N/A')}</p>
                   </div>
                 </div>
                 <div className="bg-gray-50 p-3 rounded-2xl flex items-center gap-3">
@@ -126,12 +129,25 @@ export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
               </div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="mt-6 w-full py-4 bg-primary text-white font-bold rounded-2xl active:scale-95 transition-transform"
-            >
-              Đóng
-            </button>
+            <div className="flex gap-3 mt-6">
+              {role === 'client' && (
+                <button
+                  onClick={() => {
+                    onClose();
+                    navigate('/client/report', { state: { tripId: trip.id || trip._id } });
+                  }}
+                  className="flex-1 py-4 bg-orange-100 text-orange-600 font-bold rounded-2xl active:scale-95 transition-transform"
+                >
+                  Phản hồi
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="flex-1 py-4 bg-primary text-white font-bold rounded-2xl active:scale-95 transition-transform"
+              >
+                Đóng
+              </button>
+            </div>
           </motion.div>
         </motion.div>
       )}
