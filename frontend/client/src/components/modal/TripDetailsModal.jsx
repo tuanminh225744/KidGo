@@ -1,7 +1,10 @@
 import { motion, AnimatePresence } from "motion/react";
 import { X, MapPin, Clock, Car, Wallet, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
+  const navigate = useNavigate();
+
   if (!isOpen || !trip) return null;
 
   return (
@@ -11,7 +14,7 @@ export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm sm:p-4"
+          className="fixed inset-0 z-[60] flex items-end sm:items-center justify-center bg-black/50 backdrop-blur-sm sm:p-4"
           onClick={onClose}
         >
           <motion.div
@@ -19,7 +22,7 @@ export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
             animate={{ y: 0 }}
             exit={{ y: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="w-full max-w-lg bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl flex flex-col relative max-h-[90vh] overflow-y-auto"
+            className="w-full max-w-[400px] bg-white rounded-t-3xl sm:rounded-3xl p-6 shadow-2xl flex flex-col relative max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <button
@@ -43,10 +46,10 @@ export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
                 <div className="text-right">
                   <p className="text-xs text-gray-500 font-medium mb-1">Trạng thái</p>
                   <span className={`text-xs px-2 py-1 rounded-full font-bold ${trip.status === 'HOÀN THÀNH' || trip.status === 'completed'
-                      ? 'bg-green-100 text-green-700'
-                      : trip.status === 'HUỶ' || trip.status === 'cancelled'
-                        ? 'bg-red-100 text-red-700'
-                        : 'bg-orange-100 text-orange-700'
+                    ? 'bg-green-100 text-green-700'
+                    : trip.status === 'HUỶ' || trip.status === 'cancelled'
+                      ? 'bg-red-100 text-red-700'
+                      : 'bg-orange-100 text-orange-700'
                     }`}>
                     {trip.status === 'completed' ? 'HOÀN THÀNH' : trip.status === 'cancelled' ? 'HUỶ' : trip.status}
                   </span>
@@ -126,12 +129,25 @@ export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
               </div>
             </div>
 
-            <button
-              onClick={onClose}
-              className="mt-6 w-full py-4 bg-primary text-white font-bold rounded-2xl active:scale-95 transition-transform"
-            >
-              Đóng
-            </button>
+            <div className="flex gap-3 mt-6">
+              {role === 'client' && (
+                <button
+                  onClick={() => {
+                    onClose();
+                    navigate('/client/report', { state: { tripId: trip.id || trip._id } });
+                  }}
+                  className="flex-1 py-4 bg-orange-100 text-orange-600 font-bold rounded-2xl active:scale-95 transition-transform"
+                >
+                  Phản hồi
+                </button>
+              )}
+              <button
+                onClick={onClose}
+                className="flex-1 py-4 bg-primary text-white font-bold rounded-2xl active:scale-95 transition-transform"
+              >
+                Đóng
+              </button>
+            </div>
           </motion.div>
         </motion.div>
       )}

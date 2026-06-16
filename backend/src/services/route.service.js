@@ -95,9 +95,9 @@ export const appendActualWaypoint = async (driverId, lat, lng, routeId) => {
         $push: { actualWaypoints: geoPoint },
       },
     );
-    console.log(
-      `[RouteService] Appended actual waypoint for driver ${driverId} to route ${routeId}. Matched: ${res.matchedCount}, Modified: ${res.modifiedCount}`,
-    );
+    // console.log(
+    //   `[RouteService] Appended actual waypoint for driver ${driverId} to route ${routeId}. Matched: ${res.matchedCount}, Modified: ${res.modifiedCount}`,
+    // );
     return {
       success: true,
       message: "Waypoints appended",

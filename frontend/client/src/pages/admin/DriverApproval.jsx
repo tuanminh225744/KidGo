@@ -5,25 +5,19 @@ import {
   rejectDriver,
 } from "../../services/admin.service";
 import {
-  Users,
   Search,
   CheckCircle,
   XCircle,
   Filter,
   ChevronRight,
-  LogOut,
   FileText,
 } from "lucide-react";
-import { useAuthStore } from "../../store/useAuthStore";
-import { useNavigate } from "react-router-dom";
 
 export default function DriverApproval() {
   const [drivers, setDrivers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
-  const logout = useAuthStore((state) => state.logout);
-  const navigate = useNavigate();
 
   const fetchDrivers = async () => {
     setLoading(true);
@@ -72,48 +66,10 @@ export default function DriverApproval() {
     }
   };
 
-  const handleLogout = () => {
-    logout();
-    navigate("/admin/login");
-  };
-
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row">
-      {/* Sidebar for Desktop */}
-      <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-gray-200 p-4 flex flex-col">
-        <div className="flex items-center gap-3 px-2 py-4">
-          <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-md">
-            <span className="text-white font-extrabold text-lg tracking-tighter">
-              KG
-            </span>
-          </div>
-          <span className="font-bold text-xl text-gray-900 tracking-tight">
-            AdminPanel
-          </span>
-        </div>
+    <div className="flex-1 p-4 md:p-8 lg:p-12">
+      <div className="max-w-6xl mx-auto">
 
-        <nav className="flex-1 mt-6 space-y-1">
-          <button className="w-full flex items-center gap-3 px-4 py-3 bg-blue-50 text-blue-700 rounded-xl font-semibold transition-colors">
-            <Users size={20} />
-            Duyệt tài xế
-          </button>
-          {/* Future nav items can go here */}
-        </nav>
-
-        <div className="mt-auto pt-6 border-t border-gray-100">
-          <button
-            onClick={handleLogout}
-            className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-xl font-medium transition-colors"
-          >
-            <LogOut size={20} />
-            Đăng xuất
-          </button>
-        </div>
-      </aside>
-
-      {/* Main Content */}
-      <main className="flex-1 p-4 md:p-8 lg:p-12 overflow-y-auto">
-        <div className="max-w-6xl mx-auto">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
             <div>
@@ -233,9 +189,8 @@ export default function DriverApproval() {
                 </table>
               </div>
             )}
-          </div>
         </div>
-      </main>
+      </div>
 
       {/* Detail Modal */}
       {selectedDriver && (

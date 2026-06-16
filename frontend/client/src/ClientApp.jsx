@@ -6,20 +6,23 @@ import {
   disconnectParentSocket,
 } from "./socket/parentSocket.js";
 
-import HomeView from "./pages/client/Home/Home.jsx";
+import HomeView from "./pages/client/home/Home.jsx";
 import Login from "./pages/client/Login.jsx";
 import Register from "./pages/client/Register.jsx";
 import OTP from "./pages/client/OTP.jsx";
 import KidProfile from "./pages/client/KidProfile.jsx";
 import ClientProfile from "./pages/client/ClientProfile.jsx";
-import Booking from "./pages/client/Booking";
+import Booking from "./pages/client/booking/index.jsx";
 import Tracking from "./pages/client/Tracking.jsx";
 import Schedules from "./pages/client/Schedules.jsx";
 import Notifications from "./pages/client/Notifications.jsx";
 import BottomNav from "./pages/client/BottomNav.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import ParentSocketManager from "./components/ParentSocketManager.jsx";
-import CurrentTrip from "./pages/client/Current-trip/CurrentTrip.jsx";
+import CurrentTrip from "./pages/client/current-trip/CurrentTrip.jsx";
+import Report from "./pages/client/report/Report.jsx";
+import ReportList from "./pages/client/report/ReportList.jsx";
+import HistoryPage from "./pages/client/history/History.jsx";
 
 export default function ClientApp() {
   const user = useAuthStore((state) => state.user);
@@ -57,6 +60,9 @@ export default function ClientApp() {
             <Route path="schedules" element={<Schedules />} />
             <Route path="notifications" element={<Notifications />} />
             <Route path="current-trip" element={<CurrentTrip />} />
+            <Route path="report" element={<Report />} />
+            <Route path="report-list" element={<ReportList />} />
+            <Route path="history" element={<HistoryPage />} />
           </Route>
         </Routes>
       </div>

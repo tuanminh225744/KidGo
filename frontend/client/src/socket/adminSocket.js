@@ -32,7 +32,7 @@ export const connectAdminSocket = ({ adminId }) => {
   socket.on("connect_error", (error) => {
     console.error("Không thể kết nối socket admin:", error);
   });
-  
+
   return socket;
 };
 

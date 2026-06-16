@@ -154,9 +154,9 @@ export const updateLocationInRedis = async (
       driverId.toString(),
     );
 
-    console.log(
-      `[Redis] Updated location for driver ${driverId}: lat=${lat}, lng=${lng}, shouldAppendWaypoint=${shouldAppendWaypoint}`,
-    );
+    // console.log(
+    //   `[Redis] Updated location for driver ${driverId}: lat=${lat}, lng=${lng}, shouldAppendWaypoint=${shouldAppendWaypoint}`,
+    // );
 
     // 3. Đẩy vào Buffer ngắn hạn (trip_buffer) phục vụ riêng cho Cảnh Sát Bản Đồ (CronJob Monitor) tính toán
     const payloadStr = JSON.stringify({ lat, lng, time: Date.now() });

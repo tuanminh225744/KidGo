@@ -268,9 +268,9 @@ export default function SetDateTime() {
       </div>
 
       <main className="px-5 pt-8 pb-52 space-y-8">
-        <h2 className="text-3xl font-extrabold text-on-surface tracking-tight">
+        {/* <h2 className="text-3xl font-extrabold text-on-surface tracking-tight">
           Khi nào?
-        </h2>
+        </h2> */}
 
         <div className="flex p-1 bg-surface-container rounded-2xl">
           <button

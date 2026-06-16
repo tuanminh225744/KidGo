@@ -3,6 +3,8 @@ import {
   createReport,
   getReportsByTripIdHandler,
   deleteReportHandler,
+  adminReplyHandler,
+  getReportsByParentIdHandler,
 } from "../controllers/ReportController.js";
 import {
   authenticateToken,
@@ -13,6 +15,7 @@ import {
   validateCreateReport,
   validateTripIdParam,
   validateReportIdParam,
+  validateAdminReply,
 } from "../validators/reportValidators.js";
 
 const router = express.Router();
@@ -30,6 +33,17 @@ router.post(
   validateCreateReport,
   validate,
   createReport,
+);
+
+/**
+ * GET /api/v1/reports/me
+ * Lấy danh sách report của phụ huynh
+ * Role: parent
+ */
+router.get(
+  "/me",
+  authorize("parent"),
+  getReportsByParentIdHandler,
 );
 
 /**
@@ -56,6 +70,19 @@ router.delete(
   validateReportIdParam,
   validate,
   deleteReportHandler,
+);
+
+/**
+ * POST /api/v1/reports/:reportId/reply
+ * Admin trả lời report
+ */
+router.post(
+  "/:reportId/reply",
+  authorize("admin"),
+  validateReportIdParam,
+  validateAdminReply,
+  validate,
+  adminReplyHandler,
 );
 
 export default router;

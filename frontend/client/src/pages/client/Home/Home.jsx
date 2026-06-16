@@ -10,7 +10,6 @@ import {
 import { getUnreadCount } from "../../../services/notification.service.js";
 import { getTripSchedulesByDate } from "../../../services/booking.service.js";
 import { useAuthStore } from "../../../store/useAuthStore.js";
-import { TripDetailsModal } from "../../../components/modal/TripDetailsModal.jsx";
 import { useSocketStore } from "../../../store/useSocketStore.js";
 import TripCard from "./TripCard.jsx";
 import KidCard from "./KidCard.jsx";
@@ -25,7 +24,8 @@ export default function Home() {
   const [historyTrips, setHistoryTrips] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedTrip, setSelectedTrip] = useState(null);
-  const { user, setUser } = useAuthStore();
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user, setUser, logout } = useAuthStore();
   const displayProfile = profile || user;
   const events = useSocketStore((s) => s.events);
 
@@ -169,38 +169,74 @@ export default function Home() {
           </div> */}
         </button>
 
-        <button
-          type="button"
-          onClick={() => navigate("/client/profile")}
-          className="flex items-center gap-3 active:scale-95 transition-transform"
-          aria-label="Tài khoản"
-        >
-          <div className="text-right">
-            <p className="text-xs text-on-surface-variant leading-none mb-1">
-              Xin chào
-            </p>
-            <h2 className="text-base font-bold text-on-surface leading-tight">
-              {displayProfile?.fullName || "Phụ huynh"}
-            </h2>
-          </div>
-          <div className="relative">
-            <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary-fixed bg-surface-container">
-              <img
-                src={
-                  displayProfile?.avatar ||
-                  "https://api.dicebear.com/7.x/avataaars/svg?seed=Parent"
-                }
-                alt={displayProfile?.fullName || "Parent profile"}
-                className="w-full h-full object-cover"
-              />
+        <div className="relative">
+          <button
+            type="button"
+            onClick={() => setIsMenuOpen(!isMenuOpen)}
+            className="flex items-center gap-3 active:scale-95 transition-transform"
+            aria-label="Tài khoản"
+          >
+            <div className="text-right">
+              <p className="text-xs text-on-surface-variant leading-none mb-1">
+                Xin chào
+              </p>
+              <h2 className="text-base font-bold text-on-surface leading-tight">
+                {displayProfile?.fullName || "Phụ huynh"}
+              </h2>
             </div>
-            {unreadCount > 0 && (
-              <span className="absolute -top-1 -right-1 w-5 h-5 bg-error text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
-                {unreadCount > 9 ? "9+" : unreadCount}
-              </span>
-            )}
-          </div>
-        </button>
+            <div className="relative">
+              <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-primary-fixed bg-surface-container">
+                <img
+                  src={
+                    displayProfile?.avatar ||
+                    "https://api.dicebear.com/7.x/avataaars/svg?seed=Parent"
+                  }
+                  alt={displayProfile?.fullName || "Parent profile"}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              {unreadCount > 0 && (
+                <span className="absolute -top-1 -right-1 w-5 h-5 bg-error text-white text-[10px] font-bold flex items-center justify-center rounded-full border-2 border-white">
+                  {unreadCount > 9 ? "9+" : unreadCount}
+                </span>
+              )}
+            </div>
+          </button>
+
+          {isMenuOpen && (
+            <div className="absolute top-full right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-gray-100 z-50 overflow-hidden">
+              <button
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate("/client/profile");
+                }}
+                className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Thông tin cá nhân
+              </button>
+              <button
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  navigate("/client/report-list");
+                }}
+                className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
+                Phản hồi
+              </button>
+              <div className="h-px bg-gray-100 w-full" />
+              <button
+                onClick={() => {
+                  setIsMenuOpen(false);
+                  logout();
+                  navigate("/client/login");
+                }}
+                className="w-full text-left px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
+              >
+                Đăng xuất
+              </button>
+            </div>
+          )}
+        </div>
       </header>
 
       <main className="px-5 pt-6 space-y-6">
@@ -296,76 +332,8 @@ export default function Home() {
           )}
         </section>
 
-        {/* Trip History */}
-        <section className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h2 className="text-lg font-bold text-on-background">
-              Lịch sử di chuyển
-            </h2>
-            <button className="text-primary font-bold text-sm hover:underline">
-              Xem tất cả
-            </button>
-          </div>
-          {loading ? (
-            <div className="text-center text-on-surface-variant py-4">
-              Đang tải...
-            </div>
-          ) : historyTrips.length === 0 ? (
-            <div className="bg-secondary-container rounded-3xl p-5 text-white flex flex-col justify-between h-36 shadow-lg shadow-tertiary/20 w-full">
-              <History size={32} strokeWidth={1.5} />
-              <div>
-                <h3 className="font-bold text-lg">Chưa có chuyến đi</h3>
-                <p className="text-white/80 text-sm">
-                  Bạn chưa có chuyến đi nào đã hoàn thành
-                </p>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-3">
-              {historyTrips.map((trip) => (
-                <div
-                  key={trip.id}
-                  onClick={() => setSelectedTrip(trip)}
-                  className="bg-white p-4 rounded-3xl shadow-sm border border-outline-variant/30 active:scale-[0.98] transition-transform cursor-pointer relative overflow-hidden"
-                >
-                  <div className="flex justify-between items-start mb-2">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs text-gray-500 font-medium">
-                        {trip.time}
-                      </p>
-                      <span className="text-[10px] px-2 py-0.5 rounded-full font-bold bg-green-100 text-green-700">
-                        {trip.status}
-                      </span>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-bold text-primary">{trip.price}</p>
-                    </div>
-                  </div>
-
-                  <div className="mb-2">
-                    <h3 className="font-bold text-gray-800 truncate">
-                      Bé {trip.name}
-                    </h3>
-                    <h3 className="font-bold text-gray-800 truncate">
-                      Từ: {trip.from}
-                    </h3>
-                    <h3 className="font-bold text-gray-800 truncate">
-                      Đến: {trip.to}
-                    </h3>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
       </main>
 
-      <TripDetailsModal
-        isOpen={!!selectedTrip}
-        onClose={() => setSelectedTrip(null)}
-        trip={selectedTrip}
-        role="client"
-      />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Home, Calendar, Bell, Settings, Car } from "lucide-react";
+import { Home, Calendar, Bell, History, Car } from "lucide-react";
 
 export default function BottomNav() {
   const navigate = useNavigate();
@@ -40,15 +40,18 @@ export default function BottomNav() {
         </button>
       </div>
       <button
+        onClick={() => navigate("/client/history")}
+        className={`flex flex-col items-center gap-1 ${isActive("/client/history") ? "text-primary" : "text-on-surface-variant"}`}
+      >
+        <History size={24} />
+        <span className="text-[10px] font-bold">Lịch sử</span>
+      </button>
+      <button
         onClick={() => navigate("/client/notifications")}
-        className="flex flex-col items-center gap-1 text-on-surface-variant"
+        className={`flex flex-col items-center gap-1 ${isActive("/client/notifications") ? "text-primary" : "text-on-surface-variant"}`}
       >
         <Bell size={24} />
         <span className="text-[10px] font-bold">Thông báo</span>
-      </button>
-      <button className="flex flex-col items-center gap-1 text-on-surface-variant">
-        <Settings size={24} />
-        <span className="text-[10px] font-bold">Cài đặt</span>
       </button>
     </nav>
   );

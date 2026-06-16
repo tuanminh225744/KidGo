@@ -24,6 +24,7 @@ const ReportSchema = new Schema(
       default: "PENDING",
       index: true,
     },
+    adminAnswer: { type: String, trim: true, maxlength: 2000 },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );

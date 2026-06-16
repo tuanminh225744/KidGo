@@ -54,3 +54,42 @@ export const deleteReportHandler = async (req, res, next) => {
     next(error);
   }
 };
+
+/**
+ * POST /api/v1/reports/:reportId/reply
+ * Admin trả lời report
+ * Role: admin
+ */
+export const adminReplyHandler = async (req, res, next) => {
+  try {
+    const { reportId } = req.params;
+    const { adminAnswer } = req.body;
+    const result = await reportService.adminReply(
+      reportId,
+      req.user.id,
+      adminAnswer,
+    );
+    return success(
+      res,
+      result.data,
+      result.message || "Đã phản hồi report.",
+      200,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/v1/reports/me
+ * Lấy danh sách report của phụ huynh
+ * Role: parent
+ */
+export const getReportsByParentIdHandler = async (req, res, next) => {
+  try {
+    const result = await reportService.getReportsByParentId(req.user.id);
+    return success(res, result.data, result.message, 200);
+  } catch (err) {
+    next(err);
+  }
+};

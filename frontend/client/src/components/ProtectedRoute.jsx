@@ -12,7 +12,7 @@ export default function ProtectedRoute({
 }) {
   const location = useLocation();
   const user = useAuthStore((state) => state.user);
-  const clearUser = useAuthStore((state) => state.clearUser);
+  const logout = useAuthStore((state) => state.logout);
   const notifiedRef = useRef(false);
 
   const accessToken = localStorage.getItem("accessToken");
@@ -32,9 +32,9 @@ export default function ProtectedRoute({
 
     notifiedRef.current = true;
     clearAuthTokens();
-    clearUser();
+    logout();
     message.error(SESSION_EXPIRED_MESSAGE);
-  }, [isAllowed, clearUser]);
+  }, [isAllowed, logout]);
 
   if (!isAllowed) {
     return <Navigate to={loginPath} replace state={{ from: location }} />;
