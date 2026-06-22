@@ -262,7 +262,7 @@ export const InTripScreen = () => {
     } catch (err) {
       alert(
         "Lỗi xác nhận thu tiền mặt: " +
-          (err.response?.data?.message || err.message),
+        (err.response?.data?.message || err.message),
       );
       setLoading(false);
     }
@@ -285,7 +285,7 @@ export const InTripScreen = () => {
     } catch (err) {
       alert(
         "Lỗi xác nhận hoàn thành chuyến đi: " +
-          (err.response?.message || err.message),
+        (err.response?.message || err.message),
       );
     } finally {
       setLoading(false);
@@ -299,7 +299,7 @@ export const InTripScreen = () => {
         <button className="w-10 h-10 bg-white rounded-full flex items-center justify-center shadow-md">
           <ChevronLeft size={24} className="text-gray-400" />
         </button>
-        <div className="bg-white/95 backdrop-blur px-6 py-2.5 rounded-full shadow-md border border-gray-100">
+        {/* <div className="bg-white/95 backdrop-blur px-6 py-2.5 rounded-full shadow-md border border-gray-100">
           <h2 className="font-bold text-sm">
             {tripStatus === "picking_up"
               ? "Đang đến điểm đón"
@@ -312,7 +312,7 @@ export const InTripScreen = () => {
         </div>
         <button className="px-5 py-2.5 bg-white rounded-full font-black text-red-500 shadow-md border-2 border-red-50">
           SOS
-        </button>
+        </button> */}
       </div>
 
       <div className="absolute inset-0 z-0">
@@ -320,8 +320,8 @@ export const InTripScreen = () => {
           className="h-full w-full"
           startPointProp={
             tripStatus === "picking_up" ||
-            tripStatus === "waiting" ||
-            tripStatus === "on_trip"
+              tripStatus === "waiting" ||
+              tripStatus === "on_trip"
               ? "current"
               : undefined
           }

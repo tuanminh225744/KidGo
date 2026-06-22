@@ -100,7 +100,7 @@ export const useTripStore = create(
     }),
     {
       name: "trip-storage",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
     },
   ),
 );

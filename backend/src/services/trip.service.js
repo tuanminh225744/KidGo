@@ -267,12 +267,23 @@ export const driverDropoffKid = async (tripId) => {
     // Chuyến đi dứt điểm, Thả xích ông xế về Trạng thái "Tự Do 100%"
     await Driver.findByIdAndUpdate(trip.driverId, { rideStatus: "free" });
 
+    // Populate driver info để gửi cho parent
+    const populatedTrip = await Trip.findById(tripId)
+      .populate({
+        path: "driverId",
+        select: "user",
+        populate: { path: "user", select: "fullName avatar" },
+      });
+
     const io = getIo();
-    io.of("/parent").to(trip.parentId.toString()).emit("kid_dropped_off", {
+    io.of("/parent").to(trip.parentId.toString()).emit("trip_completed", {
       title: "Hành trình Mỹ Vãn",
       message:
-        "Bé con đã được thả xuống điểm trả một cách hoàn hảo. Cảm ơn Mẹ đã giao phó cho KidGo!",
+        "Bé con đã được thả xuống điểm trả một cách hoàn hảo. ",
       tripId: trip._id,
+      driverId: populatedTrip?.driverId?._id?.toString() || trip.driverId?.toString(),
+      driverName: populatedTrip?.driverId?.user?.fullName || null,
+      driverAvatar: populatedTrip?.driverId?.user?.avatar || null,
     });
 
     return { success: true, message: "Trip completed", data: trip };
