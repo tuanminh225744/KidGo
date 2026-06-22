@@ -8,9 +8,17 @@ import mongoose from "mongoose";
 import { getIo } from "../sockets/socketManager.js";
 import { getNearbyDrivers, getDriverByUserId } from "./driver.service.js";
 import { driverStartPickup } from "./trip.service.js";
+import redisClient from "../config/redisClient.js";
 
 // Memory Object lưu trữ luồng hệ thống để có thể ngắt bất kì lúc nào
 const activeBookingTimers = {};
+const activeBookingQueues = {};
+
+const addRejectedDriverToRedis = async (bookingId, driverId) => {
+  const key = `booking:rejected:${bookingId}`;
+  await redisClient.sadd(key, driverId.toString());
+  await redisClient.expire(key, 300); // TTL 5 phút
+};
 
 /**
  * Xóa toàn bộ các Timer đếm giờ của một booking
@@ -20,6 +28,12 @@ const clearBookingTimer = (bookingId) => {
     activeBookingTimers[bookingId].forEach((timer) => clearTimeout(timer));
     delete activeBookingTimers[bookingId];
   }
+  if (activeBookingQueues[bookingId]) {
+    clearTimeout(activeBookingQueues[bookingId].timer);
+    delete activeBookingQueues[bookingId];
+  }
+  const key = `booking:rejected:${bookingId}`;
+  redisClient.del(key).catch(e => console.error("Lỗi xóa blacklist booking từ Redis:", e));
 };
 
 const sendParentBookingNotification = async (
@@ -43,38 +57,20 @@ const sendParentBookingNotification = async (
 
 const isDriverRelatedToBooking = (booking, driverId) => {
   const driverIdStr = driverId?.toString();
-  return (
+  if (
     booking?.assignedDriverId?.toString() === driverIdStr ||
     booking?.preferredDriverId?.toString() === driverIdStr
-  );
-};
+  ) {
+    return true;
+  }
 
-const findAndAssignNearbyDriver = async (booking) => {
-  const route = await Route.findById(booking.routeId);
-  const pickupCoords =
-    route?.estimatedPickupCoords?.coordinates ||
-    route?.actualPickupCoords?.coordinates;
-  if (!pickupCoords) return null;
-
-  const [lng, lat] = pickupCoords;
-  const nearbyRes = await getNearbyDrivers(lat, lng, 10, "km");
-  const nearby = nearbyRes && nearbyRes.data ? nearbyRes.data : [];
-  const freeDriverIds = await filterFreeDrivers(nearby);
-  if (freeDriverIds.length === 0) return null;
-
-  const driverId = freeDriverIds[0];
-  booking.assignedDriverId = driverId;
-  booking.status = "matched";
-  await booking.save();
-
-  const io = getIo();
-  io.of("/driver").to(driverId).emit("booking_assigned", {
-    message: "Bạn có một yêu cầu đón mới từ hệ thống.",
-    bookingId: booking._id,
-  });
-  console.log("da gui yeu cau cho driver");
-
-  return driverId;
+  if (activeBookingQueues[booking._id]) {
+    const queue = activeBookingQueues[booking._id];
+    if (queue.currentIndex > 0 && queue.drivers[queue.currentIndex - 1] === driverIdStr) {
+      return true;
+    }
+  }
+  return false;
 };
 
 /**
@@ -94,8 +90,8 @@ const triggerTimeoutCancel = async (bookingId) => {
 
       const io = getIo();
       let message =
-        "Vượt quá 5 phút chờ. Rất tiếc không có tài xế rảnh nào tiếp nhận yêu cầu, hệ thống đã hủy ghép xe.";
-      
+        "Rất tiếc không có tài xế rảnh nào tiếp nhận yêu cầu, hệ thống đã hủy ghép xe.";
+
       if (booking.preferredDriverId) {
         message =
           "Tài xế ưu tiên không nhận cuốc. Hệ thống đã hủy chuyến xe, vui lòng đặt lại.";
@@ -118,7 +114,7 @@ const triggerTimeoutCancel = async (bookingId) => {
 };
 
 /**
- * Lọc mảng Redis trả về để kiếm xem ông xế nào thực sự Rảnh rang
+ * Lọc mảng Redis trả về để kiếm xem ông xế nào thực sự Rảnh rang, ưu tiên rating cao
  */
 const filterFreeDrivers = async (nearbyDriverIdArray) => {
   if (!nearbyDriverIdArray || nearbyDriverIdArray.length === 0) return [];
@@ -130,9 +126,78 @@ const filterFreeDrivers = async (nearbyDriverIdArray) => {
     _id: { $in: ids },
     isOnline: true,
     rideStatus: "free", // CHỈ bắt xế free
-  }).select("_id");
+  })
+    .sort({ rating: -1 })
+    .select("_id");
   console.log("da tim thay driver ranh trong pham vi:", freeDrivers);
   return freeDrivers.map((d) => d._id.toString());
+};
+
+const sendToNextInQueue = async (bookingId) => {
+  const queue = activeBookingQueues[bookingId];
+  if (!queue) return;
+
+  clearTimeout(queue.timer);
+
+  if (queue.currentIndex >= queue.drivers.length) {
+    queue.sweepRadius = queue.sweepRadius === 2 ? 5 : (queue.sweepRadius === 5 ? 10 : null);
+    if (queue.sweepRadius) {
+      await sweepFn(bookingId, queue.sweepRadius);
+    } else {
+      triggerTimeoutCancel(bookingId);
+    }
+    return;
+  }
+
+  const driverId = queue.drivers[queue.currentIndex];
+  queue.currentIndex++;
+
+  const io = getIo();
+  io.of("/driver")
+    .to(driverId)
+    .emit("new_booking_available", {
+      message: `Có 1 cuốc đón vé trong bán kính ${queue.sweepRadius}km`,
+      bookingId: bookingId,
+    });
+  console.log(`[Match Cycle] Booking ${bookingId} ping tài xế ${driverId}. Chờ 15s.`);
+
+  queue.timer = setTimeout(async () => {
+    console.log(`[Match Cycle] Tài xế ${driverId} bỏ qua, chuyển người tiếp theo.`);
+    await addRejectedDriverToRedis(bookingId, driverId);
+    sendToNextInQueue(bookingId);
+  }, 15000);
+};
+
+const sweepFn = async (bookingId, radius) => {
+  const checkBooking = await Booking.findById(bookingId);
+  if (!checkBooking || checkBooking.status !== "pending") return;
+
+  const route = await Route.findById(checkBooking.routeId);
+  const pickupCoords =
+    route?.estimatedPickupCoords?.coordinates ||
+    route?.actualPickupCoords?.coordinates;
+  if (!pickupCoords) return;
+  const [lng, lat] = pickupCoords;
+
+  const rawNearbyRes = await getNearbyDrivers(lat, lng, radius, "km");
+  let rawNearby = rawNearbyRes && rawNearbyRes.data ? rawNearbyRes.data : [];
+
+  const key = `booking:rejected:${bookingId}`;
+  const rejectedIds = await redisClient.smembers(key);
+  if (rejectedIds && rejectedIds.length > 0) {
+    rawNearby = rawNearby.filter(item => !rejectedIds.includes(item[0].toString()));
+  }
+
+  const freeDriverIds = await filterFreeDrivers(rawNearby);
+
+  activeBookingQueues[bookingId] = {
+    drivers: freeDriverIds,
+    currentIndex: 0,
+    sweepRadius: radius,
+    timer: null
+  };
+
+  await sendToNextInQueue(bookingId);
 };
 
 /**
@@ -141,40 +206,8 @@ const filterFreeDrivers = async (nearbyDriverIdArray) => {
 const startGenericMatchingCycle = async (bookingId, lat, lng) => {
   activeBookingTimers[bookingId] = [];
 
-  const sweepFn = async (radius) => {
-    const checkBooking = await Booking.findById(bookingId);
-    if (!checkBooking || checkBooking.status !== "pending") return;
-
-    const rawNearbyRes = await getNearbyDrivers(lat, lng, radius, "km");
-    const rawNearby =
-      rawNearbyRes && rawNearbyRes.data ? rawNearbyRes.data : [];
-    const freeDriverIds = await filterFreeDrivers(rawNearby);
-
-    const io = getIo();
-    if (freeDriverIds.length > 0) {
-      freeDriverIds.forEach((driverId) => {
-        io.of("/driver")
-          .to(driverId)
-          .emit("new_booking_available", {
-            message: `Có 1 cuốc đón vé trong bán kính ${radius}km`,
-            bookingId: bookingId,
-          });
-      });
-      console.log(
-        `[Match Cycle] Booking ${bookingId} quét ${radius}km -> Ping ${freeDriverIds.length} tài xế rảnh.`,
-      );
-    }
-  };
-
   // Vừa vào nổ cú sóng đầu tiên
-  sweepFn(2);
-
-  // Kế hoạch nổ sóng tương lai
-  const t1 = setTimeout(() => sweepFn(5), 60 * 1000);
-  const t2 = setTimeout(() => sweepFn(10), 120 * 1000);
-  const tFail = setTimeout(() => triggerTimeoutCancel(bookingId), 300 * 1000);
-
-  activeBookingTimers[bookingId].push(t1, t2, tFail);
+  await sweepFn(bookingId, 2);
 };
 
 export const createBooking = async (bookingData) => {
@@ -201,29 +234,25 @@ export const createBooking = async (bookingData) => {
           bookingId: booking._id,
         });
 
-      // Thiết lập Timeout 1 phút cho Xế ưu tiên
+      // Thiết lập Timeout 3 phút cho Xế ưu tiên
       activeBookingTimers[booking._id] = [
-        setTimeout(() => triggerTimeoutCancel(booking._id), 60 * 1000),
+        setTimeout(() => triggerTimeoutCancel(booking._id), 180 * 1000),
       ];
     } else {
       console.log("tim tai xe xung quan voi", booking);
-      const matchedDriverId = await findAndAssignNearbyDriver(booking);
-      if (!matchedDriverId) {
-        // Lấy tọa độ điểm đón từ Route để tiến hành dô sóng
-        const route = await Route.findById(booking.routeId);
-        const pickupCoords =
-          route?.estimatedPickupCoords?.coordinates ||
-          route?.actualPickupCoords?.coordinates;
-        if (!route || !pickupCoords) {
-          throw new Error(
-            "Không đủ tọa độ để khởi động Rada dò tìm cuốc (Route ID thiếu/sai).",
-          );
-        }
-
-        const [lng, lat] = pickupCoords;
-        // Tiến hành mở máy dò
-        await startGenericMatchingCycle(booking._id, lat, lng);
+      const route = await Route.findById(booking.routeId);
+      const pickupCoords =
+        route?.estimatedPickupCoords?.coordinates ||
+        route?.actualPickupCoords?.coordinates;
+      if (!route || !pickupCoords) {
+        throw new Error(
+          "Không đủ tọa độ để khởi động Rada dò tìm cuốc (Route ID thiếu/sai).",
+        );
       }
+
+      const [lng, lat] = pickupCoords;
+      // Tiến hành mở máy dò
+      await startGenericMatchingCycle(booking._id, lat, lng);
     }
 
     return { success: true, message: "Booking created", data: booking };
@@ -395,36 +424,49 @@ export const driverCancelBooking = async (bookingId, userId) => {
       throw new Error("Bạn không có quyền hủy booking này.");
     }
 
-    booking.status = "cancelled";
-    booking.assignedDriverId = null;
-    await booking.save();
+    if (booking.preferredDriverId && booking.preferredDriverId.toString() === driverId.toString()) {
+      booking.status = "cancelled";
+      booking.assignedDriverId = null;
+      await booking.save();
 
-    // Xóa Timer bận của bộ nhớ
-    clearBookingTimer(booking._id);
+      clearBookingTimer(booking._id);
 
-    // Trục xuất ông xế lên trạng thái Rảnh Free để còn kiếm cuốc khác
-    await Driver.findByIdAndUpdate(driverId, { rideStatus: "free" });
+      await Driver.findByIdAndUpdate(driverId, { rideStatus: "free" });
 
-    const io = getIo();
-    io.of("/parent")
-      .to(booking.parentId.toString())
-      .emit("driver_rejected_booking", {
-        title: "Tài xế hủy chuyến",
-        message:
-          "Tài xế có thể đã gặp trục trặc và vừa hủy lệnh đón bé. Vui lòng thao tác book một chuyến mới ngay nhé!",
-        bookingId: booking._id,
-      });
+      const io = getIo();
+      io.of("/parent")
+        .to(booking.parentId.toString())
+        .emit("driver_rejected_booking", {
+          title: "Tài xế hủy chuyến",
+          message:
+            "Tài xế có thể đã gặp trục trặc và vừa hủy lệnh đón bé. Vui lòng thao tác book một chuyến mới ngay nhé!",
+          bookingId: booking._id,
+        });
 
-    await sendParentBookingNotification(
-      booking,
-      "Tài xế đã từ chối chuyến",
-      "Tài xế được chỉ định đã từ chối chuyến. Vui lòng tạo một booking mới hoặc chờ hệ thống ghép tài xế khác.",
-      "booking_rejected",
-    );
+      await sendParentBookingNotification(
+        booking,
+        "Tài xế đã từ chối chuyến",
+        "Tài xế được chỉ định đã từ chối chuyến. Vui lòng tạo một booking mới hoặc chờ hệ thống ghép tài xế khác.",
+        "booking_rejected",
+      );
+    } else {
+      if (booking.assignedDriverId && booking.assignedDriverId.toString() === driverId.toString()) {
+        booking.assignedDriverId = null;
+        booking.status = "pending";
+        await booking.save();
+      }
+
+      await Driver.findByIdAndUpdate(driverId, { rideStatus: "free" });
+      await addRejectedDriverToRedis(booking._id, driverId);
+
+      if (activeBookingQueues[booking._id]) {
+        sendToNextInQueue(booking._id);
+      }
+    }
 
     return {
       success: true,
-      message: "Driver cancelled booking",
+      message: "Driver rejected booking",
       data: booking,
     };
   } catch (error) {
