@@ -487,9 +487,9 @@ export const getDriverEarningsStats = async (driverId, { date, month }) => {
   }
 
   const tripQuery = { driverId, status: 'completed' };
-  if (Object.keys(dateFilter).length > 0) tripQuery.createdAt = dateFilter; 
+  if (Object.keys(dateFilter).length > 0) tripQuery.createdAt = dateFilter;
   const trips = await Trip.find(tripQuery).populate("paymentId");
-  
+
   let actualEarnings = 0;
   let cashReceived = 0;
 
@@ -497,7 +497,7 @@ export const getDriverEarningsStats = async (driverId, { date, month }) => {
     if (trip.paymentId) {
       // 1. Số tiền thực tế tài xế nhận được cho 1 chuyến
       actualEarnings += trip.paymentId.driverEarning;
-      
+
       // 2. Tiền mặt tài xế nhận được từ khách (chỉ với thanh toán tiền mặt cho 1 chuyến)
       if (trip.paymentId.method === 'cash' && trip.paymentId.status === 'completed') {
         cashReceived += trip.paymentId.amount;
@@ -549,6 +549,8 @@ export const getDriverTripsStats = async (driverId, { date, month }) => {
       cancelledTrips
     }
   };
+};
+/**
  * 11. Cập nhật estimated waypoints cho route
  */
 export const updateTripEstimatedWaypoints = async (tripId, waypoints) => {
