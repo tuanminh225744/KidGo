@@ -258,41 +258,16 @@ export const updatePaymentStatus = async (req, res, next) => {
 export const confirmCashPayment = async (req, res, next) => {
   try {
     const { paymentId } = req.params;
-    const fetchResult = await paymentService.getPaymentById(paymentId);
-    const payment = fetchResult.data;
-
-    if (req.user.role !== "driver") {
-      throw new AuthorizationError(
-        "Chỉ tài xế mới có quyền xác nhận nhận tiền mặt.",
-      );
-    }
-
-    if (payment.method !== "cash") {
-      throw new AppError(
-        "Thanh toán này không phải là thanh toán tiền mặt.",
-        400,
-      );
-    }
-    if (payment.status === "completed") {
-      throw new AppError("Thanh toán này đã được hoàn thành.", 400);
-    }
-
-    const updatedPayment = await paymentService.updatePaymentStatus(
+    
+    const result = await paymentService.confirmCashPayment(
       paymentId,
-      "completed",
-    );
-
-    // Lấy model Driver và cập nhật cashReceived
-    const Driver = (await import("../models/core/driver.model.js")).default;
-    await Driver.findOneAndUpdate(
-      { user: req.user.id },
-      { $inc: { cashReceived: payment.amount } },
+      req.user.role
     );
 
     return success(
       res,
-      updatedPayment.data,
-      updatedPayment.message || "Xác nhận nhận tiền mặt thành công.",
+      result.data,
+      result.message,
       200,
     );
   } catch (error) {

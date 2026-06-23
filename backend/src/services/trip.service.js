@@ -252,18 +252,6 @@ export const driverDropoffKid = async (tripId) => {
     trip.status = "completed";
     await trip.save();
 
-    // Cập nhật tổng thu nhập cho tài xế nếu chuyến có payment
-    if (trip.paymentId) {
-      const payment = await import("../models/operational/payment.model.js")
-        .then((m) => m.default)
-        .then((Payment) => Payment.findById(trip.paymentId));
-      if (payment && payment.driverEarning) {
-        await Driver.findByIdAndUpdate(trip.driverId, {
-          $inc: { totalEarnings: payment.driverEarning },
-        });
-      }
-    }
-
     // Chuyến đi dứt điểm, Thả xích ông xế về Trạng thái "Tự Do 100%"
     await Driver.findByIdAndUpdate(trip.driverId, { rideStatus: "free" });
 

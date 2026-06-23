@@ -1,4 +1,5 @@
 import Payment from "../models/operational/payment.model.js";
+import { AuthorizationError, AppError } from "../utils/AppError.js";
 
 /**
  * Tạo mới một bản ghi thanh toán
@@ -51,4 +52,40 @@ export const updatePaymentStatus = async (paymentId, status) => {
       error.message || `Lỗi cập nhật thanh toán: ${error.message}`,
     );
   }
+};
+
+/**
+ * Tài xế xác nhận đã nhận tiền mặt
+ */
+export const confirmCashPayment = async (paymentId, userRole) => {
+  if (userRole !== "driver") {
+    throw new AuthorizationError(
+      "Chỉ tài xế mới có quyền xác nhận nhận tiền mặt.",
+    );
+  }
+
+  const payment = await Payment.findById(paymentId);
+  if (!payment) {
+    throw new AppError("Không tìm thấy thông tin thanh toán.", 404);
+  }
+
+  if (payment.method !== "cash") {
+    throw new AppError(
+      "Thanh toán này không phải là thanh toán tiền mặt.",
+      400,
+    );
+  }
+  if (payment.status === "completed") {
+    throw new AppError("Thanh toán này đã được hoàn thành.", 400);
+  }
+
+  payment.status = "completed";
+  payment.paidAt = new Date();
+  await payment.save();
+
+  return {
+    success: true,
+    message: "Xác nhận nhận tiền mặt thành công.",
+    data: payment,
+  };
 };

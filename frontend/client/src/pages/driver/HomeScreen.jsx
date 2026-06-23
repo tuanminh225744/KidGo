@@ -43,17 +43,7 @@ export const HomeScreen = () => {
       <div className="px-6 flex justify-between items-center mb-6">
         <div className="flex items-center gap-2">
           <span className="text-primary text-xl font-black italic">KidGo</span>
-          {isAvailable ? (
-            <div className="bg-primary-light text-primary text-[10px] flex items-center gap-1.5 px-3 py-1 rounded-full border border-primary/20">
-              <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></div>
-              Đang nhận chuyến
-            </div>
-          ) : (
-            <div className="bg-gray-100 text-gray-500 text-[10px] flex items-center gap-1.5 px-3 py-1 rounded-full border border-gray-200">
-              <div className="w-1.5 h-1.5 rounded-full bg-gray-400"></div>
-              Ngưng nhận chuyến
-            </div>
-          )}
+
         </div>
         <div className="flex items-center gap-3">
           <button
@@ -106,21 +96,14 @@ export const HomeScreen = () => {
         </div>
       </div>
 
-      <div className="px-6 grid grid-cols-3 gap-3 mb-8">
+      <div className="px-6 grid grid-cols-2 gap-3 mb-8">
         <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-50 text-center">
           <span className="text-[10px] text-gray-500 block mb-1">Chuyến</span>
           <div className="text-base font-bold text-primary">
             {displayData?.totalTrips || "Đang tải"}
           </div>
         </div>
-        <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-50 text-center">
-          <span className="text-[10px] text-gray-500 block mb-1">
-            Quãng đường
-          </span>
-          <div className="text-base font-bold text-primary text-[#0d9488]">
-            Đang tải
-          </div>
-        </div>
+
         <div className="bg-white p-3 rounded-xl shadow-sm border border-gray-50 text-center">
           <span className="text-[10px] text-gray-500 block mb-1">Thu nhập</span>
           <div className="text-base font-bold text-primary text-[#0d9488]">
