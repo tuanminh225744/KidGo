@@ -176,3 +176,80 @@ export const getSchedulesByParentAndDate = async (parentId, date) => {
     throw new Error(`Lỗi lấy lịch trình theo ngày: ${error.message}`);
   }
 };
+
+/**
+ * Lấy danh sách lịch trình theo ngày cụ thể của tài xế
+ */
+export const getSchedulesByDriverAndDate = async (driverId, date) => {
+  try {
+    const targetDate = String(date);
+
+    if (!targetDate.match(/^\d{4}-\d{2}-\d{2}$/)) {
+      throw new Error("Ngày lọc không hợp lệ. Vui lòng định dạng YYYY-MM-DD");
+    }
+
+    const startOfDay = new Date(`${targetDate}T00:00:00.000Z`);
+    const endOfDay = new Date(`${targetDate}T23:59:59.999Z`);
+    const dayOfWeek = startOfDay.getUTCDay();
+
+    const schedules = await TripSchedule.find({
+      preferredDriverId: driverId,
+      isActive: true,
+      $and: [
+        { startDate: { $lte: endOfDay } },
+        { $or: [{ endDate: null }, { endDate: { $gte: startOfDay } }] },
+        {
+          $or: [
+            { repeatDays: dayOfWeek },
+            { repeatDays: [] },
+            { repeatDays: { $size: 0 } },
+          ],
+        },
+      ],
+    })
+      .populate("parentId", "fullName phone")
+      .populate("kidId", "fullName avatar")
+      .populate(
+        "routeId",
+        "estimatedPickupAddress estimatedDropoffAddress estimatedDistance estimatedDuration actualPickupAddress actualDropoffAddress actualDistance actualDuration",
+      )
+      .sort({ pickupTime: 1, createdAt: -1 });
+
+    return {
+      success: true,
+      message: "Driver's trip schedules by date fetched",
+      data: schedules,
+    };
+  } catch (error) {
+    throw new Error(`Lỗi lấy lịch trình tài xế theo ngày: ${error.message}`);
+  }
+};
+
+/**
+ * Lấy danh sách các chuyến định kì của tài xế đặt theo gói
+ */
+export const getSubscriptionSchedulesByDriver = async (driverId) => {
+  try {
+    const schedules = await TripSchedule.find({
+      preferredDriverId: driverId,
+      subscriptionId: { $ne: null },
+      isActive: true,
+    })
+      .populate("parentId", "fullName phone")
+      .populate("kidId", "fullName avatar")
+      .populate("subscriptionId", "plan status startDate endDate usedTrips")
+      .populate(
+        "routeId",
+        "estimatedPickupAddress estimatedDropoffAddress estimatedDistance estimatedDuration actualPickupAddress actualDropoffAddress actualDistance actualDuration",
+      )
+      .sort({ createdAt: -1 });
+
+    return {
+      success: true,
+      message: "Driver's subscription schedules fetched",
+      data: schedules,
+    };
+  } catch (error) {
+    throw new Error(`Lỗi lấy danh sách lịch định kì theo gói của tài xế: ${error.message}`);
+  }
+};

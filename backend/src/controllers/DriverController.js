@@ -1,5 +1,6 @@
 import * as driverService from "../services/driver.service.js";
 import * as tripService from "../services/trip.service.js";
+import * as tripScheduleService from "../services/tripSchedule.service.js";
 import * as reviewService from "../services/review.service.js";
 import Vehicle from "../models/core/vehicle.model.js";
 import {
@@ -117,6 +118,42 @@ export const getDriverTrips = async (req, res, next) => {
     const userRes = await driverService.getDriverByUserId(req.user.id);
     const user = userRes.data;
     const result = await tripService.getTripsByDriver(user._id);
+    return success(res, result.data, result.message, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/v1/drivers/me/schedules/daily
+ * Lấy danh sách lịch trình theo ngày của tài xế
+ */
+export const getDriverDailySchedules = async (req, res, next) => {
+  try {
+    const userRes = await driverService.getDriverByUserId(req.user.id);
+    const user = userRes.data;
+    const date = req.query.date || new Date().toISOString().split("T")[0]; // default to today if not provided
+    const result = await tripScheduleService.getSchedulesByDriverAndDate(
+      user._id,
+      date,
+    );
+    return success(res, result.data, result.message, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/v1/drivers/me/schedules/subscriptions
+ * Lấy danh sách các chuyến định kì đặt theo gói của tài xế
+ */
+export const getDriverSubscriptionSchedules = async (req, res, next) => {
+  try {
+    const userRes = await driverService.getDriverByUserId(req.user.id);
+    const user = userRes.data;
+    const result = await tripScheduleService.getSubscriptionSchedulesByDriver(
+      user._id,
+    );
     return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);

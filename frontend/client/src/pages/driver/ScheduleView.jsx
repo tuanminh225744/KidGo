@@ -1,20 +1,31 @@
 import { useState, useEffect } from 'react';
 import { Bell, Car, Clock, MapPin } from 'lucide-react';
-import { getDriverTrips } from '../../services/driver.service';
+import { getDriverDailySchedules, getDriverSubscriptionSchedules } from '../../services/driver.service';
 import { useNavigate } from 'react-router-dom';
 
 export default function ScheduleView() {
   const navigate = useNavigate();
   const [scheduledTrips, setScheduledTrips] = useState([]);
+  const [subTrips, setSubTrips] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedDate, setSelectedDate] = useState(new Date());
 
   useEffect(() => {
     const fetchTrips = async () => {
       try {
         setLoading(true);
-        const res = await getDriverTrips({ status: 'scheduled' });
-        if (res?.data?.data) {
-          setScheduledTrips(res.data.data);
+        const dateStr = selectedDate.toISOString().split('T')[0];
+
+        const [dailyRes, subRes] = await Promise.all([
+          getDriverDailySchedules(dateStr),
+          getDriverSubscriptionSchedules()
+        ]);
+
+        if (dailyRes?.data) {
+          setScheduledTrips(dailyRes.data);
+        }
+        if (subRes?.data) {
+          setSubTrips(subRes.data);
         }
       } catch (error) {
         console.error('Lỗi khi tải lịch chuyến:', error);
@@ -23,7 +34,30 @@ export default function ScheduleView() {
       }
     };
     fetchTrips();
-  }, []);
+  }, [selectedDate]);
+
+  const generateWeekDates = () => {
+    const dates = [];
+    for (let i = -2; i <= 4; i++) {
+      const d = new Date();
+      d.setDate(d.getDate() + i);
+      dates.push({
+        date: d,
+        d: d.getDay() === 0 ? 'CN' : `T${d.getDay() + 1}`,
+        n: d.getDate(),
+        active: d.toDateString() === selectedDate.toDateString()
+      });
+    }
+    return dates;
+  };
+  const weekDates = generateWeekDates();
+
+  const formatRepeatDays = (days) => {
+    if (!days || days.length === 0) return 'Tất cả các ngày';
+    const map = { 0: 'CN', 1: 'T2', 2: 'T3', 3: 'T4', 4: 'T5', 5: 'T6', 6: 'T7' };
+    if (days.length === 5 && !days.includes(0) && !days.includes(6)) return 'T2-T6';
+    return days.map(d => map[d]).join(', ');
+  }
 
   return (
     <div className="pb-24">
@@ -36,22 +70,16 @@ export default function ScheduleView() {
       </div>
 
       <div className="flex overflow-x-auto p-4 gap-2 no-scrollbar bg-white">
-        {[
-          { d: 'CN', n: 19 },
-          { d: 'T2', n: 20 },
-          { d: 'T3', n: 21, active: true },
-          { d: 'T4', n: 22 },
-          { d: 'T5', n: 23 },
-          { d: 'T6', n: 24 },
-          { d: 'T7', n: 25 }].map((day, idx) => (
-            <div
-              key={idx}
-              className={`flex-shrink-0 flex flex-col items-center justify-center w-12 py-3 rounded-xl transition-all ${day.active ? 'bg-[#1D7C45] text-white shadow-lg shadow-green-100' : 'bg-gray-50 text-gray-500'}`}>
-              <span className="text-[10px] font-bold uppercase mb-1">{day.d}</span>
-              <span className="text-lg font-bold">{day.n}</span>
-              {day.active && <div className="w-1 h-1 bg-white rounded-full mt-1" />}
-            </div>
-          ))}
+        {weekDates.map((day, idx) => (
+          <div
+            key={idx}
+            onClick={() => setSelectedDate(day.date)}
+            className={`cursor-pointer flex-shrink-0 flex flex-col items-center justify-center w-12 py-3 rounded-xl transition-all ${day.active ? 'bg-[#1D7C45] text-white shadow-lg shadow-green-100' : 'bg-gray-50 text-gray-500'}`}>
+            <span className="text-[10px] font-bold uppercase mb-1">{day.d}</span>
+            <span className="text-lg font-bold">{day.n}</span>
+            {day.active && <div className="w-1 h-1 bg-white rounded-full mt-1" />}
+          </div>
+        ))}
       </div>
 
       <div className="p-4">
@@ -66,7 +94,7 @@ export default function ScheduleView() {
             <p className="text-gray-500 text-center py-5">Không có chuyến nào được lên lịch</p>
           ) : (
             scheduledTrips.map((trip, idx) => {
-              const time = new Date(trip.plannedStartTime || trip.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+              const time = trip.pickupTime || new Date(trip.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
               const isFirst = idx === 0;
               return (
                 <div key={trip._id} className="relative pl-14">
@@ -80,17 +108,17 @@ export default function ScheduleView() {
                         {isFirst ? 'Sắp diễn ra' : 'Đã lên lịch'}
                       </span>
                     </div>
-                    <h3 className="font-bold text-gray-800 mb-3">{trip.kid?.name || 'Bé A'}</h3>
+                    <h3 className="font-bold text-gray-800 mb-3">{trip.kidId?.fullName || 'Bé Gia Bảo'}</h3>
                     <div className="flex gap-3 mb-4">
                       <MapPin className="w-4 h-4 text-gray-400 flex-shrink-0" />
-                      <p className="text-sm text-gray-600">{trip.pickupLocation?.address || 'Điểm đón'}</p>
+                      <p className="text-sm text-gray-600">{trip.routeId?.actualPickupAddress || trip.routeId?.estimatedPickupAddress || 'Điểm đón'}</p>
                     </div>
                     <div className="h-6 border-l-2 border-dashed border-gray-200 ml-2" />
                     <div className="flex gap-3">
                       <div className="w-4 h-4 rounded border-2 border-gray-300 flex items-center justify-center flex-shrink-0">
                         <div className="w-1.5 h-1.5 bg-gray-300 rounded-sm" />
                       </div>
-                      <p className="text-sm text-gray-600">{trip.dropoffLocation?.address || 'Điểm đến'}</p>
+                      <p className="text-sm text-gray-600">{trip.routeId?.actualDropoffAddress || trip.routeId?.estimatedDropoffAddress || 'Điểm đến'}</p>
                     </div>
                   </div>
                 </div>
@@ -101,19 +129,20 @@ export default function ScheduleView() {
 
         <h2 className="font-bold text-gray-800 mt-8 mb-4">Chuyến định kỳ của tôi</h2>
         <div className="space-y-3">
-          {[
-            { tag: 'T2-T6', time: '07:30', name: 'Bé A', path: 'Nhà → Trường' },
-            { tag: 'T2-T6', time: '12:00', name: 'Bé A', path: 'Trường → Nhà' }].map((trip, idx) => (
-              <div key={idx} className="bg-blue-50/40 p-4 rounded-xl flex items-center justify-between border border-blue-100/50">
-                <div>
-                  <p className="text-[10px] font-bold text-green-700 mb-1">{trip.tag} • {trip.time}</p>
-                  <p className="font-bold text-gray-800">{trip.name} <span className="text-gray-400 font-normal">→ {trip.path}</span></p>
-                </div>
-                <div className="w-12 h-6 bg-green-600 rounded-full p-1 relative shadow-inner">
-                  <div className="absolute right-1 top-1 bottom-1 w-4 bg-white rounded-full" />
-                </div>
+          {subTrips.length === 0 && !loading && (
+            <p className="text-gray-500 text-center py-5">Bạn chưa có chuyến định kỳ nào được đặt theo gói.</p>
+          )}
+          {subTrips.map((trip, idx) => (
+            <div key={trip._id} className="bg-blue-50/40 p-4 rounded-xl flex items-center justify-between border border-blue-100/50">
+              <div>
+                <p className="text-[10px] font-bold text-green-700 mb-1">{formatRepeatDays(trip.repeatDays)} • {trip.pickupTime || '--:--'}</p>
+                <p className="font-bold text-gray-800">{trip.kidId?.fullName} <span className="text-gray-400 font-normal">→ {trip.routeId?.estimatedDropoffAddress?.substring(0, 20)}...</span></p>
               </div>
-            ))}
+              <div className={`w-12 h-6 ${trip.isActive ? 'bg-green-600' : 'bg-gray-400'} rounded-full p-1 relative shadow-inner`}>
+                <div className={`absolute ${trip.isActive ? 'right-1' : 'left-1'} top-1 bottom-1 w-4 bg-white rounded-full`} />
+              </div>
+            </div>
+          ))}
         </div>
       </div>
     </div>

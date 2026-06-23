@@ -2,13 +2,14 @@ import { useState, useEffect } from "react";
 import { Bell, Search, MapPin, ChevronRight } from "lucide-react";
 import {
   getDriverProfile,
-  getDriverTrips,
+  getDriverDailySchedules,
   getDriverEarningsStats,
   getDriverTripsStats,
 } from "../../services/driver.service";
 import { useNavigate } from "react-router-dom";
 import DriverLiveMap from "../../components/DriverLiveMap";
 import { useAuthStore } from "../../store/useAuthStore";
+import { ScheduleCard } from "./ScheduleCard";
 
 export const HomeScreen = () => {
   const navigate = useNavigate();
@@ -23,7 +24,7 @@ export const HomeScreen = () => {
       try {
         const [profRes, tripsRes] = await Promise.all([
           getDriverProfile(),
-          getDriverTrips({ status: "scheduled" }),
+          getDriverDailySchedules(new Date().toISOString().split("T")[0]),
         ]);
 
         let driverId = null;
@@ -32,8 +33,8 @@ export const HomeScreen = () => {
           driverId = profRes.data._id;
         }
 
-        if (tripsRes?.data?.data) {
-          setUpcomingTrips(tripsRes.data.data.trips.slice(0, 2));
+        if (tripsRes?.data) {
+          setUpcomingTrips(tripsRes.data);
         }
 
         if (driverId) {
@@ -197,94 +198,7 @@ export const HomeScreen = () => {
           </div>
         </div>
 
-        <section className="space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="text-lg font-bold">Lịch sắp tới</h3>
-            <button
-              className="text-primary text-xs font-bold"
-              onClick={() => navigate("/driver/schedule")}
-            >
-              Xem tất cả
-            </button>
-          </div>
-
-          <div className="space-y-3">
-            {upcomingTrips.length > 0 ? (
-              upcomingTrips.map((trip) => {
-                const time = new Date(trip.plannedStartTime || trip.createdAt);
-                return (
-                  <div
-                    key={trip._id}
-                    className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div className="text-center px-3 py-2 bg-primary-light rounded-xl border-l-4 border-primary">
-                        <div className="text-xs font-bold text-primary">
-                          {time.toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </div>
-                        <div className="text-[8px] text-gray-500">Hôm nay</div>
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm">
-                            {trip.kid?.name || trip.kidId?.fullName || "Bé Gia Bảo"}
-                          </span>
-                        </div>
-                        <div className="text-[9px] text-gray-400 flex items-center gap-1 mt-0.5 line-clamp-1 max-w-[150px]">
-                          <MapPin size={10} className="flex-shrink-0" />{" "}
-                          {trip.pickupLocation?.address || trip.routeId?.actualPickupAddress || trip.routeId?.estimatedPickupAddress || "Đang lấy địa chỉ..."}
-                        </div>
-                      </div>
-                    </div>
-                    <ChevronRight size={18} className="text-gray-300" />
-                  </div>
-                );
-              })
-            ) : (
-              <>
-                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between opacity-60">
-                  <div className="flex items-center gap-4">
-                    <div className="text-center px-3 py-2 bg-primary-light rounded-xl border-l-4 border-primary">
-                      <div className="text-xs font-bold text-primary">14:00</div>
-                      <div className="text-[8px] text-gray-500">Hôm nay</div>
-                    </div>
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-bold text-sm">Bé Gia Bảo</span>
-                        <span className="bg-orange-50 text-orange-600 text-[8px] px-2 py-0.5 rounded font-black border border-orange-100">
-                          VIP
-                        </span>
-                      </div>
-                      <div className="text-[9px] text-gray-400 flex items-center gap-1 mt-0.5">
-                        <MapPin size={10} /> 123 Lê Lợi, P. Bến Thàn...
-                      </div>
-                    </div>
-                  </div>
-                  <ChevronRight size={18} className="text-gray-300" />
-                </div>
-
-                <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex items-center justify-between opacity-60">
-                  <div className="flex items-center gap-4">
-                    <div className="text-center px-3 py-2 bg-gray-50 rounded-xl border-l-4 border-gray-200">
-                      <div className="text-xs font-bold text-gray-600">16:30</div>
-                      <div className="text-[8px] text-gray-500">Hôm nay</div>
-                    </div>
-                    <div>
-                      <span className="font-bold text-sm">Bé Minh Anh</span>
-                      <div className="text-[9px] text-gray-400 flex items-center gap-1 mt-0.5">
-                        <MapPin size={10} /> 456 Nguyễn Huệ, Quận 1
-                      </div>
-                    </div>
-                  </div>
-                  <ChevronRight size={18} className="text-gray-300" />
-                </div>
-              </>
-            )}
-          </div>
-        </section>
+        <ScheduleCard trips={upcomingTrips} />
       </main>
     </div>
   );

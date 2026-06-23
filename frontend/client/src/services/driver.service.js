@@ -67,3 +67,11 @@ export const getDriverEarningsStats = async (driverId, params = {}) => {
 export const getDriverTripsStats = async (driverId, params = {}) => {
   return api.get(`/drivers/${driverId}/stats/trips`, { params });
 };
+
+export const getDriverDailySchedules = async (date) => {
+  return api.get('/drivers/me/schedules/daily', { params: { date } });
+};
+
+export const getDriverSubscriptionSchedules = async () => {
+  return api.get('/drivers/me/schedules/subscriptions');
+};

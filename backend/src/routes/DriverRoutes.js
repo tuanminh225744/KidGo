@@ -12,6 +12,8 @@ import {
   setActiveVehicle,
   getDriverEarningsStats,
   getDriverTripsStats,
+  getDriverDailySchedules,
+  getDriverSubscriptionSchedules,
 } from "../controllers/DriverController.js";
 import {
   getBookingRequests,
@@ -89,6 +91,18 @@ router.put(
  * Lịch sử chuyến của tài xế
  */
 router.get("/me/trips", authorize("driver"), getDriverTrips);
+
+/**
+ * GET /api/v1/drivers/me/schedules/daily
+ * Lấy danh sách lịch trình theo ngày của tài xế
+ */
+router.get("/me/schedules/daily", authorize("driver"), getDriverDailySchedules);
+
+/**
+ * GET /api/v1/drivers/me/schedules/subscriptions
+ * Lấy danh sách các chuyến định kì đặt theo gói của tài xế
+ */
+router.get("/me/schedules/subscriptions", authorize("driver"), getDriverSubscriptionSchedules);
 
 /**
  * GET /api/v1/drivers/me/earnings
