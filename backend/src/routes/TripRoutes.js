@@ -12,6 +12,7 @@ import {
   confirmDropoff,
   cancelTripHandler,
   gpsTick,
+  updateEstimatedWaypointsHandler,
 } from "../controllers/TripController.js";
 import {
   authenticateToken,
@@ -26,6 +27,7 @@ import {
   validateVerifySecurityQuestion,
   validateConfirmPickup,
   validateTripsQuery,
+  validateEstimatedWaypoints,
 } from "../validators/tripValidators.js";
 
 const router = express.Router();
@@ -189,6 +191,20 @@ router.post(
   validateGpsTick,
   validate,
   gpsTick
+);
+
+/**
+ * POST /api/v1/trips/:tripId/estimated-waypoints
+ * Tài xế cập nhật estimated waypoints cho route
+ * Role: driver
+ */
+router.post(
+  "/:tripId/estimated-waypoints",
+  authorize("driver"),
+  validateTripIdParam,
+  validateEstimatedWaypoints,
+  validate,
+  updateEstimatedWaypointsHandler
 );
 
 export default router;

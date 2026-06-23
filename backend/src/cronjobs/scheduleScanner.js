@@ -3,18 +3,15 @@ import TripSchedule from "../models/operational/tripSchedule.model.js";
 import Booking from "../models/operational/booking.model.js";
 import { createBooking } from "../services/booking.service.js";
 
-/**
- * Cỗ máy Quét Rada tự động đánh thức các Lịch Trình để biến thành Cuốc xe (Booking)
- */
 export const startScheduleScanner = () => {
-  // Lead time: Bọn mình đã chốt là Đánh thức trước 20 phút
-  const LEAD_TIME_MINUTES = 20;
+
+  const leadTimeMinutes = parseInt(process.env.LEAD_TIME_MINUTES || "20", 10);
 
   // Chu kỳ: Cứ mỗi 1 phút hàm này lại tự động kích hoạt ngầm
   const task = cron.schedule(" * * * * *", async () => {
     try {
       // Bước 1: Suy ra thời điểm cần đón theo độ trễ
-      const targetMoment = new Date(Date.now() + LEAD_TIME_MINUTES * 60 * 1000);
+      const targetMoment = new Date(Date.now() + leadTimeMinutes * 60 * 1000);
       // console.log("[CronJob] Đang quét Lịch vào thời điểm: ", targetMoment);
       // Format ra chuỗi thời gian chuẩn "HH:mm" trong Database (VD: 07:30)
       const hh = String(targetMoment.getHours()).padStart(2, "0");
@@ -34,10 +31,10 @@ export const startScheduleScanner = () => {
       );
       const todayEnd = new Date(todayStart.getTime() + 24 * 60 * 60 * 1000);
 
-      // Bước 2: Truy tìm các Lịch đang sống có Điểm Hẹn nằm trong khoảng từ hiện tại đến TargetTime
+
       const query = {
         isActive: true,
-        // Rào cản gói vụ: Ngày quét phải đè nát bét nằm gọn trong Gói Cước
+
         startDate: { $lte: targetMoment },
         $or: [{ endDate: null }, { endDate: { $gte: todayStart } }],
       };
@@ -45,7 +42,7 @@ export const startScheduleScanner = () => {
       if (nowTimeStr <= targetTimeStr) {
         query.pickupTime = { $gte: nowTimeStr, $lte: targetTimeStr };
       } else {
-        // Xử lý qua đêm (ví dụ: now = 23:50, target = 00:10)
+
         query.$and = [
           {
             $or: [
@@ -58,26 +55,26 @@ export const startScheduleScanner = () => {
 
       const activeSchedules = await TripSchedule.find(query);
 
-      // Bước 3: Phân tích từng hồ sơ cá nhân
+
       for (const schedule of activeSchedules) {
-        // Lọc ngày thứ: Có phải hôm nay em bé đi học không?
+
         if (schedule.repeatDays && schedule.repeatDays.length > 0) {
           if (!schedule.repeatDays.includes(todayDayOfWeek)) continue; // Hôm nay được nghỉ, bỏ lặp
         }
 
-        // Chống Trượt/Đúp (Idempotency): Hôm nay Lịch này đã được ông Cronjob nào quét chưa?
+
         const existingBooking = await Booking.findOne({
           scheduleId: schedule._id,
           scheduledTime: { $gte: todayStart, $lt: todayEnd },
         });
 
         if (!existingBooking) {
-          // Xây dựng lại chính xác thời gian đón dựa trên pickupTime của Lịch
+
           const [pickHh, pickMm] = schedule.pickupTime.split(":");
           const exactScheduledTime = new Date(todayStart);
           exactScheduledTime.setHours(parseInt(pickHh, 10), parseInt(pickMm, 10), 0, 0);
 
-          // Bước 4: Chuyển sinh Lịch Trình thành một bảng Yêu Cầu Booking thực thụ
+
           const bookingData = {
             parentId: schedule.parentId,
             kidId: schedule.kidId,
@@ -85,11 +82,11 @@ export const startScheduleScanner = () => {
             scheduleId: schedule._id,
             preferredDriverId: schedule.preferredDriverId,
             scheduledTime: exactScheduledTime,
-            type: "recurring", // Nhãn hiệu lặp vòng mưu tả
-            paymentId: schedule.paymentId, // Kế thừa mã thanh toán từ Lịch tổng
+            type: "recurring",
+            paymentId: schedule.paymentId,
           };
 
-          // Nổ lệnh Booking (Bên dưới tự động Ping tín hiệu gọi Driver tới vớt)
+
           await createBooking(bookingData);
           console.log(
             `[CronJob - Máy Quét Lịch] Tạo thành công cuốc gọi xe lặp vòng cho Lịch ${schedule._id}. Xe rước lúc ${schedule.pickupTime}.`,

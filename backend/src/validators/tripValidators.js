@@ -82,3 +82,12 @@ export const validateTripsQuery = [
     .isInt({ min: 1, max: 100 })
     .withMessage("limit phải từ 1 đến 100."),
 ];
+
+/**
+ * Validator cho cập nhật estimated waypoints
+ */
+export const validateEstimatedWaypoints = [
+  body("waypoints")
+    .isArray()
+    .withMessage("waypoints phải là mảng các tọa độ [lat, lng]"),
+];

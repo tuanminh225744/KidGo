@@ -1,6 +1,7 @@
 import Trip from "../models/operational/trip.model.js";
 import Driver from "../models/core/driver.model.js";
 import Kid from "../models/core/kid.model.js";
+import Route from "../models/operational/route.model.js";
 import { getIo } from "../sockets/socketManager.js";
 import redisClient from "../config/redisClient.js";
 import { AppError, NotFoundError } from "../utils/AppError.js";
@@ -548,4 +549,22 @@ export const getDriverTripsStats = async (driverId, { date, month }) => {
       cancelledTrips
     }
   };
+ * 11. Cập nhật estimated waypoints cho route
+ */
+export const updateTripEstimatedWaypoints = async (tripId, waypoints) => {
+  const trip = await Trip.findById(tripId);
+  if (!trip) throw new NotFoundError("Chuyến đi không tồn tại.");
+
+  const formattedWaypoints = waypoints.map((wp) => ({
+    type: "Point",
+    coordinates: [wp[1], wp[0]], // [lat, lng] -> [lng, lat]
+  }));
+
+  await Route.findByIdAndUpdate(
+    trip.routeId,
+    { $set: { estimatedWaypoints: formattedWaypoints } },
+    { new: true, runValidators: true },
+  );
+
+  return { success: true, message: "Estimated waypoints updated", data: null };
 };
