@@ -346,6 +346,7 @@ export const login = async (email, password) => {
           email: user.email,
           fullName: user.fullName,
           role: user.role,
+          avatar: user.avatar,
         },
       },
     };
