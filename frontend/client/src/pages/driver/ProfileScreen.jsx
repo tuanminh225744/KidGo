@@ -52,7 +52,7 @@ export const ProfileScreen = () => {
       <div className="flex flex-col items-center">
         <div className="relative mb-4">
           <img
-            src={displayData?.avatar || '/default-avatar.png'}
+            src={displayData?.avatar || '/images/anh-avatar-trang.jpg'}
             alt="Avatar"
             className="w-24 h-24 rounded-full border-4 border-white/20 object-cover" />
 

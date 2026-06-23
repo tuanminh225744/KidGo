@@ -93,7 +93,7 @@ export default function SetKidAndType() {
                   <img
                     src={
                       kid.avatar ||
-                      `https://api.dicebear.com/7.x/avataaars/svg?seed=${kid.fullName}`
+                      `/images/anh-avatar-trang.jpg`
                     }
                     alt={kid.fullName}
                     className="w-full h-full object-cover"

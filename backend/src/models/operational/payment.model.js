@@ -10,7 +10,7 @@ const PaymentSchema = new Schema(
 
     // Giá tiền
     amount: { type: Number, required: true },         // Tổng tiền khách phải trả cho chuyến này/lịch này
-    driverEarning: { type: Number, required: true },  // Số tiền tài xế nhận được 
+    driverEarning: { type: Number, required: true },  // Số tiền tài xế nhận được 1 chuyến
 
     // Trạng thái và Phương thức
     method: {

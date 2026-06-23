@@ -253,18 +253,6 @@ export const driverDropoffKid = async (tripId) => {
     trip.status = "completed";
     await trip.save();
 
-    // Cập nhật tổng thu nhập cho tài xế nếu chuyến có payment
-    if (trip.paymentId) {
-      const payment = await import("../models/operational/payment.model.js")
-        .then((m) => m.default)
-        .then((Payment) => Payment.findById(trip.paymentId));
-      if (payment && payment.driverEarning) {
-        await Driver.findByIdAndUpdate(trip.driverId, {
-          $inc: { totalEarnings: payment.driverEarning },
-        });
-      }
-    }
-
     // Chuyến đi dứt điểm, Thả xích ông xế về Trạng thái "Tự Do 100%"
     await Driver.findByIdAndUpdate(trip.driverId, { rideStatus: "free" });
 
@@ -482,6 +470,85 @@ export const recordGpsTick = async (
 };
 
 /**
+ * Lấy thống kê thanh toán / thu nhập của tài xế
+ */
+export const getDriverEarningsStats = async (driverId, { date, month }) => {
+  let dateFilter = {};
+  if (date) { // YYYY-MM-DD
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  } else if (month) { // YYYY-MM
+    const start = new Date(`${month}-01`);
+    const end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  }
+
+  const tripQuery = { driverId, status: 'completed' };
+  if (Object.keys(dateFilter).length > 0) tripQuery.createdAt = dateFilter; 
+  const trips = await Trip.find(tripQuery).populate("paymentId");
+  
+  let actualEarnings = 0;
+  let cashReceived = 0;
+
+  for (const trip of trips) {
+    if (trip.paymentId) {
+      // 1. Số tiền thực tế tài xế nhận được cho 1 chuyến
+      actualEarnings += trip.paymentId.driverEarning;
+      
+      // 2. Tiền mặt tài xế nhận được từ khách (chỉ với thanh toán tiền mặt cho 1 chuyến)
+      if (trip.paymentId.method === 'cash' && trip.paymentId.status === 'completed') {
+        cashReceived += trip.paymentId.amount;
+      }
+    }
+  }
+
+  return {
+    success: true,
+    message: "Driver earnings stats fetched",
+    data: {
+      cashReceived,
+      actualEarnings: Math.round(actualEarnings)
+    }
+  };
+};
+
+/**
+ * Lấy thống kê số chuyến của tài xế
+ */
+export const getDriverTripsStats = async (driverId, { date, month }) => {
+  let dateFilter = {};
+  if (date) {
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  } else if (month) {
+    const start = new Date(`${month}-01`);
+    const end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  }
+
+  const query = { driverId };
+  if (Object.keys(dateFilter).length > 0) query.createdAt = dateFilter;
+
+  const trips = await Trip.find(query);
+  const totalTrips = trips.length;
+  const completedTrips = trips.filter(t => t.status === 'completed').length;
+  const cancelledTrips = trips.filter(t => t.status === 'cancelled').length;
+
+  return {
+    success: true,
+    message: "Driver trips stats fetched",
+    data: {
+      totalTrips,
+      completedTrips,
+      cancelledTrips
+    }
+  };
  * 11. Cập nhật estimated waypoints cho route
  */
 export const updateTripEstimatedWaypoints = async (tripId, waypoints) => {

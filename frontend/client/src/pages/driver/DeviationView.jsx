@@ -54,7 +54,7 @@ export default function DeviationView({ tripData }) {
 
         <h2 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-3">Xem lại đường đi</h2>
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-8 relative">
-          <img src="https://api.dicebear.com/9.x/shapes/svg?seed=map" className="w-full h-40 object-cover opacity-20" />
+          <img src="/images/anh-avatar-trang.jpg" className="w-full h-40 object-cover opacity-20" />
           <div className="absolute inset-0 p-4">
             <svg viewBox="0 0 100 100" className="w-full h-full">
               <path d="M 20 20 L 50 50 L 50 80" fill="none" stroke="#1D7C45" strokeWidth="2" strokeDasharray="4 2" />
@@ -63,12 +63,12 @@ export default function DeviationView({ tripData }) {
               <circle cx="80" cy="80" r="3" fill="#EF4444" />
             </svg>
             <div className="absolute top-2 right-2 flex gap-2">
-               <div className="bg-white/90 backdrop-blur px-2 py-1 rounded-md border border-gray-200 text-[10px] font-bold flex items-center gap-1">
-                 <div className="w-3 h-0.5 bg-[#1D7C45]" /> Lộ trình gốc
-               </div>
-               <div className="bg-white/90 backdrop-blur px-2 py-1 rounded-md border border-gray-200 text-[10px] font-bold flex items-center gap-1">
-                 <div className="w-3 h-0.5 bg-red-500" /> Thực tế
-               </div>
+              <div className="bg-white/90 backdrop-blur px-2 py-1 rounded-md border border-gray-200 text-[10px] font-bold flex items-center gap-1">
+                <div className="w-3 h-0.5 bg-[#1D7C45]" /> Lộ trình gốc
+              </div>
+              <div className="bg-white/90 backdrop-blur px-2 py-1 rounded-md border border-gray-200 text-[10px] font-bold flex items-center gap-1">
+                <div className="w-3 h-0.5 bg-red-500" /> Thực tế
+              </div>
             </div>
           </div>
         </div>
@@ -101,7 +101,7 @@ export default function DeviationView({ tripData }) {
               placeholder="Mô tả thêm (không bắt buộc)">
             </textarea>
           </div>
-          
+
           <div className="space-y-3 pt-4">
             <button
               onClick={handleSubmit}

@@ -29,7 +29,7 @@ export default function ScheduleView() {
     <div className="pb-24">
       <div className="flex items-center justify-between p-4 bg-white">
         <div className="flex items-center gap-3">
-          <img src="https://images.unsplash.com/photo-1633332755192-727a05c4013d?w=100&h=100&fit=crop" className="w-10 h-10 rounded-full border-2 border-[#1D7C45] p-0.5" />
+          <img src="/images/anh-avatar-trang.jpg" className="w-10 h-10 rounded-full border-2 border-[#1D7C45] p-0.5" />
           <h1 className="text-xl font-bold text-[#1D7C45]">Lịch chuyến</h1>
         </div>
         <Bell className="w-6 h-6 text-[#1D7C45]" onClick={() => navigate('/driver/notifications')} />

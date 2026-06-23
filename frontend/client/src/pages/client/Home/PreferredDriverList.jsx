@@ -141,8 +141,8 @@ function AddDriverModal({ onClose, onSuccess }) {
                   type="button"
                   onClick={() => setPriority(p)}
                   className={`py-2 rounded-xl text-xs font-bold transition-all border-2 ${priority === p
-                      ? "bg-primary-container text-white border-primary-container shadow-md"
-                      : "bg-surface-container-low text-on-surface-variant border-transparent"
+                    ? "bg-primary-container text-white border-primary-container shadow-md"
+                    : "bg-surface-container-low text-on-surface-variant border-transparent"
                     }`}
                 >
                   {p}
@@ -267,8 +267,8 @@ function EditPriorityModal({ item, onClose, onSuccess }) {
                   type="button"
                   onClick={() => setPriority(p)}
                   className={`py-2 rounded-xl text-xs font-bold transition-all border-2 ${priority === p
-                      ? "bg-primary-container text-white border-primary-container shadow-md"
-                      : "bg-surface-container-low text-on-surface-variant border-transparent"
+                    ? "bg-primary-container text-white border-primary-container shadow-md"
+                    : "bg-surface-container-low text-on-surface-variant border-transparent"
                     }`}
                 >
                   {p}
@@ -431,7 +431,7 @@ export default function PreferredDriverList() {
                       <img
                         src={
                           item.driver?.avatar ||
-                          `https://api.dicebear.com/7.x/avataaars/svg?seed=${item.driverId}`
+                          `/images/anh-avatar-trang.jpg`
                         }
                         alt={item.driver?.fullName || "Driver"}
                         className="w-full h-full object-cover"
@@ -440,10 +440,10 @@ export default function PreferredDriverList() {
                     {/* Online dot */}
                     <span
                       className={`absolute -bottom-0.5 -right-0.5 w-4 h-4 rounded-full border-2 border-white ${item.isAvailable
-                          ? "bg-green-500"
-                          : item.isOnline
-                            ? "bg-yellow-400"
-                            : "bg-gray-300"
+                        ? "bg-green-500"
+                        : item.isOnline
+                          ? "bg-yellow-400"
+                          : "bg-gray-300"
                         }`}
                     />
                   </div>
@@ -472,10 +472,10 @@ export default function PreferredDriverList() {
                       )}
                       <span
                         className={`flex items-center gap-1 text-[10px] font-bold ${item.isAvailable
-                            ? "text-green-600"
-                            : item.isOnline
-                              ? "text-yellow-600"
-                              : "text-gray-400"
+                          ? "text-green-600"
+                          : item.isOnline
+                            ? "text-yellow-600"
+                            : "text-gray-400"
                           }`}
                       >
                         {item.isAvailable ? (

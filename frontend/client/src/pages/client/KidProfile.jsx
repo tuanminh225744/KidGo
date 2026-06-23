@@ -218,7 +218,7 @@ export default function KidProfile() {
                 src={
                   avatarPreview ||
                   formData.avatar ||
-                  "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg"
+                  "/images/anh-avatar-trang.jpg"
                 }
                 alt="Kid avatar"
                 className="w-full h-full object-cover"
@@ -397,11 +397,10 @@ export default function KidProfile() {
                   tripPhotoVerification: !prev.tripPhotoVerification,
                 }))
               }
-              className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${
-                securityOptions.tripPhotoVerification
+              className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all ${securityOptions.tripPhotoVerification
                   ? "border-primary-container bg-[#EEF2FF]"
                   : "border-outline-variant/20 bg-surface-container-low"
-              }`}
+                }`}
             >
               <div className="flex items-center gap-3 text-left">
                 <div className="w-11 h-11 rounded-2xl bg-white flex items-center justify-center shadow-sm">
@@ -420,11 +419,10 @@ export default function KidProfile() {
               </div>
 
               <div
-                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${
-                  securityOptions.tripPhotoVerification
+                className={`w-6 h-6 rounded-full border-2 flex items-center justify-center ${securityOptions.tripPhotoVerification
                     ? "border-primary-container"
                     : "border-outline-variant"
-                }`}
+                  }`}
               >
                 {securityOptions.tripPhotoVerification && (
                   <div className="w-3 h-3 rounded-full bg-primary-container" />

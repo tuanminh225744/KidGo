@@ -67,7 +67,7 @@ export const toggleDriverStatus = async (req, res, next) => {
       res,
       updated.data,
       updated.message ||
-        `${isOnline ? "Bật" : "Tắt"} trạng thái sẵn sàng thành công.`,
+      `${isOnline ? "Bật" : "Tắt"} trạng thái sẵn sàng thành công.`,
       200,
     );
   } catch (error) {
@@ -131,7 +131,54 @@ export const getDriverEarnings = async (req, res, next) => {
   try {
     const userRes = await driverService.getDriverByUserId(req.user.id);
     const user = userRes.data;
-    const result = await tripService.getDriverEarnings(user._id);
+    const result = await tripService.getDriverEarningsStats(user._id, req.query);
+    return success(res, result.data, result.message, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/v1/drivers/:driverId/stats/earnings
+ * API thống kê thanh toán và thu nhập của tài xế (dành cho Admin và Tài xế)
+ */
+export const getDriverEarningsStats = async (req, res, next) => {
+  try {
+    const { driverId } = req.params;
+    
+    // Nếu là driver thì chỉ được xem của chính mình
+    if (req.user.role === 'driver') {
+       const userRes = await driverService.getDriverByUserId(req.user.id);
+       if (userRes.data._id.toString() !== driverId) {
+          throw new AuthorizationError("Bạn không có quyền xem thống kê của tài xế khác.");
+       }
+    }
+
+    const { date, month } = req.query;
+    const result = await tripService.getDriverEarningsStats(driverId, { date, month });
+    return success(res, result.data, result.message, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/v1/drivers/:driverId/stats/trips
+ * API thống kê số lượng chuyến của tài xế (dành cho Admin và Tài xế)
+ */
+export const getDriverTripsStats = async (req, res, next) => {
+  try {
+    const { driverId } = req.params;
+    
+    if (req.user.role === 'driver') {
+       const userRes = await driverService.getDriverByUserId(req.user.id);
+       if (userRes.data._id.toString() !== driverId) {
+          throw new AuthorizationError("Bạn không có quyền xem thống kê của tài xế khác.");
+       }
+    }
+
+    const { date, month } = req.query;
+    const result = await tripService.getDriverTripsStats(driverId, { date, month });
     return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
