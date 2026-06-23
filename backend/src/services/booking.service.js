@@ -83,20 +83,31 @@ const findAndAssignNearbyDriver = async (booking) => {
 const triggerTimeoutCancel = async (bookingId) => {
   try {
     const booking = await Booking.findById(bookingId);
-    if (booking && booking.status === "pending") {
+    if (
+      booking &&
+      (booking.status === "pending" ||
+        (booking.status === "matched" && booking.preferredDriverId))
+    ) {
       booking.status = "cancelled";
       booking.assignedDriverId = null;
       await booking.save();
 
       const io = getIo();
+      let message =
+        "Vượt quá 5 phút chờ. Rất tiếc không có tài xế rảnh nào tiếp nhận yêu cầu, hệ thống đã hủy ghép xe.";
+      
+      if (booking.preferredDriverId) {
+        message =
+          "Tài xế ưu tiên không nhận cuốc. Hệ thống đã hủy chuyến xe, vui lòng đặt lại.";
+      }
+
       // Bắn cho phụ huynh dể họ tìm cuốc mới
       io.of("/parent").to(booking.parentId.toString()).emit("pairing_timeout", {
-        message:
-          "Vượt quá 5 phút chờ. Rất tiếc không có tài xế rảnh nào tiếp nhận yêu cầu, hệ thống đã hủy ghép xe.",
+        message,
         bookingId: booking._id,
       });
       console.log(
-        `[Timer] Booking ${bookingId} cancelled due to 5 mins timeout.`,
+        `[Timer] Booking ${bookingId} cancelled due to timeout.`,
       );
     }
   } catch (e) {
@@ -190,9 +201,9 @@ export const createBooking = async (bookingData) => {
           bookingId: booking._id,
         });
 
-      // Thiết lập Timeout 5 phút cho Xế ưu tiên
+      // Thiết lập Timeout 1 phút cho Xế ưu tiên
       activeBookingTimers[booking._id] = [
-        setTimeout(() => triggerTimeoutCancel(booking._id), 300 * 1000),
+        setTimeout(() => triggerTimeoutCancel(booking._id), 60 * 1000),
       ];
     } else {
       console.log("tim tai xe xung quan voi", booking);

@@ -107,74 +107,16 @@ export const createPayment = async (req, res, next) => {
  */
 export const previewPayment = async (req, res, next) => {
   try {
-    const { tripScheduleId } = req.body;
+    const { tripScheduleId, preferredDriverId } = req.body;
 
-    // Lấy thông tin lịch trình để tính giá
-    const schedule = await TripSchedule.findById(tripScheduleId)
-      .populate("routeId")
-      .populate("subscriptionId");
 
-    if (!schedule) {
-      throw new AppError("Không tìm thấy Lịch trình (TripSchedule).", 404);
-    }
-    if (!schedule.endDate) {
-      throw new AppError(
-        "Lịch trình phải có ngày kết thúc (endDate) để tính tổng thanh toán.",
-        400,
-      );
-    }
+    const result = await paymentService.previewPayment(
+      tripScheduleId,
+      preferredDriverId,
 
-    // Đếm số chuyến
-    let tripCount = 0;
-    const start = new Date(schedule.startDate);
-    const end = new Date(schedule.endDate);
-
-    const maxDays = 366;
-    let daysPassed = 0;
-
-    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
-      if (daysPassed++ > maxDays) break;
-
-      const dayOfWeek = d.getDay();
-      if (schedule.repeatDays && schedule.repeatDays.length > 0) {
-        if (schedule.repeatDays.includes(dayOfWeek)) {
-          tripCount++;
-        }
-      } else {
-        tripCount = 1;
-        break;
-      }
-    }
-
-    if (tripCount === 0) {
-      throw new AppError(
-        "Không có ngày đi học nào nằm trong khoảng thời gian này.",
-        400,
-      );
-    }
-
-    // Tính giá
-    const distance = schedule.routeId?.estimatedDistance || 0;
-    const pricePerTrip = 15000 + distance * 5000;
-
-    let discount = 0;
-    if (schedule.subscriptionId) {
-      if (schedule.subscriptionId.plan === "monthly") {
-        discount = 0.05;
-      } else if (schedule.subscriptionId.plan === "yearly") {
-        discount = 0.1;
-      }
-    }
-
-    const amount = pricePerTrip * tripCount * (1 - discount);
-    const driverEarning = pricePerTrip * (1 - discount) * 0.8;
-
-    return success(
-      res,
-      { tripCount, pricePerTrip, discount, amount, driverEarning },
-      "Payment preview calculated",
-      200,
     );
+
+    return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }

@@ -23,6 +23,7 @@ import CurrentTrip from "./pages/client/current-trip/CurrentTrip.jsx";
 import Report from "./pages/client/report/Report.jsx";
 import ReportList from "./pages/client/report/ReportList.jsx";
 import HistoryPage from "./pages/client/history/History.jsx";
+import PreferredDriverList from "./pages/client/home/PreferredDriverList.jsx";
 
 export default function ClientApp() {
   const user = useAuthStore((state) => state.user);
@@ -63,6 +64,7 @@ export default function ClientApp() {
             <Route path="report" element={<Report />} />
             <Route path="report-list" element={<ReportList />} />
             <Route path="history" element={<HistoryPage />} />
+            <Route path="preferred-drivers" element={<PreferredDriverList />} />
           </Route>
         </Routes>
       </div>

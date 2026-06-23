@@ -30,7 +30,7 @@ export const useBookingStore = create(
     }),
     {
       name: "kidgo_booking",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => state,
     },
   ),

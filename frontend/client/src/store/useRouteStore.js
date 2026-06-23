@@ -89,7 +89,7 @@ export const useRouteStore = create(
     }),
     {
       name: "route-storage",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
     },
   ),
 );
