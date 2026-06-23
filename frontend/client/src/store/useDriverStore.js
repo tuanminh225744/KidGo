@@ -21,7 +21,7 @@ export const useDriverStore = create(
     }),
     {
       name: "kidgo_driver",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => state,
     },
   ),

@@ -1,4 +1,5 @@
 import Payment from "../models/operational/payment.model.js";
+import TripSchedule from "../models/operational/tripSchedule.model.js";
 
 /**
  * Tạo mới một bản ghi thanh toán
@@ -50,5 +51,75 @@ export const updatePaymentStatus = async (paymentId, status) => {
     throw new Error(
       error.message || `Lỗi cập nhật thanh toán: ${error.message}`,
     );
+  }
+};
+
+/**
+ * Tính toán trước giá tiền (dành cho màn hình chọn phương thức)
+ */
+export const previewPayment = async (tripScheduleId, preferredDriverId = null) => {
+  try {
+    const schedule = await TripSchedule.findById(tripScheduleId)
+      .populate("routeId")
+      .populate("subscriptionId");
+
+    if (!schedule) {
+      throw new Error("Không tìm thấy Lịch trình (TripSchedule).");
+    }
+    if (!schedule.endDate) {
+      throw new Error("Lịch trình phải có ngày kết thúc (endDate) để tính tổng thanh toán.");
+    }
+
+    let tripCount = 0;
+    const start = new Date(schedule.startDate);
+    const end = new Date(schedule.endDate);
+
+    const maxDays = 366;
+    let daysPassed = 0;
+
+    for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+      if (daysPassed++ > maxDays) break;
+
+      const dayOfWeek = d.getDay();
+      if (schedule.repeatDays && schedule.repeatDays.length > 0) {
+        if (schedule.repeatDays.includes(dayOfWeek)) {
+          tripCount++;
+        }
+      } else {
+        tripCount = 1;
+        break;
+      }
+    }
+
+    if (tripCount === 0) {
+      throw new Error("Không có ngày đi học nào nằm trong khoảng thời gian này.");
+    }
+
+    const distance = schedule.routeId?.estimatedDistance || 0;
+    let pricePerTrip = 15000 + distance * 5000;
+
+    if (preferredDriverId) {
+      pricePerTrip += 10000; // Phụ phí 10k cho tài xế ưu tiên
+    }
+
+    let discount = 0;
+    if (schedule.subscriptionId) {
+      if (schedule.subscriptionId.plan === "monthly") {
+        discount = 0.05;
+      } else if (schedule.subscriptionId.plan === "yearly") {
+        discount = 0.1;
+      }
+    }
+
+    const amount = pricePerTrip * tripCount * (1 - discount);
+    const driverEarning = amount * 0.8;
+
+    return {
+      success: true,
+      message: "Payment preview calculated",
+      data: { tripCount, pricePerTrip, discount, amount, driverEarning },
+    };
+  } catch (error) {
+    throw new Error(`Lỗi tính toán trước giá tiền: ${error.message}`);
   }
 };

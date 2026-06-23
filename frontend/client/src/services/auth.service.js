@@ -30,28 +30,28 @@ export const refreshAuthToken = async (refreshToken) => {
 
 export const setAuthTokens = ({ accessToken, refreshToken }) => {
   if (accessToken) {
-    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
   }
   if (refreshToken) {
-    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+    sessionStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
   }
 };
 
 export const clearAuthTokens = () => {
-  localStorage.removeItem(ACCESS_TOKEN_KEY);
-  localStorage.removeItem(REFRESH_TOKEN_KEY);
+  sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+  sessionStorage.removeItem(REFRESH_TOKEN_KEY);
 };
 
 export const savePendingEmail = (email) => {
   if (email) {
-    localStorage.setItem(PENDING_EMAIL_KEY, email);
+    sessionStorage.setItem(PENDING_EMAIL_KEY, email);
   }
 };
 
 export const getPendingEmail = () => {
-  return localStorage.getItem(PENDING_EMAIL_KEY) || "";
+  return sessionStorage.getItem(PENDING_EMAIL_KEY) || "";
 };
 
 export const clearPendingEmail = () => {
-  localStorage.removeItem(PENDING_EMAIL_KEY);
+  sessionStorage.removeItem(PENDING_EMAIL_KEY);
 };

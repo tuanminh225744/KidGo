@@ -1,6 +1,7 @@
 import Trip from "../models/operational/trip.model.js";
 import Driver from "../models/core/driver.model.js";
 import Kid from "../models/core/kid.model.js";
+import Route from "../models/operational/route.model.js";
 import { getIo } from "../sockets/socketManager.js";
 import redisClient from "../config/redisClient.js";
 import { AppError, NotFoundError } from "../utils/AppError.js";
@@ -267,12 +268,23 @@ export const driverDropoffKid = async (tripId) => {
     // Chuyến đi dứt điểm, Thả xích ông xế về Trạng thái "Tự Do 100%"
     await Driver.findByIdAndUpdate(trip.driverId, { rideStatus: "free" });
 
+    // Populate driver info để gửi cho parent
+    const populatedTrip = await Trip.findById(tripId)
+      .populate({
+        path: "driverId",
+        select: "user",
+        populate: { path: "user", select: "fullName avatar" },
+      });
+
     const io = getIo();
-    io.of("/parent").to(trip.parentId.toString()).emit("kid_dropped_off", {
+    io.of("/parent").to(trip.parentId.toString()).emit("trip_completed", {
       title: "Hành trình Mỹ Vãn",
       message:
-        "Bé con đã được thả xuống điểm trả một cách hoàn hảo. Cảm ơn Mẹ đã giao phó cho KidGo!",
+        "Bé con đã được thả xuống điểm trả một cách hoàn hảo. ",
       tripId: trip._id,
+      driverId: populatedTrip?.driverId?._id?.toString() || trip.driverId?.toString(),
+      driverName: populatedTrip?.driverId?.user?.fullName || null,
+      driverAvatar: populatedTrip?.driverId?.user?.avatar || null,
     });
 
     return { success: true, message: "Trip completed", data: trip };
@@ -467,4 +479,25 @@ export const recordGpsTick = async (
   });
 
   return { success: true, message: "GPS tick recorded", data: { ok: true } };
+};
+
+/**
+ * 11. Cập nhật estimated waypoints cho route
+ */
+export const updateTripEstimatedWaypoints = async (tripId, waypoints) => {
+  const trip = await Trip.findById(tripId);
+  if (!trip) throw new NotFoundError("Chuyến đi không tồn tại.");
+
+  const formattedWaypoints = waypoints.map((wp) => ({
+    type: "Point",
+    coordinates: [wp[1], wp[0]], // [lat, lng] -> [lng, lat]
+  }));
+
+  await Route.findByIdAndUpdate(
+    trip.routeId,
+    { $set: { estimatedWaypoints: formattedWaypoints } },
+    { new: true, runValidators: true },
+  );
+
+  return { success: true, message: "Estimated waypoints updated", data: null };
 };

@@ -27,7 +27,7 @@ export const useBookingStoreDriver = create(
     }),
     {
       name: "kidgo_driver_booking",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => state,
     },
   ),

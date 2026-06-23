@@ -1,6 +1,7 @@
-import { History, CalendarDays } from "lucide-react";
+import { History, CalendarDays, Star } from "lucide-react";
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { AnimatePresence } from "motion/react";
 import { getKidsByParent } from "../../../services/kid.service.js";
 import { getCurrentProfile } from "../../../services/user.service.js";
 import {
@@ -13,6 +14,7 @@ import { useAuthStore } from "../../../store/useAuthStore.js";
 import { useSocketStore } from "../../../store/useSocketStore.js";
 import TripCard from "./TripCard.jsx";
 import KidCard from "./KidCard.jsx";
+import TripSuccessCard from "./TripSuccessCard.jsx";
 
 export default function Home() {
   const navigate = useNavigate();
@@ -25,12 +27,43 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [selectedTrip, setSelectedTrip] = useState(null);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [dismissedEvents, setDismissedEvents] = useState(new Set());
   const { user, setUser, logout } = useAuthStore();
   const displayProfile = profile || user;
   const events = useSocketStore((s) => s.events);
 
+  // Lọc các event chuyến xe thành công chưa đọc và chưa dismiss
+  const successEvents = events.filter(
+    (e) =>
+      e.namespace === "parent" &&
+      e.type === "trip_completed" &&
+      !e.isRead &&
+      !dismissedEvents.has(e.id)
+  );
+
+  const dismissSuccessEvent = (id) => {
+    setDismissedEvents((prev) => new Set([...prev, id]));
+  };
+
+  // Load data lần đầu khi mount
   useEffect(() => {
     loadAllData();
+  }, []);
+
+  // Khi có socket event ảnh hưởng đến trạng thái chuyến → refresh activeTrips
+  const TRIP_STATUS_EVENTS = [
+    "driver_is_coming",  // picking_up
+    "kid_picked_up",     // in_progress
+    "trip_completed",    // completed → ẩn TripCard
+    "trip_cancelled",    // cancelled → ẩn TripCard
+  ];
+  useEffect(() => {
+    const hasTripEvent = events.some(
+      (e) => e.namespace === "parent" && TRIP_STATUS_EVENTS.includes(e.type) && !e.isRead
+    );
+    if (hasTripEvent) {
+      loadActiveTrips();
+    }
   }, [events]);
 
   const loadAllData = async () => {
@@ -151,23 +184,20 @@ export default function Home() {
     <div className="flex-1 flex flex-col pb-24">
       {/* Header */}
       <header className="px-5 py-4 flex items-center justify-between bg-white sticky top-0 z-40 shadow-sm">
-        <button
-          type="button"
-          onClick={() => navigate("/client/home")}
-          className="flex items-center gap-3 active:scale-95 transition-transform"
-        >
-          <div className="w-20 h-11 rounded-2xl bg-primary text-white flex items-center justify-center shadow-md shadow-primary/20">
-            <span className="text-lg font-black tracking-tight">KidGo</span>
-          </div>
-          {/* <div className="text-left">
-            <p className="text-[10px] uppercase tracking-[0.24em] text-on-surface-variant">
-              KidGo
-            </p>
-            <h1 className="text-base font-bold text-on-surface leading-tight">
-              Home
-            </h1>
-          </div> */}
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate("/client/home")}
+            className="flex items-center gap-2 active:scale-95 transition-transform"
+          >
+            <div className="w-20 h-11 rounded-2xl bg-primary text-white flex items-center justify-center shadow-md shadow-primary/20">
+              <span className="text-lg font-black tracking-tight">KidGo</span>
+            </div>
+          </button>
+
+          {/* Nút tài xế ưu tiên */}
+
+        </div>
 
         <div className="relative">
           <button
@@ -223,6 +253,15 @@ export default function Home() {
               >
                 Phản hồi
               </button>
+              <button
+                type="button"
+                onClick={() => navigate("/client/preferred-drivers")}
+                className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                aria-label="Tài xế ưu tiên"
+              >
+
+                Tài xế ưu tiên
+              </button>
               <div className="h-px bg-gray-100 w-full" />
               <button
                 onClick={() => {
@@ -234,12 +273,24 @@ export default function Home() {
               >
                 Đăng xuất
               </button>
+
             </div>
           )}
         </div>
       </header>
 
       <main className="px-5 pt-6 space-y-6">
+        {/* Trip Success Cards - hiển thị khi nhận socket trip_completed */}
+        <AnimatePresence>
+          {successEvents.map((event) => (
+            <TripSuccessCard
+              key={event.id}
+              event={event}
+              onDismiss={() => dismissSuccessEvent(event.id)}
+            />
+          ))}
+        </AnimatePresence>
+
         {/* Active Trip Card */}
         {activeTrips.length > 0 &&
           activeTrips.map((trip) => (

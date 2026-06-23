@@ -11,6 +11,7 @@ import {
   driverDropoffKid,
   cancelTrip,
   recordGpsTick,
+  updateTripEstimatedWaypoints,
 } from "../services/trip.service.js";
 import { AppError } from "../utils/AppError.js";
 import { success, error } from "../utils/response.js";
@@ -210,6 +211,22 @@ export const gpsTick = async (req, res, next) => {
     const driverId = req.user.id;
     const gpsData = req.body;
     const result = await recordGpsTick(tripId, driverId, gpsData);
+    return success(res, result.data, result.message, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/v1/trips/:tripId/estimated-waypoints
+ * Tài xế cập nhật estimated waypoints cho route
+ * Role: driver
+ */
+export const updateEstimatedWaypointsHandler = async (req, res, next) => {
+  try {
+    const { tripId } = req.params;
+    const { waypoints } = req.body;
+    const result = await updateTripEstimatedWaypoints(tripId, waypoints);
     return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);

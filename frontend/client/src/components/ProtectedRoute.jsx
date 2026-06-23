@@ -15,8 +15,8 @@ export default function ProtectedRoute({
   const logout = useAuthStore((state) => state.logout);
   const notifiedRef = useRef(false);
 
-  const accessToken = localStorage.getItem("accessToken");
-  const refreshToken = localStorage.getItem("refreshToken");
+  const accessToken = sessionStorage.getItem("accessToken");
+  const refreshToken = sessionStorage.getItem("refreshToken");
   const hasToken = Boolean(accessToken || refreshToken);
   const hasValidRole =
     !allowedRoles.length || (user?.role && allowedRoles.includes(user.role));

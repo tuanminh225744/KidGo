@@ -25,9 +25,9 @@ export const useKidStore = create(
           kids: state.kids.map((kid) =>
             kid._id === kidId
               ? {
-                  ...kid,
-                  ...payload,
-                }
+                ...kid,
+                ...payload,
+              }
               : kid,
           ),
         })),
@@ -44,7 +44,7 @@ export const useKidStore = create(
     }),
     {
       name: "kid-storage",
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
     },
   ),
 );
