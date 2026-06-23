@@ -71,9 +71,9 @@ export const createPayment = async (req, res, next) => {
       }
     }
 
-    // Tổng tiền & thu nhập tài xế
+    // Tổng tiền (của tất cả chuyến) & thu nhập tài xế (TRÊN 1 CHUYẾN)
     const amount = pricePerTrip * tripCount * (1 - discount);
-    const driverEarning = amount * 0.8;
+    const driverEarning = pricePerTrip * (1 - discount) * 0.8;
 
     const paymentData = {
       userId: req.user.id,
@@ -167,7 +167,7 @@ export const previewPayment = async (req, res, next) => {
     }
 
     const amount = pricePerTrip * tripCount * (1 - discount);
-    const driverEarning = amount * 0.8;
+    const driverEarning = pricePerTrip * (1 - discount) * 0.8;
 
     return success(
       res,
@@ -258,7 +258,7 @@ export const updatePaymentStatus = async (req, res, next) => {
 export const confirmCashPayment = async (req, res, next) => {
   try {
     const { paymentId } = req.params;
-    
+
     const result = await paymentService.confirmCashPayment(
       paymentId,
       req.user.role

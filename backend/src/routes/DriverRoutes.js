@@ -7,9 +7,12 @@ import {
   getDriverTrips,
   getDriverEarnings,
   getDriverReviews,
+  getDriverReviews,
   addVehicle,
   getDriverVehicles,
   setActiveVehicle,
+  getDriverEarningsStats,
+  getDriverTripsStats,
 } from "../controllers/DriverController.js";
 import {
   getBookingRequests,
@@ -170,6 +173,28 @@ router.get(
   validateDriverIdParam,
   validate,
   getDriverLocationPublic,
+);
+
+/**
+ * GET /api/v1/drivers/:driverId/stats/earnings
+ */
+router.get(
+  "/:driverId/stats/earnings",
+  authorize("admin", "driver"),
+  validateDriverIdParam,
+  validate,
+  getDriverEarningsStats,
+);
+
+/**
+ * GET /api/v1/drivers/:driverId/stats/trips
+ */
+router.get(
+  "/:driverId/stats/trips",
+  authorize("admin", "driver"),
+  validateDriverIdParam,
+  validate,
+  getDriverTripsStats,
 );
 
 router.get(
