@@ -1,7 +1,7 @@
 import { ChevronLeft, CalendarDays, Star, ChevronDown } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useState, useEffect } from 'react';
-import { getDriverTrips } from '../../services/driver.service';
+import { getDriverTrips, getDriverMeEarnings, getDriverMeTripsStats } from '../../services/driver.service';
 import { useNavigate } from 'react-router-dom';
 import { TripDetailsModal } from '../../components/modal/TripDetailsModal';
 
@@ -12,13 +12,20 @@ export default function HistoryView() {
   const [loading, setLoading] = useState(true);
   const [selectedTrip, setSelectedTrip] = useState(null);
 
+  const [stats, setStats] = useState({ totalTrips: 0, earnings: 0 });
+
   useEffect(() => {
-    const fetchTrips = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        const res = await getDriverTrips({ period: selectedTab });
-        if (res?.success || res?.data?.success) {
-          const tripsData = res.data?.trips || res.trips || [];
+        const [tripsRes, earningsRes, statsRes] = await Promise.all([
+          getDriverTrips({ period: selectedTab }),
+          getDriverMeEarnings({ period: selectedTab }),
+          getDriverMeTripsStats({ period: selectedTab })
+        ]);
+
+        if (tripsRes?.success || tripsRes?.data?.success) {
+          const tripsData = tripsRes.data?.trips || tripsRes.data?.data?.trips || [];
           const formatted = tripsData.map(t => ({
             id: t._id,
             time: new Date(t.createdAt).toLocaleString(),
@@ -37,13 +44,22 @@ export default function HistoryView() {
         } else {
           setTrips([]);
         }
+
+        const totalTrips = statsRes?.data?.totalTrips || 0;
+        const actualEarnings = earningsRes?.data?.actualEarnings || 0;
+
+        setStats({
+          totalTrips,
+          earnings: actualEarnings
+        });
+
       } catch (error) {
         console.error('Lỗi khi tải lịch sử chuyến:', error);
       } finally {
         setLoading(false);
       }
     };
-    fetchTrips();
+    fetchData();
   }, [selectedTab]);
 
   const getStatusStyle = (status) => {
@@ -81,11 +97,10 @@ export default function HistoryView() {
         })}
       </div>
 
-      <div className="grid grid-cols-3 gap-3 p-4">
+      <div className="grid grid-cols-2 gap-3 p-4">
         {[
-          { label: 'Số chuyến', val: trips.length },
-          { label: 'Tổng km', val: '84.2' },
-          { label: 'Thu nhập', val: '540k' }
+          { label: 'Số chuyến', val: stats.totalTrips },
+          { label: 'Thu nhập', val: stats.earnings > 0 ? `${stats.earnings.toLocaleString()}đ` : '0đ' }
         ].map((stat) => (
           <div key={stat.label} className="bg-white p-4 rounded-xl border border-gray-100 text-center shadow-sm">
             <p className="text-xs text-gray-500 mb-1">{stat.label}</p>

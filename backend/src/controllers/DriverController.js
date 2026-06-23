@@ -176,8 +176,24 @@ export const getDriverEarnings = async (req, res, next) => {
 };
 
 /**
+ * GET /api/v1/drivers/me/stats/trips
+ * Tổng kết số chuyến
+ */
+export const getDriverMeTripsStats = async (req, res, next) => {
+  try {
+    const userRes = await driverService.getDriverByUserId(req.user.id);
+    const user = userRes.data;
+    const result = await tripService.getDriverTripsStats(user._id, req.query);
+    return success(res, result.data, result.message, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * GET /api/v1/drivers/:driverId/stats/earnings
  * API thống kê thanh toán và thu nhập của tài xế (dành cho Admin và Tài xế)
+
  */
 export const getDriverEarningsStats = async (req, res, next) => {
   try {
@@ -191,8 +207,8 @@ export const getDriverEarningsStats = async (req, res, next) => {
        }
     }
 
-    const { date, month } = req.query;
-    const result = await tripService.getDriverEarningsStats(driverId, { date, month });
+    const { date, month, period } = req.query;
+    const result = await tripService.getDriverEarningsStats(driverId, { date, month, period });
     return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
@@ -214,8 +230,8 @@ export const getDriverTripsStats = async (req, res, next) => {
        }
     }
 
-    const { date, month } = req.query;
-    const result = await tripService.getDriverTripsStats(driverId, { date, month });
+    const { date, month, period } = req.query;
+    const result = await tripService.getDriverTripsStats(driverId, { date, month, period });
     return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);

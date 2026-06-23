@@ -321,10 +321,41 @@ export const getParentTrips = async (
  */
 export const getTripsByDriver = async (
   driverId,
-  { status, page = 1, limit = 20 } = {},
+  { status, period, date, month, page = 1, limit = 20 } = {},
 ) => {
   const query = { driverId };
   if (status) query.status = status;
+
+  let dateFilter = {};
+  const now = new Date();
+  if (period === 'today') {
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    const end = new Date(); end.setHours(23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  } else if (period === 'week') {
+    const start = new Date();
+    const day = start.getDay();
+    const diff = start.getDate() - day + (day === 0 ? -6 : 1);
+    start.setDate(diff); start.setHours(0, 0, 0, 0);
+    const end = new Date(start); end.setDate(end.getDate() + 6); end.setHours(23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  } else if (period === 'month') {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  } else if (date) {
+    const start = new Date(date); start.setHours(0, 0, 0, 0);
+    const end = new Date(date); end.setHours(23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  } else if (month) {
+    const start = new Date(`${month}-01`);
+    const end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  }
+  
+  if (Object.keys(dateFilter).length > 0) {
+    query.createdAt = dateFilter;
+  }
 
   const skip = (page - 1) * limit;
   const [trips, total] = await Promise.all([
@@ -472,9 +503,25 @@ export const recordGpsTick = async (
 /**
  * Lấy thống kê thanh toán / thu nhập của tài xế
  */
-export const getDriverEarningsStats = async (driverId, { date, month }) => {
+export const getDriverEarningsStats = async (driverId, { period, date, month }) => {
   let dateFilter = {};
-  if (date) { // YYYY-MM-DD
+  const now = new Date();
+  if (period === 'today') {
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    const end = new Date(); end.setHours(23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  } else if (period === 'week') {
+    const start = new Date();
+    const day = start.getDay();
+    const diff = start.getDate() - day + (day === 0 ? -6 : 1);
+    start.setDate(diff); start.setHours(0, 0, 0, 0);
+    const end = new Date(start); end.setDate(end.getDate() + 6); end.setHours(23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  } else if (period === 'month') {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  } else if (date) { // YYYY-MM-DD
     const start = new Date(date);
     start.setHours(0, 0, 0, 0);
     const end = new Date(date);
@@ -518,9 +565,25 @@ export const getDriverEarningsStats = async (driverId, { date, month }) => {
 /**
  * Lấy thống kê số chuyến của tài xế
  */
-export const getDriverTripsStats = async (driverId, { date, month }) => {
+export const getDriverTripsStats = async (driverId, { period, date, month }) => {
   let dateFilter = {};
-  if (date) {
+  const now = new Date();
+  if (period === 'today') {
+    const start = new Date(); start.setHours(0, 0, 0, 0);
+    const end = new Date(); end.setHours(23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  } else if (period === 'week') {
+    const start = new Date();
+    const day = start.getDay();
+    const diff = start.getDate() - day + (day === 0 ? -6 : 1);
+    start.setDate(diff); start.setHours(0, 0, 0, 0);
+    const end = new Date(start); end.setDate(end.getDate() + 6); end.setHours(23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  } else if (period === 'month') {
+    const start = new Date(now.getFullYear(), now.getMonth(), 1, 0, 0, 0, 0);
+    const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59, 999);
+    dateFilter = { $gte: start, $lte: end };
+  } else if (date) {
     const start = new Date(date);
     start.setHours(0, 0, 0, 0);
     const end = new Date(date);

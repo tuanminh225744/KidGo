@@ -63,10 +63,10 @@ export default function ScheduleView() {
     <div className="pb-24">
       <div className="flex items-center justify-between p-4 bg-white">
         <div className="flex items-center gap-3">
-          <img src="/images/anh-avatar-trang.jpg" className="w-10 h-10 rounded-full border-2 border-[#1D7C45] p-0.5" />
+          {/* <img src="/images/anh-avatar-trang.jpg" className="w-10 h-10 rounded-full border-2 border-[#1D7C45] p-0.5" /> */}
           <h1 className="text-xl font-bold text-[#1D7C45]">Lịch chuyến</h1>
         </div>
-        <Bell className="w-6 h-6 text-[#1D7C45]" onClick={() => navigate('/driver/notifications')} />
+        {/* <Bell className="w-6 h-6 text-[#1D7C45]" onClick={() => navigate('/driver/notifications')} /> */}
       </div>
 
       <div className="flex overflow-x-auto p-4 gap-2 no-scrollbar bg-white">
@@ -138,9 +138,9 @@ export default function ScheduleView() {
                 <p className="text-[10px] font-bold text-green-700 mb-1">{formatRepeatDays(trip.repeatDays)} • {trip.pickupTime || '--:--'}</p>
                 <p className="font-bold text-gray-800">{trip.kidId?.fullName} <span className="text-gray-400 font-normal">→ {trip.routeId?.estimatedDropoffAddress?.substring(0, 20)}...</span></p>
               </div>
-              <div className={`w-12 h-6 ${trip.isActive ? 'bg-green-600' : 'bg-gray-400'} rounded-full p-1 relative shadow-inner`}>
+              {/* <div className={`w-12 h-6 ${trip.isActive ? 'bg-green-600' : 'bg-gray-400'} rounded-full p-1 relative shadow-inner`}>
                 <div className={`absolute ${trip.isActive ? 'right-1' : 'left-1'} top-1 bottom-1 w-4 bg-white rounded-full`} />
-              </div>
+              </div> */}
             </div>
           ))}
         </div>

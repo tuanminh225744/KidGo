@@ -14,6 +14,7 @@ import {
   getDriverTripsStats,
   getDriverDailySchedules,
   getDriverSubscriptionSchedules,
+  getDriverMeTripsStats,
 } from "../controllers/DriverController.js";
 import {
   getBookingRequests,
@@ -109,6 +110,12 @@ router.get("/me/schedules/subscriptions", authorize("driver"), getDriverSubscrip
  * Tổng kết thu nhập
  */
 router.get("/me/earnings", authorize("driver"), getDriverEarnings);
+
+/**
+ * GET /api/v1/drivers/me/stats/trips
+ * Tổng kết số chuyến
+ */
+router.get("/me/stats/trips", authorize("driver"), getDriverMeTripsStats);
 
 /**
  * GET /api/v1/drivers/me/reviews
