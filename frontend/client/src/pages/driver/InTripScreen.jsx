@@ -12,6 +12,7 @@ import {
   verifySecurityQuestion,
   confirmPickup,
   confirmDropoff,
+  updateEstimatedWaypoints,
 } from "../../services/trip.service";
 import { verifySecurityAnswer } from "../../services/kid.service";
 import { PickingUpModal } from "../../components/modal/PickingUpModal";
@@ -27,7 +28,7 @@ import { confirmCashPayment, getPayment } from "../../services/payment.service";
 
 export const InTripScreen = () => {
   const navigate = useNavigate();
-  // states: picking_up -> waiting -> verifying -> on_trip -> dropping_off
+  // states: picking_up -> waiting -> verifying -> in_progress -> dropping_off
   const [tripStatus, setTripStatus] = useState("picking_up");
   const [currentVerificationStep, setCurrentVerificationStep] = useState(null); // 'otp', 'photo', 'security_question', null
   const [loading, setLoading] = useState(false);
@@ -35,7 +36,9 @@ export const InTripScreen = () => {
 
   const trip = useTripStore((state) => state);
   const setTripData = useTripStore((state) => state.setTrip);
+  const resetTrip = useTripStore((state) => state.resetTrip);
   const route = useRouteStore((state) => state);
+  const resetRoute = useRouteStore((state) => state.resetRoute);
 
   const rawCoords = route?.estimatedPickupCoords?.coordinates;
   const formattedPickupLocation =
@@ -53,6 +56,16 @@ export const InTripScreen = () => {
   const [photoInput, setPhotoInput] = useState(null);
   const [securityAnswer, setSecurityAnswer] = useState("");
   const fileInputRef = useRef(null);
+
+  const handleRouteCalculated = async (waypoints) => {
+    if (tripStatus === "in_progress") {
+      try {
+        await updateEstimatedWaypoints(trip._id, { waypoints });
+      } catch (err) {
+        console.error("Lỗi cập nhật waypoints", err);
+      }
+    }
+  };
 
   const handleArrivedAtPickup = () => {
     setTripStatus("waiting");
@@ -174,7 +187,7 @@ export const InTripScreen = () => {
       const res = await confirmPickup(trip._id);
       if (res?.success) {
         setTripData(res.data);
-        setTripStatus("on_trip");
+        setTripStatus("in_progress");
       }
     } catch (err) {
       alert("Lỗi chốt chuyến: " + (err.response?.message || err.message));
@@ -278,6 +291,10 @@ export const InTripScreen = () => {
           trip.routeId?.estimatedDistance || trip.routeId?.actualDistance || 0;
         const duration =
           trip.routeId?.estimatedDuration || trip.routeId?.actualDuration || 0;
+
+        resetTrip();
+        resetRoute();
+
         navigate("/driver/summary", {
           state: { tripData: { fare, distance, duration } },
         });
@@ -305,7 +322,7 @@ export const InTripScreen = () => {
               ? "Đang đến điểm đón"
               : tripStatus === "waiting"
                 ? "Chờ bé"
-                : tripStatus === "on_trip"
+                : tripStatus === "in_progress"
                   ? "Đang chở"
                   : "Hành trình"}
           </h2>
@@ -321,17 +338,18 @@ export const InTripScreen = () => {
           startPointProp={
             tripStatus === "picking_up" ||
               tripStatus === "waiting" ||
-              tripStatus === "on_trip"
+              tripStatus === "in_progress"
               ? "current"
               : undefined
           }
           endPointProp={
             tripStatus === "picking_up" || tripStatus === "waiting"
               ? formattedPickupLocation
-              : tripStatus === "on_trip"
+              : tripStatus === "in_progress"
                 ? formattedDropoffLocation
                 : undefined
           }
+          onRouteCalculated={handleRouteCalculated}
         />
       </div>
 
@@ -379,7 +397,7 @@ export const InTripScreen = () => {
           )}
 
         {/* On Trip state UI (already existing logic adapted) */}
-        {tripStatus === "on_trip" && (
+        {tripStatus === "in_progress" && (
           <OnTripModal setTripStatus={() => handleArrivedAtDropoff()} />
         )}
 

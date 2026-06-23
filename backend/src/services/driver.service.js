@@ -168,6 +168,7 @@ export const updateLocationInRedis = async (
     // Nếu đủ 30s kể từ lần ghi trước, append waypoint vào Route.actualWaypoints
     if (shouldAppendWaypoint) {
       try {
+        console.log("[Redis] Lưu waypoint vào route", routeId);
         await routeService.appendActualWaypoint(driverId, lat, lng, routeId);
         // Update last DB save timestamp
         try {

@@ -5,6 +5,7 @@ import Trip from "../models/operational/trip.model.js";
 import { getIo } from "../sockets/socketManager.js";
 
 export const runTripAnalytics = async () => {
+  console.log("[Jobs] Bắt đầu check các chuyến xe!");
   try {
     // Tìm toàn bộ danh sách các chuyến xe đang lăn bánh
     const activeTrips = await Trip.find({ status: "in_progress" }).populate("routeId");

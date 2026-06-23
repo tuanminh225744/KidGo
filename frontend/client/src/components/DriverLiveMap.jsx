@@ -57,7 +57,7 @@ const MapCenter = ({ position }) => {
   return null;
 };
 
-const DriverLiveMap = ({ className = "", startPointProp, endPointProp }) => {
+const DriverLiveMap = ({ className = "", startPointProp, endPointProp, onRouteCalculated }) => {
   const [position, setPosition] = useState(null);
   const watchIdRef = useRef(null);
   const positionRef = useRef(null);
@@ -107,6 +107,9 @@ const DriverLiveMap = ({ className = "", startPointProp, endPointProp }) => {
         const geometry = routeData.geometry;
         const decodedPath = decodePolyline(geometry);
         setRoute(decodedPath);
+        if (onRouteCalculated) {
+          onRouteCalculated(decodedPath);
+        }
       }
     } catch (err) {
       console.error("Lỗi tính toán tuyến đường:", err);
