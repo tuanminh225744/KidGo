@@ -7,7 +7,6 @@ import {
   getDriverTrips,
   getDriverEarnings,
   getDriverReviews,
-  getDriverReviews,
   addVehicle,
   getDriverVehicles,
   setActiveVehicle,
