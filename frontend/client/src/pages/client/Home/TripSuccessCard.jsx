@@ -337,7 +337,7 @@ export default function TripSuccessCard({ event, onDismiss }) {
               <img
                 src={
                   payload?.driverAvatar ||
-                  `https://api.dicebear.com/7.x/avataaars/svg?seed=${payload?.driverId}`
+                  `/images/anh-avatar-trang.jpg`
                 }
                 alt={payload?.driverName}
                 className="w-full h-full object-cover"

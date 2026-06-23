@@ -98,7 +98,7 @@ export default function ClientProfile() {
               <img
                 src={
                   formData.avatar ||
-                  "https://i.pinimg.com/736x/bc/43/98/bc439871417621836a0eeea768d60944.jpg"
+                  "/images/anh-avatar-trang.jpg"
                 }
                 alt="Avatar"
                 className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-md"

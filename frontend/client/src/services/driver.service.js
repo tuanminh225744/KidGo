@@ -59,3 +59,11 @@ export const getDriverById = async (driverId) => {
 export const getDriverLocation = async (driverId) => {
   return api.get(`/drivers/${driverId}/location`);
 };
+
+export const getDriverEarningsStats = async (driverId, params = {}) => {
+  return api.get(`/drivers/${driverId}/stats/earnings`, { params });
+};
+
+export const getDriverTripsStats = async (driverId, params = {}) => {
+  return api.get(`/drivers/${driverId}/stats/trips`, { params });
+};

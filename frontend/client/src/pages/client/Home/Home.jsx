@@ -219,7 +219,7 @@ export default function Home() {
                 <img
                   src={
                     displayProfile?.avatar ||
-                    "https://api.dicebear.com/7.x/avataaars/svg?seed=Parent"
+                    "/images/anh-avatar-trang.jpg"
                   }
                   alt={displayProfile?.fullName || "Parent profile"}
                   className="w-full h-full object-cover"

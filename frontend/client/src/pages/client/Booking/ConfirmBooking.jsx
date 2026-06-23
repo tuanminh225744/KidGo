@@ -179,7 +179,7 @@ export default function ConfirmBooking() {
       if (!routeRes.success)
         throw new Error(routeRes.message || "Lỗi tạo lộ trình");
       const routeId = routeRes.data._id;
-      
+
       // Lưu routeId vào store
       setBookingData({ routeId });
 
@@ -278,7 +278,7 @@ export default function ConfirmBooking() {
                 <img
                   src={
                     kid?.avatar ||
-                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${kid?.fullName || "Kid"}`
+                    `/images/anh-avatar-trang.jpg`
                   }
                   alt={kid?.fullName || "Bé"}
                   className="h-full w-full object-cover"
