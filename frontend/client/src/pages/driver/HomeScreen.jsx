@@ -72,13 +72,13 @@ export const HomeScreen = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <button
+          {/* <button
             className="relative"
             onClick={() => navigate("/driver/notifications")}
           >
             <Bell size={24} className="text-gray-600" />
             <div className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></div>
-          </button>
+          </button> */}
 
           <div className="relative">
             <button
@@ -119,6 +119,15 @@ export const HomeScreen = () => {
                   className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   Thông tin cá nhân
+                </button>
+                <button
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    navigate("/driver/notifications");
+                  }}
+                  className="w-full text-left px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                >
+                  Thông báo
                 </button>
                 <div className="h-px bg-gray-100 w-full" />
                 <button
