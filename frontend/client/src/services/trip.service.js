@@ -47,3 +47,7 @@ export const cancelTrip = async (tripId, data) => {
 export const gpsTick = async (tripId, data) => {
   return api.post(`/trips/${tripId}/gps-tick`, data);
 };
+
+export const updateEstimatedWaypoints = async (tripId, data) => {
+  return api.post(`/trips/${tripId}/estimated-waypoints`, data);
+};
