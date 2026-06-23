@@ -15,6 +15,12 @@ if (!fs.existsSync(confirmationDir)) {
   fs.mkdirSync(confirmationDir, { recursive: true });
 }
 
+// Thư mục riêng cho ảnh xe
+const vehicleDir = path.join(process.cwd(), "uploads", "vehicles");
+if (!fs.existsSync(vehicleDir)) {
+  fs.mkdirSync(vehicleDir, { recursive: true });
+}
+
 const fileFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image/")) {
     cb(null, true);
@@ -55,6 +61,24 @@ const confirmationStorage = multer.diskStorage({
 
 export const uploadConfirmation = multer({
   storage: confirmationStorage,
+  fileFilter,
+  limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
+});
+
+// ── Ảnh xe (Vehicle) ──────────────────────────────
+const vehicleStorage = multer.diskStorage({
+  destination(req, file, cb) {
+    cb(null, vehicleDir);
+  },
+  filename(req, file, cb) {
+    const ext = path.extname(file.originalname);
+    const vehicleId = req.params.vehicleId || "unknown";
+    cb(null, `vehicle-${vehicleId}-${Date.now()}${ext}`);
+  },
+});
+
+export const uploadVehiclePhoto = multer({
+  storage: vehicleStorage,
   fileFilter,
   limits: { fileSize: 10 * 1024 * 1024 }, // 10MB
 });

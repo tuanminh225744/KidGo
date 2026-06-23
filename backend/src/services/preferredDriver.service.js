@@ -17,7 +17,7 @@ export const getPreferredDrivers = async (parentId) => {
       .sort({ priority: 1, addedAt: -1 })
       .populate({
         path: "driverId",
-        select: "user isOnline rideStatus rating totalTrips",
+        select: "user isOnline rideStatus certificationLevel totalTrips",
         populate: {
           path: "user",
           select: "fullName phone avatar",
@@ -40,7 +40,7 @@ export const getPreferredDrivers = async (parentId) => {
           fullName: driver?.user?.fullName,
           phone: driver?.user?.phone,
           avatar: driver?.user?.avatar,
-          rating: driver?.rating,
+          certificationLevel: driver?.certificationLevel,
           totalTrips: driver?.totalTrips,
         },
         // Chỉ available = true khi Online VÀ Free (không có chuyến)
@@ -183,7 +183,7 @@ export const updatePreferredDriver = async (parentId, driverId, updateData) => {
       { new: true, runValidators: true }
     ).populate({
       path: "driverId",
-      select: "user isOnline rideStatus rating",
+      select: "user isOnline rideStatus certificationLevel",
       populate: {
         path: "user",
         select: "fullName phone avatar",

@@ -300,7 +300,7 @@ export const getParentTrips = async (
       .populate("routeId")
       .populate({
         path: "driverId",
-        select: "user licenseNumber rating",
+        select: "user licenseNumber certificationLevel",
         populate: { path: "user", select: "fullName avatar phone" },
       })
       .populate("kidId", "fullName avatar")
@@ -366,7 +366,7 @@ export const getTripsByDriver = async (
       .populate("routeId")
       .populate({
         path: "driverId",
-        select: "user licenseNumber rating currentLocation isOnline",
+        select: "user licenseNumber certificationLevel currentLocation isOnline",
         populate: { path: "user", select: "fullName avatar phone" },
       })
       .populate("kidId", "fullName avatar")
@@ -409,7 +409,7 @@ export const getActiveTrips = async (parentId) => {
 export const getTripDetail = async (tripId, userId, role) => {
   const trip = await Trip.findById(tripId)
     .populate("routeId")
-    .populate("driverId", "user licenseNumber rating")
+    .populate("driverId", "user licenseNumber certificationLevel")
     .populate("kidId", "fullName avatar")
     .populate("vehicleId", "licensePlate model color")
     .populate("bookingId")

@@ -18,7 +18,7 @@ router.get("/dashboard", getAdminStats);
 
 /**
  * GET /api/v1/admin/reports
- * Báo cáo nâng cao (trips/ngày, alert rate, driver ratings)
+ * Báo cáo nâng cao (trips/ngày, alert rate)
  */
 router.get("/reports", getReports);
 

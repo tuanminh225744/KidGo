@@ -52,6 +52,20 @@ export const rejectBooking = async (bookingId) => {
   return api.post(`/drivers/me/booking-requests/${bookingId}/reject`);
 };
 
+export const getDriverVehicleByDriverId = async (driverId) => {
+  return api.get(`/drivers/${driverId}/vehicle`);
+};
+
+export const uploadVehiclePhoto = async (vehicleId, file) => {
+  const formData = new FormData();
+  formData.append("photo", file);
+  return api.post(`/drivers/me/vehicles/${vehicleId}/photo`, formData, {
+    headers: {
+      "Content-Type": "multipart/form-data",
+    },
+  });
+};
+
 export const getDriverById = async (driverId) => {
   return api.get(`/drivers/${driverId}`);
 };

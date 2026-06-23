@@ -114,7 +114,7 @@ const triggerTimeoutCancel = async (bookingId) => {
 };
 
 /**
- * Lọc mảng Redis trả về để kiếm xem ông xế nào thực sự Rảnh rang, ưu tiên rating cao
+ * Lọc mảng Redis trả về để kiếm xem ông xế nào thực sự Rảnh rang, ưu tiên certificationLevel cao
  */
 const filterFreeDrivers = async (nearbyDriverIdArray) => {
   if (!nearbyDriverIdArray || nearbyDriverIdArray.length === 0) return [];
@@ -127,7 +127,7 @@ const filterFreeDrivers = async (nearbyDriverIdArray) => {
     isOnline: true,
     rideStatus: "free", // CHỈ bắt xế free
   })
-    .sort({ rating: -1 })
+    .sort({ certificationLevel: -1 })
     .select("_id");
   console.log("da tim thay driver ranh trong pham vi:", freeDrivers);
   return freeDrivers.map((d) => d._id.toString());

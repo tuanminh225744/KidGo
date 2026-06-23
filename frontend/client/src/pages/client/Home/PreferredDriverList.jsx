@@ -464,10 +464,10 @@ export default function PreferredDriverList() {
                       {item.driver?.phone || "---"}
                     </p>
                     <div className="flex items-center gap-2 mt-1">
-                      {item.driver?.rating && (
+                      {item.driver?.certificationLevel !== undefined && (
                         <span className="flex items-center gap-0.5 text-orange-500 text-[10px] font-bold">
                           <Star size={10} fill="currentColor" />
-                          {item.driver.rating.toFixed(1)}
+                          {item.driver.certificationLevel.toFixed(1)}
                         </span>
                       )}
                       <span

@@ -33,7 +33,7 @@ export default function ProtectedRoute({
     notifiedRef.current = true;
     clearAuthTokens();
     logout();
-    message.error(SESSION_EXPIRED_MESSAGE);
+    // message.error(SESSION_EXPIRED_MESSAGE);
   }, [isAllowed, logout]);
 
   if (!isAllowed) {

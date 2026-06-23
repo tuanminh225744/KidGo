@@ -15,6 +15,8 @@ import {
   getDriverDailySchedules,
   getDriverSubscriptionSchedules,
   getDriverMeTripsStats,
+  getDriverVehicleByDriverId,
+  uploadVehiclePhotoController,
 } from "../controllers/DriverController.js";
 import {
   getBookingRequests,
@@ -25,6 +27,7 @@ import {
   authenticateToken,
   authorize,
 } from "../middlewares/auth.middleware.js";
+import { uploadVehiclePhoto } from "../middlewares/upload.middleware.js";
 import { validate } from "../middlewares/validate.middleware.js";
 import {
   validateVehicleIdParam,
@@ -142,6 +145,17 @@ router.post(
 router.get("/me/vehicles", authorize("driver"), getDriverVehicles);
 
 /**
+ * POST /api/v1/drivers/me/vehicles/:vehicleId/photo
+ * Upload ảnh cho xe
+ */
+router.post(
+  "/me/vehicles/:vehicleId/photo",
+  authorize("driver"),
+  uploadVehiclePhoto.single("photo"),
+  uploadVehiclePhotoController
+);
+
+/**
  * PATCH /api/v1/drivers/me/vehicles/:vehicleId/active
  * Chọn xe đang dùng
  */
@@ -215,6 +229,17 @@ router.get(
   validateDriverIdParam,
   validate,
   getDriverTripsStats,
+);
+
+/**
+ * GET /api/v1/drivers/:driverId/vehicle
+ */
+router.get(
+  "/:driverId/vehicle",
+  authorize("parent", "admin", "driver"),
+  validateDriverIdParam,
+  validate,
+  getDriverVehicleByDriverId,
 );
 
 router.get(

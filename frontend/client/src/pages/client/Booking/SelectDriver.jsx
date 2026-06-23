@@ -217,11 +217,11 @@ export default function SelectDriver() {
                       <p className="font-bold text-xs truncate w-full text-center">
                         {item.nickname || item.driver?.fullName || "Tài xế"}
                       </p>
-                      {item.driver?.rating && (
+                      {item.driver?.certificationLevel !== undefined && (
                         <div className="flex items-center justify-center gap-0.5 text-orange-500 mt-0.5">
                           <Star size={10} fill="currentColor" />
                           <span className="text-[10px] font-bold">
-                            {item.driver.rating.toFixed(1)}
+                            {item.driver.certificationLevel.toFixed(1)}
                           </span>
                         </div>
                       )}

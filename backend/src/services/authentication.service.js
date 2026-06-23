@@ -219,20 +219,7 @@ export const registerDriver = async (payload) => {
         { session },
       );
 
-      const [newDriver] = await Driver.create(
-        [
-          {
-            user: newUser._id,
-            licenseNumber,
-            licenseExpiry: licenseExpiry ? new Date(licenseExpiry) : undefined,
-            status: "pending",
-          },
-        ],
-        { session },
-      );
-
       const vehicleData = {
-        driverId: newDriver._id,
         licensePlate,
         brand,
         model,
@@ -244,6 +231,19 @@ export const registerDriver = async (payload) => {
       };
 
       const [newVehicle] = await Vehicle.create([vehicleData], { session });
+
+      const [newDriver] = await Driver.create(
+        [
+          {
+            user: newUser._id,
+            licenseNumber,
+            licenseExpiry: licenseExpiry ? new Date(licenseExpiry) : undefined,
+            status: "pending",
+            vehicleId: newVehicle._id,
+          },
+        ],
+        { session },
+      );
 
       result = {
         success: true,

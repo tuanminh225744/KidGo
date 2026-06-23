@@ -18,8 +18,8 @@ const DriverSchema = new Schema(
     currentLocation: { type: PointSchema },
     certificationLevel: { type: Number, min: 0, max: 5, default: 0 },
     totalTrips: { type: Number, default: 0 },
-    rating: { type: Number, min: 1, max: 5 },
     isActive: { type: Boolean, default: true },
+    vehicleId: { type: Schema.Types.ObjectId, ref: "Vehicle" },
   },
   { timestamps: { createdAt: true, updatedAt: false } },
 );

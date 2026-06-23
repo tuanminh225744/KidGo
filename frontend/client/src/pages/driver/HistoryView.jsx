@@ -36,7 +36,7 @@ export default function HistoryView() {
             price: t.paymentId?.amount ? `${t.paymentId.amount.toLocaleString()}đ` : '0đ',
             dist: t.routeId?.estimatedDistance ? `${t.routeId.estimatedDistance}km` : t.routeId?.actualDistance ? `${t.routeId.actualDistance}km` : '0.0km',
             duration: t.routeId?.estimatedDuration ? `${t.routeId.estimatedDuration} phút` : t.routeId?.actualDuration ? `${t.routeId.actualDuration} phút` : '0 phút',
-            rating: t.rating || null,
+            certificationLevel: t.driverId?.certificationLevel || t.certificationLevel || null,
             hasAlert: t.status === 'deviated',
             cancelled: t.status === 'cancelled'
           }));

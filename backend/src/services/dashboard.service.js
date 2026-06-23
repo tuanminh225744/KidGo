@@ -91,30 +91,14 @@ export const getAlertReport = async () => {
 
 /**
  * GET /api/v1/admin/reports/drivers
- * Xếp hạng tài xế theo rating + số chuyến
+ * Xếp hạng tài xế theo certificationLevel + số chuyến
  */
 export const getDriverRankingReport = async () => {
-  const rankings = await Review.aggregate([
-    {
-      $group: {
-        _id: "$driverId",
-        averageRating: { $avg: "$rating" },
-        reviewCount: { $sum: 1 },
-      },
-    },
-    {
-      $lookup: {
-        from: "drivers",
-        localField: "_id",
-        foreignField: "_id",
-        as: "driverInfo",
-      },
-    },
-    { $unwind: { path: "$driverInfo", preserveNullAndEmptyArrays: true } },
+  const rankings = await Driver.aggregate([
     {
       $lookup: {
         from: "users",
-        localField: "driverInfo.user",
+        localField: "user",
         foreignField: "_id",
         as: "userInfo",
       },
@@ -123,16 +107,14 @@ export const getDriverRankingReport = async () => {
     {
       $project: {
         driverId: "$_id",
-        averageRating: { $round: ["$averageRating", 2] },
-        reviewCount: 1,
-        totalTrips: "$driverInfo.totalTrips",
-        certificationLevel: "$driverInfo.certificationLevel",
+        certificationLevel: { $ifNull: ["$certificationLevel", 0] },
+        totalTrips: { $ifNull: ["$totalTrips", 0] },
         driverName: "$userInfo.fullName",
-        licenseNumber: "$driverInfo.licenseNumber",
-        status: "$driverInfo.status",
+        licenseNumber: "$licenseNumber",
+        status: "$status",
       },
     },
-    { $sort: { averageRating: -1, reviewCount: -1 } },
+    { $sort: { certificationLevel: -1, totalTrips: -1 } },
   ]);
 
   return { success: true, message: "Driver rankings fetched", data: rankings };

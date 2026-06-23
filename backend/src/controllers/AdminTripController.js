@@ -22,7 +22,7 @@ export const getAllTrips = async (req, res, next) => {
         .skip(skip)
         .limit(+limit)
         .populate("routeId")
-        .populate("driverId", "user licenseNumber rating")
+        .populate("driverId", "user licenseNumber certificationLevel")
         .populate("parentId", "fullName email phone")
         .populate("kidId", "fullName")
         .populate("vehicleId", "licensePlate model color"),
@@ -78,7 +78,7 @@ export const getTripDetailAdmin = async (req, res, next) => {
     const { tripId } = req.params;
     const trip = await Trip.findById(tripId)
       .populate("routeId")
-      .populate("driverId", "user licenseNumber rating currentLocation")
+      .populate("driverId", "user licenseNumber certificationLevel currentLocation")
       .populate("parentId", "fullName email phone")
       .populate("kidId", "fullName avatar")
       .populate("vehicleId", "licensePlate model color")

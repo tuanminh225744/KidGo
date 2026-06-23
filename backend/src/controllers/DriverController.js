@@ -3,6 +3,7 @@ import * as tripService from "../services/trip.service.js";
 import * as tripScheduleService from "../services/tripSchedule.service.js";
 import * as reviewService from "../services/review.service.js";
 import Vehicle from "../models/core/vehicle.model.js";
+import Driver from "../models/core/driver.model.js";
 import {
   AppError,
   AuthorizationError,
@@ -198,13 +199,13 @@ export const getDriverMeTripsStats = async (req, res, next) => {
 export const getDriverEarningsStats = async (req, res, next) => {
   try {
     const { driverId } = req.params;
-    
+
     // Nếu là driver thì chỉ được xem của chính mình
     if (req.user.role === 'driver') {
-       const userRes = await driverService.getDriverByUserId(req.user.id);
-       if (userRes.data._id.toString() !== driverId) {
-          throw new AuthorizationError("Bạn không có quyền xem thống kê của tài xế khác.");
-       }
+      const userRes = await driverService.getDriverByUserId(req.user.id);
+      if (userRes.data._id.toString() !== driverId) {
+        throw new AuthorizationError("Bạn không có quyền xem thống kê của tài xế khác.");
+      }
     }
 
     const { date, month, period } = req.query;
@@ -222,12 +223,12 @@ export const getDriverEarningsStats = async (req, res, next) => {
 export const getDriverTripsStats = async (req, res, next) => {
   try {
     const { driverId } = req.params;
-    
+
     if (req.user.role === 'driver') {
-       const userRes = await driverService.getDriverByUserId(req.user.id);
-       if (userRes.data._id.toString() !== driverId) {
-          throw new AuthorizationError("Bạn không có quyền xem thống kê của tài xế khác.");
-       }
+      const userRes = await driverService.getDriverByUserId(req.user.id);
+      if (userRes.data._id.toString() !== driverId) {
+        throw new AuthorizationError("Bạn không có quyền xem thống kê của tài xế khác.");
+      }
     }
 
     const { date, month, period } = req.query;
@@ -260,11 +261,11 @@ export const getDriverReviews = async (req, res, next) => {
 export const addVehicle = async (req, res, next) => {
   try {
     const user = await driverService.getDriverByUserId(req.user.id);
+    const driverDoc = user.data;
     const { licensePlate, brand, model, color, seatCount, inspectionExpiry } =
       req.body;
 
     const vehicle = new Vehicle({
-      driverId: user._id,
       licensePlate,
       brand,
       model,
@@ -274,6 +275,10 @@ export const addVehicle = async (req, res, next) => {
     });
 
     await vehicle.save();
+
+    driverDoc.vehicleId = vehicle._id;
+    await driverDoc.save();
+
     return success(res, vehicle, "Thêm xe thành công.", 201);
   } catch (error) {
     next(error);
@@ -287,9 +292,56 @@ export const addVehicle = async (req, res, next) => {
 export const getDriverVehicles = async (req, res, next) => {
   try {
     const userRes = await driverService.getDriverByUserId(req.user.id);
-    const user = userRes.data;
-    const vehicles = await Vehicle.find({ driverId: user._id });
+    const driverDoc = await Driver.findById(userRes.data._id).populate('vehicleId');
+    const vehicles = driverDoc.vehicleId ? [driverDoc.vehicleId] : [];
     return success(res, vehicles, "Driver vehicles fetched", 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * POST /api/v1/drivers/me/vehicles/:vehicleId/photo
+ * Upload ảnh cho xe
+ */
+export const uploadVehiclePhotoController = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, message: "Không tìm thấy file ảnh" });
+    }
+
+    const { vehicleId } = req.params;
+    const vehicle = await Vehicle.findById(vehicleId);
+
+    if (!vehicle) {
+      return res.status(404).json({ success: false, message: "Xe không tồn tại" });
+    }
+
+    // URL file tĩnh
+    const photoUrl = `/uploads/vehicles/${req.file.filename}`;
+    vehicle.photo = photoUrl;
+    await vehicle.save();
+
+    return success(res, { photo: photoUrl }, "Upload ảnh xe thành công", 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * GET /api/v1/drivers/:driverId/vehicle
+ * Lấy thông tin xe của tài xế dựa vào driverId
+ */
+export const getDriverVehicleByDriverId = async (req, res, next) => {
+  try {
+    const { driverId } = req.params;
+    const driver = await Driver.findById(driverId).populate("vehicleId");
+
+    if (!driver) {
+      return res.status(404).json({ success: false, message: "Tài xế không tồn tại" });
+    }
+
+    return success(res, driver.vehicleId || null, "Driver vehicle fetched", 200);
   } catch (error) {
     next(error);
   }
