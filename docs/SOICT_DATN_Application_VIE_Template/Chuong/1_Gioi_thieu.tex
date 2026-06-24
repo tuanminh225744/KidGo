@@ -1,0 +1,56 @@
+\documentclass[../DoAn.tex]{subfiles}
+\begin{document}
+
+Lưu ý: \textbf{Trước khi viết ĐATN, sinh viên cần đọc kỹ hướng dẫn và quy định chi tiết} về cách viết ĐATN trong Phụ lục A. Sinh viên tuân theo mẫu tài liệu này để viết báo cáo đồ án tốt nghiệp, vì tài liệu này đã được căn chỉnh, chỉnh sửa theo đúng chuẩn báo cáo kỹ thuật đồ án tốt nghiệp (ISO 7144:1986). Sinh viên viết trực tiếp vào file này, chỉ chỉnh sửa nội dung, và không viết trên file mới.
+
+\textbf{Khi đóng quyển ĐATN}, sinh viên cần lưu ý tuân thủ hướng dẫn ở phụ lục A.9
+
+\textbf{SV cần đặc biệt lưu ý cách hành văn}. Mỗi đoạn văn không được quá dài và cần có ý tứ rõ ràng, bao gồm duy nhất một ý chính và các ý phân tích bổ trợ để làm rõ hơn ý chính. Các câu văn trong đoạn phải đầy đủ chủ ngữ vị ngữ, cùng hướng đến chủ đề chung. Câu sau phải liên kết với câu trước, đoạn sau liên kết với đoạn trước. Trong văn phong khoa học, sinh viên không được dùng từ trong văn nói, không dùng các từ phóng đại, thái quá, các từ thiếu khách quan, thiên về cảm xúc, về quan điểm cá nhân như “tuyệt vời”, “cực hay”, “cực kỳ hữu ích”, v.v. Các câu văn cần được tối ưu hóa, đảm bảo rất khó để thể thêm hoặc bớt đi được dù chỉ một từ. Cách diễn đạt cần ngắn gọn, súc tích, không dài dòng.
+
+Mẫu ĐATN này được thiết kế phù hợp nhất với đa số các đề tài xây dựng phần mềm ứng dụng. Với các dạng đề tài khác (giải pháp, nghiên cứu, phần mềm đặc thù, v.v.), sinh viên dựa trên cấu trúc và hướng dẫn của báo cáo này để đề xuất và trao đổi với giáo viên hướng dẫn để thiết kế khung báo cáo đồ án cho phù hợp. Sinh viên lưu ý \textbf{trong mọi trường hợp, SV luôn phải sử dụng định dạng báo cáo này, và phải đọc kỹ toàn bộ các hướng dẫn từ đầu tới cuối.} Các hướng dẫn không chỉ áp dụng riêng cho đề tài ứng dụng, mà còn phù hợp với các dạng đề tài khác. Ngoài ra, trong mẫu ĐATN này đã được tích hợp một số hướng dẫn dành riêng cho đề tài nghiên cứu.
+
+Chương 1 có độ dài từ 3 đến 6 trang với các nội dung sau đây
+
+\section{Đặt vấn đề}
+\label{section:1.1}
+Hiện nay, sự phát triển mạnh mẽ của các dịch vụ xe công nghệ và taxi đã mang lại nhiều tiện ích trong việc di chuyển hàng ngày. Tuy nhiên, đối với đối tượng là trẻ em, việc sử dụng các dịch vụ này khi không có người lớn đi kèm lại đang tiềm ẩn rất nhiều rủi ro. Thực tế tại Việt Nam cho thấy, nhiều phụ huynh bận rộn có nhu cầu nhờ tài xế đưa đón con cái đi học, đi chơi. Mặc dù vậy, việc giao phó sự an toàn của trẻ cho một dịch vụ vốn được thiết kế cho người trưởng thành lại gây ra những lo ngại sâu sắc về vấn đề an ninh, từ nguy cơ lên nhầm xe, thất lạc, cho đến những tình huống nguy hiểm phát sinh trong quá trình di chuyển.
+
+Sự thiếu vắng một cơ chế quản lý chuyên biệt và các quy trình bảo vệ dành riêng cho trẻ em đã dẫn đến một bài toán cấp thiết: Cần phải có một hệ thống đặt xe đề cao tuyệt đối yếu tố an toàn của trẻ em. Việc giải quyết bài toán này không chỉ mang ý nghĩa to lớn về mặt an sinh xã hội, giúp bảo vệ an toàn tối đa cho đối tượng yếu thế, mà còn mang lại lợi ích thiết thực cho các bậc phụ huynh, giúp họ giải tỏa áp lực và hoàn toàn an tâm khi không thể trực tiếp đưa đón con em mình.
+
+\section{Mục tiêu và phạm vi đề tài}
+\label{section:1.2}
+Trên thị trường hiện nay, các nền tảng gọi xe công nghệ lớn như Grab, Be, hay Xanh SM đang thống trị thị phần. Tuy nhiên, các ứng dụng này chủ yếu tập trung vào việc xác thực qua số điện thoại của người đặt xe, ưu tiên sự nhanh chóng và đơn giản. Chúng chưa có quy trình chặt chẽ để xác minh người trực tiếp lên xe, đồng thời thiếu các cơ chế bàn giao an toàn và giám sát chủ động. Các giải pháp thay thế như tính năng chia sẻ hành trình, lưu lịch sử chuyến đi, hay dịch vụ xe đưa đón học sinh riêng biệt lại hoạt động khá rời rạc, chưa được chuẩn hóa và thiếu tính đồng bộ trên một nền tảng rộng rãi.
+
+Từ những hạn chế trên, đồ án hướng tới mục tiêu xây dựng KidGo - một hệ thống ứng dụng web đặt xe chuyên biệt dành cho trẻ em. Hệ thống sẽ khắc phục triệt để các lỗ hổng về quản lý giám sát bằng cách cung cấp các chức năng chính bao gồm: chức năng đặt xe, chức năng xác nhận đa lớp khi trẻ em lên và xuống xe, chức năng theo dõi toàn bộ hành trình theo thời gian thực, và chức năng tự động gửi các cảnh báo an toàn đến phụ huynh trong chuyến xe. Phạm vi của đề tài tập trung vào việc đảm bảo một môi trường vận chuyển an toàn khép kín cho nhóm hành khách trẻ em.
+
+\section{Định hướng giải pháp}
+\label{section:1.3}
+Để thực hiện các mục tiêu đã đề ra, hệ thống web KidGo được định hướng phát triển dựa trên hệ sinh thái web hiện đại. Cụ thể, phía giao diện người dùng (Frontend) sử dụng React Vite, kết hợp với nền tảng NodeJS ở phía máy chủ (Backend), cơ sở dữ liệu MongoDB và Redis nhằm tối ưu hóa hiệu năng hệ thống. Đặc biệt, để giải quyết bài toán an toàn, hệ thống áp dụng các kỹ thuật xác thực đa dạng (câu hỏi bảo mật, hình ảnh đón trả, mã OTP) và tích hợp API của OpenStreetMap cùng hệ thống quét hành trình tự động (Trip Monitor) để theo dõi thời gian thực. Công nghệ Socket.IO được ứng dụng để thiết lập kênh giao tiếp và truyền tải cảnh báo ngay lập tức.
+
+Dựa trên định hướng công nghệ này, giải pháp được triển khai là một hệ thống khép kín từ lúc phụ huynh đặt xe, tài xế xác minh danh tính trẻ khi lên xe, cho đến quá trình giám sát liên tục suốt dọc đường. Bất kỳ sự cố nào được hệ thống quét Trip Monitor phát hiện đều lập tức kích hoạt thông báo qua Web Socket tới ứng dụng của phụ huynh và tài xế.
+
+Đóng góp chính của dự án là xây dựng thành công một hệ thống web đặt xe tập trung hoàn toàn vào an toàn cho trẻ em. Kết quả đạt được là một quy trình xác thực và giám sát hành trình hoàn chỉnh, không chỉ cung cấp chức năng gọi xe hiệu quả mà còn mang lại mức độ kiểm soát cao nhất, giúp cha mẹ an tâm tuyệt đối khi trẻ di chuyển một mình.
+
+\section{Bố cục đồ án}
+\label{section:1.4}
+Phần còn lại của báo cáo đồ án tốt nghiệp này được tổ chức như sau.
+
+Chương 2 trình bày về v.v.
+
+Trong Chương 3, em/tôi giới thiệu về v.v.
+
+\textbf{Chú ý:} Sinh viên cần viết mô tả thành đoạn văn đầy đủ về nội dung chương. Tuyệt đối không viết ý hay gạch đầu dòng. Chương 1 không cần mô tả trong phần này.
+
+Ví dụ tham khảo mô tả chương trong phần bố cục đồ án tốt nghiệp: Chương *** trình bày đóng góp chính của đồ án, đó là một nền tảng ABC cho phép khai phá và tích hợp nhiều nguồn dữ liệu, trong đó mỗi nguồn dữ liệu lại có định dạng đặc thù riêng. Nền tảng ABC được phát triển dựa trên khái niệm DEF, là các module ngữ nghĩa trợ giúp người dùng tìm kiếm, tích hợp và hiển thị trực quan dữ liệu theo mô hình cộng tác và mô hình phân tán.
+
+\textbf{Chú ý:} Trong phần nội dung chính, mỗi chương của đồ án nên có phần Tổng quan và Kết chương. Hai phần này đều có định dạng văn bản “Normal”, sinh viên không cần tạo định dạng riêng, ví dụ như không in đậm/in nghiêng, không đóng khung, v.v.
+
+Trong phần Tổng quan của chương N, sinh viên nên có sự liên kết với chương N-1 rồi trình bày sơ qua lý do có mặt của chương N và sự cần thiết của chương này trong đồ án. Sau đó giới thiệu những vấn đề sẽ trình bày trong chương này là gì, trong các đề mục lớn nào.
+
+Ví dụ về phần Tổng quan: Chương 3 đã thảo luận về nguồn gốc ra đời, cơ sở lý thuyết và các nhiệm vụ chính của bài toán tích hợp dữ liệu. Chương 4 này sẽ trình bày chi tiết các công cụ tích hợp dữ liệu theo hướng tiếp cận “mashup”. Với mục đích và phạm vi của đề tài, sáu nhóm công cụ tích hợp dữ liệu chính được trình bày bao gồm: (i) nhóm công cụ ABC trong phần 4.1, (ii) nhóm công cụ DEF trong phần 4.2, nhóm công cụ GHK trong phần 4.3, v.v.
+
+Trong phần Kết chương, sinh viên đưa ra một số kết luận quan trọng của chương. Những vấn đề mở ra trong Tổng quan cần được tóm tắt lại nội dung và cách giải quyết/thực hiện như thế nào. Sinh viên lưu ý không viết Kết chương giống hệt Tổng quan. Sau khi đọc phần Kết chương, người đọc sẽ nắm được sơ bộ nội dung và giải pháp cho các vấn đề đã trình bày trong chương. Trong Kết chương, Sinh viên nên có thêm câu liên kết tới chương tiếp theo.
+
+Ví dụ về phần Kết chương: Chương này đã phân tích chi tiết sáu nhóm công cụ tích hợp dữ liệu. Nhóm công cụ ABC và DEF thích hợp với những bài toán tích hợp dữ liệu phạm vi nhỏ. Trong khi đó, nhóm công cụ GHK lại chứng tỏ thế mạnh của mình với những bài toán cần độ chính xác cao, v.v. Từ kết quả nghiên cứu và phân tích về sáu nhóm công cụ tích hợp dữ liệu này, tôi đã thực hiện phát triển phần mềm tự động bóc tách và tích hợp dữ liệu sử dụng nhóm công cụ GHK. Phần này được trình bày trong chương tiếp theo – Chương 5.
+
+\end{document}
