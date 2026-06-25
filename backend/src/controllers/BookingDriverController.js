@@ -6,6 +6,32 @@ import { getDriverByUserId } from "../services/driver.service.js";
 import { success, error } from "../utils/response.js";
 
 /**
+ * GET /api/v1/drivers/me/booking-requests/:bookingId
+ * Chi tiết booking request
+ */
+export const getBookingRequestDetail = async (req, res, next) => {
+  try {
+    const driverRes = await getDriverByUserId(req.user.id);
+    const driver = driverRes?.data;
+    if (!driver) throw new AppError("Không tìm thấy tài xế.", 404);
+
+    const booking = await Booking.findById(req.params.bookingId)
+      .populate("kidId", "fullName avatar")
+      .populate(
+        "routeId",
+        "estimatedPickupAddress estimatedDropoffAddress estimatedDistance estimatedDuration actualPickupAddress actualDropoffAddress actualDistance actualDuration",
+      )
+      .populate("parentId", "fullName phone");
+
+    if (!booking) throw new AppError("Không tìm thấy thông tin chuyến đi.", 404);
+
+    return success(res, booking, "Booking request fetched", 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
  * GET /api/v1/drivers/me/booking-requests
  * Danh sách booking đang mời
  */

@@ -22,6 +22,7 @@ import {
   getBookingRequests,
   acceptBooking,
   rejectBooking,
+  getBookingRequestDetail,
 } from "../controllers/BookingDriverController.js";
 import {
   authenticateToken,
@@ -172,6 +173,18 @@ router.patch(
  * Danh sách booking đang mời
  */
 router.get("/me/booking-requests", authorize("driver"), getBookingRequests);
+
+/**
+ * GET /api/v1/drivers/me/booking-requests/:bookingId
+ * Lấy chi tiết một booking đang mời
+ */
+router.get(
+  "/me/booking-requests/:bookingId",
+  authorize("driver"),
+  validateBookingIdParam,
+  validate,
+  getBookingRequestDetail,
+);
 
 /**
  * POST /api/v1/drivers/me/booking-requests/:bookingId/accept

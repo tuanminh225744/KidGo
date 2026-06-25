@@ -153,11 +153,15 @@ const sendToNextInQueue = async (bookingId) => {
   queue.currentIndex++;
 
   const io = getIo();
+  const BookingModel = (await import("../models/operational/booking.model.js")).default;
+  const bookingData = await BookingModel.findById(bookingId).populate("kidId routeId").lean();
+
   io.of("/driver")
     .to(driverId)
     .emit("new_booking_available", {
       message: `Có 1 cuốc đón vé trong bán kính ${queue.sweepRadius}km`,
       bookingId: bookingId,
+      booking: bookingData,
     });
   console.log(`[Match Cycle] Booking ${bookingId} ping tài xế ${driverId}. Chờ 15s.`);
 

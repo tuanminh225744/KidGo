@@ -41,7 +41,7 @@ export default function BottomNav() {
   if (hideOnScreens.includes(currentView)) return null;
 
   return (
-    <nav className="bg-white border-t border-gray-100 px-6 py-3 pb-8 flex justify-between items-center fixed bottom-0 left-0 right-0 max-w-md mx-auto z-20">
+    <nav className="bg-white border-t border-gray-100 px-6 py-3 pb-8 flex justify-between items-center fixed bottom-0 left-0 right-0  mx-auto z-20 max-w-[430px]">
       {items.map((item) => {
         const isActive =
           currentView === item.id ||

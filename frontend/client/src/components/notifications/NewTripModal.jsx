@@ -1,7 +1,7 @@
 import { motion } from "motion/react";
 import { Calendar, GraduationCap } from "lucide-react";
-import { acceptBooking, rejectBooking } from "../../services/driver.service";
-import { useState } from "react";
+import { acceptBooking, rejectBooking, getBookingRequestDetail } from "../../services/driver.service";
+import { useState, useEffect } from "react";
 import { useTripStore } from "../../store/useTripStore";
 import { useBookingStoreDriver } from "../../store/useBookingStoreDriver";
 import { useRouteStore } from "../../store/useRouteStore";
@@ -12,19 +12,48 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
   const navigate = useNavigate();
   const data = tripRequest || {};
   const bookingId = data._id || data.bookingId;
+  const [bookingData, setBookingData] = useState(null);
+
+  useEffect(() => {
+    if (bookingId) {
+      getBookingRequestDetail(bookingId)
+        .then((res) => {
+          if (res.success && res.data) {
+            setBookingData(res.data);
+          }
+        })
+        .catch((err) => console.error("Lỗi khi tải thông tin chuyến đi:", err));
+    }
+  }, [bookingId]);
+
+  const mergedData = bookingData || data;
+
   const title =
-    data.name || data.kidName || data.kidId?.fullName || "Khách mới";
-  const subtitle = data.message || "Bạn có một chuyến mới đang chờ phản hồi.";
+    mergedData.name || mergedData.kidName || mergedData.kidId?.fullName || "Khách mới";
+  const subtitle = mergedData.message || "Bạn có một chuyến mới đang chờ phản hồi.";
   const pickupText =
-    data.pickupLocation?.address ||
-    data.routeId?.estimatedPickupAddress ||
-    data.routeId?.actualPickupAddress ||
+    mergedData.pickupLocation?.address ||
+    mergedData.routeId?.estimatedPickupAddress ||
+    mergedData.routeId?.actualPickupAddress ||
     "Điểm đón sẽ được cập nhật";
   const dropoffText =
-    data.dropoffLocation?.address ||
-    data.routeId?.estimatedDropoffAddress ||
-    data.routeId?.actualDropoffAddress ||
+    mergedData.dropoffLocation?.address ||
+    mergedData.routeId?.estimatedDropoffAddress ||
+    mergedData.routeId?.actualDropoffAddress ||
     "Điểm đến sẽ được cập nhật";
+
+  const [timeLeft, setTimeLeft] = useState(13);
+
+  useEffect(() => {
+    if (timeLeft <= 0) {
+      handleSkip();
+      return;
+    }
+    const timer = setInterval(() => {
+      setTimeLeft((prev) => prev - 1);
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [timeLeft]);
 
   const handleAccept = async () => {
     if (!bookingId) {
@@ -85,7 +114,7 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
             Chuyến mới!
           </h2>
           <div className="w-10 h-10 rounded-full border-2 border-primary-light flex items-center justify-center text-primary font-bold">
-            13
+            {timeLeft}
           </div>
         </div>
 
@@ -93,9 +122,9 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
           <div className="flex justify-between items-start mb-6">
             <div className="flex items-center gap-3">
               <div className="w-14 h-14 rounded-full bg-white border-2 border-white shadow-sm flex items-center justify-center overflow-hidden text-primary text-xs font-black">
-                {data.avatar || data.kidId?.avatar ? (
+                {mergedData.avatar || mergedData.kidId?.avatar ? (
                   <img
-                    src={data.avatar || data.kidId?.avatar}
+                    src={mergedData.avatar || mergedData.kidId?.avatar}
                     alt={title}
                     className="w-full h-full object-cover"
                   />
@@ -108,9 +137,9 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
                 <div className="text-xs text-gray-500">{subtitle}</div>
               </div>
             </div>
-            <div className="bg-green-100 text-green-700 text-[10px] font-black px-3 py-1.5 rounded-full border border-green-200">
+            {/* <div className="bg-green-100 text-green-700 text-[10px] font-black px-3 py-1.5 rounded-full border border-green-200">
               Gia đình quen
-            </div>
+            </div> */}
           </div>
 
           <div className="space-y-4 relative mb-6">
@@ -123,8 +152,8 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
                   {pickupText}
                 </div>
                 <div className="font-bold text-sm">
-                  {data.distFromDriver
-                    ? `Cách bạn ${data.distFromDriver}`
+                  {mergedData.distFromDriver
+                    ? `Cách bạn ${mergedData.distFromDriver}`
                     : "Có khách mới đang tìm tài xế"}
                 </div>
               </div>
@@ -147,8 +176,8 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
           <div className="flex items-center gap-2 text-gray-600 text-xs font-semibold mb-4">
             <Calendar size={14} className="text-gray-400" />
             <span>
-              {data.plannedStartTime
-                ? new Date(data.plannedStartTime).toLocaleString()
+              {mergedData.scheduledTime || mergedData.plannedStartTime
+                ? new Date(mergedData.scheduledTime || mergedData.plannedStartTime).toLocaleString()
                 : "Chờ tài xế phản hồi"}
             </span>
           </div>
@@ -156,16 +185,16 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
           <div className="flex items-center justify-between">
             <div className="flex gap-2">
               <div className="bg-blue-50 text-blue-700 text-[10px] font-bold px-2 py-1.5 rounded-lg border border-blue-100">
-                ~{data.estTime || "N/A"}
+                ~{mergedData.estTime || mergedData.routeId?.estimatedDuration || "N/A"}
               </div>
               <div className="bg-gray-100 text-gray-700 text-[10px] font-bold px-2 py-1.5 rounded-lg border border-gray-200">
-                {data.routeId?.estimatedDistance || data.routeId?.actualDistance
-                  ? `${data.routeId?.estimatedDistance || data.routeId?.actualDistance}km`
+                {mergedData.routeId?.estimatedDistance || mergedData.routeId?.actualDistance
+                  ? `${mergedData.routeId?.estimatedDistance || mergedData.routeId?.actualDistance}km`
                   : "N/A"}
               </div>
             </div>
             <div className="text-2xl font-black text-primary leading-none">
-              {data.fare ? `${data.fare.toLocaleString()}đ` : "Mới"}
+              {mergedData.fare ? `${mergedData.fare.toLocaleString()}đ` : "Mới"}
             </div>
           </div>
         </div>

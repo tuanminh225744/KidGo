@@ -98,6 +98,7 @@ export default function DriverSocketManager() {
     const tripRequest = {
       _id: unreadBookingEvent.payload.bookingId,
       message: unreadBookingEvent.payload.message,
+      ...(unreadBookingEvent.payload.booking || {}),
     };
 
     modalUi = (

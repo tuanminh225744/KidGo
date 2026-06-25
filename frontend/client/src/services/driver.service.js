@@ -44,6 +44,10 @@ export const getBookingRequests = async () => {
   return api.get("/drivers/me/booking-requests");
 };
 
+export const getBookingRequestDetail = async (bookingId) => {
+  return api.get(`/drivers/me/booking-requests/${bookingId}`);
+};
+
 export const acceptBooking = async (bookingId) => {
   return api.post(`/drivers/me/booking-requests/${bookingId}/accept`);
 };
