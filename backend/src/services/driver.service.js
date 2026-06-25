@@ -1,5 +1,6 @@
 import Driver from "../models/core/driver.model.js";
 import User from "../models/core/user.model.js";
+import Trip from "../models/operational/trip.model.js";
 import redisClient from "../config/redisClient.js";
 import * as routeService from "./route.service.js";
 
@@ -329,12 +330,16 @@ export const getDriverByUserId = async (userId) => {
  */
 export const listDriversAdmin = async ({
   status,
+  isOnline,
+  rideStatus,
   search,
   page = 1,
   limit = 20,
 } = {}) => {
   const query = {};
   if (status) query.status = status;
+  if (isOnline !== undefined && isOnline !== "") query.isOnline = String(isOnline) === "true";
+  if (rideStatus) query.rideStatus = rideStatus;
 
   const skip = (page - 1) * limit;
 
@@ -391,8 +396,20 @@ export const listDriversAdmin = async ({
 export const getDriverDetailAdmin = async (driverId) => {
   const driver = await Driver.findById(driverId)
     .populate("user", "-password -deviceTokens")
-    .populate("vehicles");
+    .populate("vehicles")
+    .lean();
   if (!driver) throw new Error("Tài xế không tồn tại.");
+
+  // Fetch active trip if driver is currently on a trip or scheduled
+  const activeTrip = await Trip.findOne({
+    driverId,
+    status: { $in: ["scheduled", "picking_up", "in_progress"] },
+  }).sort({ createdAt: -1 });
+  
+  if (activeTrip) {
+    driver.activeTripId = activeTrip._id;
+  }
+
   return { success: true, message: "Driver detail fetched", data: driver };
 };
 
@@ -435,6 +452,21 @@ export const suspendDriver = async (driverId) => {
   // Đồng bộ khóa user
   await User.findByIdAndUpdate(driver.user, { isActive: false });
   return { success: true, message: "Driver suspended", data: driver };
+};
+
+/**
+ * Mở khóa tài xế
+ */
+export const reactivateDriver = async (driverId) => {
+  const driver = await Driver.findByIdAndUpdate(
+    driverId,
+    { status: "active" },
+    { new: true },
+  );
+  if (!driver) throw new Error("Tài xế không tồn tại.");
+  // Đồng bộ mở khóa user
+  await User.findByIdAndUpdate(driver.user, { isActive: true });
+  return { success: true, message: "Driver reactivated", data: driver };
 };
 
 /**

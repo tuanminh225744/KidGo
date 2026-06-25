@@ -63,7 +63,7 @@ axiosInstance.interceptors.response.use(
         sessionStorage.removeItem("accessToken");
         sessionStorage.removeItem("refreshToken");
 
-        window.location.href = "/client/login";
+        window.location.href = "/driver/login";
 
         return Promise.reject(refreshError);
       }

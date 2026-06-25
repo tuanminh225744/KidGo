@@ -4,6 +4,7 @@ import {
   approveDriver,
   rejectDriver,
   suspendDriver,
+  reactivateDriver,
   updateCertification,
   getLiveDriverLocation,
 } from "../services/driver.service.js";
@@ -16,9 +17,11 @@ import { success, error } from "../utils/response.js";
  */
 export const listDrivers = async (req, res, next) => {
   try {
-    const { status, search, page, limit } = req.query;
+    const { status, isOnline, rideStatus, search, page, limit } = req.query;
     const result = await listDriversAdmin({
       status,
+      isOnline,
+      rideStatus,
       search,
       page: +page || 1,
       limit: +limit || 20,
@@ -97,6 +100,26 @@ export const suspendDriverHandler = async (req, res, next) => {
       res,
       result.data,
       result.message || "Tài xế đã bị tạm khóa.",
+      200,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+/**
+ * PATCH /api/v1/admin/drivers/:driverId/reactivate
+ * Mở khóa tài xế
+ * Role: admin
+ */
+export const reactivateDriverHandler = async (req, res, next) => {
+  try {
+    const { driverId } = req.params;
+    const result = await reactivateDriver(driverId);
+    return success(
+      res,
+      result.data,
+      result.message || "Tài xế đã được mở khóa.",
       200,
     );
   } catch (error) {

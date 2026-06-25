@@ -1,5 +1,6 @@
 import User from "../models/core/user.model.js";
 import Driver from "../models/core/driver.model.js";
+import Kid from "../models/core/kid.model.js";
 
 /**
  * Get user by ID including their role-specific details
@@ -133,9 +134,13 @@ export const listParents = async ({
  * Chi tiết một phụ huynh theo userId
  */
 export const getParentById = async (userId) => {
-  const user = await User.findById(userId).select("-password -deviceTokens");
+  const user = await User.findById(userId).select("-password -deviceTokens").lean();
   if (!user || user.role !== "parent")
     throw new Error("Phụ huynh không tồn tại.");
+
+  const kids = await Kid.find({ parentId: userId });
+  user.kids = kids;
+
   return { success: true, message: "Parent fetched", data: user };
 };
 

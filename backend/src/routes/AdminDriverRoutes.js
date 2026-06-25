@@ -5,6 +5,7 @@ import {
   approveDriverHandler,
   rejectDriverHandler,
   suspendDriverHandler,
+  reactivateDriverHandler,
   updateCertificationHandler,
   getDriverLiveLocation,
 } from "../controllers/AdminDriverController.js";
@@ -43,6 +44,12 @@ router.patch(
   validateDriverIdParam,
   validate,
   suspendDriverHandler,
+);
+router.patch(
+  "/:driverId/reactivate",
+  validateDriverIdParam,
+  validate,
+  reactivateDriverHandler,
 );
 router.patch(
   "/:driverId/certification",

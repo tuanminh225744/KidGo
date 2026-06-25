@@ -110,3 +110,40 @@ export const verifySecurityAnswer = async (kidId, answer) => {
   );
   return { success: true, message: "Security answer verified", data: match };
 };
+
+// ── Admin Kid Management ───────────────────────────────────────────────────────
+
+/**
+ * Lấy danh sách trẻ em (có filter + phân trang)
+ */
+export const listAllKids = async ({
+  search,
+  isActive,
+  page = 1,
+  limit = 20,
+} = {}) => {
+  const query = {};
+  if (typeof isActive === "boolean") query.isActive = isActive;
+  if (search) {
+    query.$or = [
+      { fullName: { $regex: search, $options: "i" } },
+      // Có thể thêm search theo parentId, etc.
+    ];
+  }
+
+  const skip = (page - 1) * limit;
+  const [kids, total] = await Promise.all([
+    Kid.find(query)
+      .populate("parentId", "fullName phone email avatar")
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limit),
+    Kid.countDocuments(query),
+  ]);
+
+  return {
+    success: true,
+    message: "Kids list fetched",
+    data: { page, total, totalPages: Math.ceil(total / limit), kids },
+  };
+};

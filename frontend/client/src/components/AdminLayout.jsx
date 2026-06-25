@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { Users, FileText, LogOut } from "lucide-react";
+import { Users, FileText, LogOut, Truck, UsersRound } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 
 export default function AdminLayout() {
@@ -15,13 +15,15 @@ export default function AdminLayout() {
 
   const navItems = [
     { path: "/admin/driver-approval", label: "Duyệt tài xế", icon: <Users size={20} /> },
+    { path: "/admin/drivers", label: "Quản lý Tài xế", icon: <Truck size={20} /> },
+    { path: "/admin/parents", label: "Quản lý Phụ huynh", icon: <UsersRound size={20} /> },
     { path: "/admin/report", label: "Xử lý Report", icon: <FileText size={20} /> },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col md:flex-row w-full">
+    <div className="h-screen bg-gray-50 flex flex-col md:flex-row w-full overflow-hidden">
       {/* Sidebar for Desktop */}
-      <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-gray-200 p-4 flex flex-col shrink-0">
+      <aside className="w-full md:w-64 bg-white border-b md:border-b-0 md:border-r border-gray-200 p-4 flex flex-col shrink-0 overflow-y-auto">
         <div className="flex items-center gap-3 px-2 py-4">
           <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center shadow-md">
             <span className="text-white font-extrabold text-lg tracking-tighter">

@@ -318,7 +318,7 @@ export const uploadVehiclePhotoController = async (req, res, next) => {
     }
 
     // URL file tĩnh
-    const photoUrl = `/uploads/vehicles/${req.file.filename}`;
+    const photoUrl = `http://localhost:5000/uploads/vehicles/${req.file.filename}`;
     vehicle.photo = photoUrl;
     await vehicle.save();
 

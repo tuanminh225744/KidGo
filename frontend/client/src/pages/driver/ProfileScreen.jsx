@@ -51,9 +51,10 @@ export const ProfileScreen = () => {
 
     try {
       const res = await uploadAvatar(file);
+      console.log(res)
       if (res.success && res.data?.avatar) {
         // Update user state
-        setUser({ ...user, avatar: res.data.avatar });
+        setUser({ ...user, avatar: res.data.avatarUrl });
       }
     } catch (error) {
       console.error("Lỗi khi tải ảnh đại diện lên:", error);

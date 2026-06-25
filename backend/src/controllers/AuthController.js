@@ -32,6 +32,7 @@ export const loginUser = async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const result = await authService.login(email, password);
+    console.log(result);
     if (!result.success) {
       return error(res, result.message, 401);
     }
