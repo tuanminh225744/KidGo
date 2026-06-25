@@ -11,7 +11,6 @@
   },
   "dependencies": {
     "@mapbox/polyline": "^1.2.1",
-    "@reduxjs/toolkit": "^2.11.2",
     "antd": "^6.3.3",
     "axios": "^1.13.6",
     "leaflet": "^1.9.4",
@@ -22,10 +21,8 @@
     "react-datepicker": "^9.1.0",
     "react-dom": "^19.2.4",
     "react-leaflet": "^5.0.0",
-    "react-redux": "^9.2.0",
     "react-router-dom": "^7.13.1",
     "react-spinners": "^0.17.0",
-    "redux": "^5.0.1",
     "socket.io-client": "^4.8.3",
     "tailwindcss": "^4.2.2",
     "zustand": "^5.0.13"

@@ -1,15 +1,63 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 
-Chương này có độ dài không quá 10 trang. Nếu cần trình bày dài hơn, sinh viên đưa vào phần phụ lục. Chú ý đây là kiến thức đã có sẵn; SV sau khi tìm hiểu được thì phân tích và tóm tắt lại. Sinh viên không trình bày dài dòng, chi tiết. 
+\section{Nền tảng lý thuyết}
 
-Với đồ án ứng dụng, sinh viên để tên chương là “Nền tảng lý thuyết và Công nghệ sử dụng”. Trong chương này, sinh viên giới thiệu về các công nghệ, nền tảng lý thuyết sử dụng trong đồ án. Sinh viên cũng có thể trình bày thêm nền tảng lý thuyết nào đó nếu cần dùng tới.
+\subsection{Kiến trúc RESTful API}
+\begin{itemize}
+    \item \textbf{Ứng dụng trong hệ thống:} Được sử dụng làm nền tảng giao tiếp chính giữa Frontend (ứng dụng người dùng/tài xế) và Backend. Đáp ứng yêu cầu truyền tải và đồng bộ dữ liệu nhanh chóng.
+    \item \textbf{Lý thuyết cơ bản:} REST (Representational State Transfer) là một kiểu kiến trúc phần mềm cho các hệ thống phân tán. Mọi tài nguyên được quản lý thông qua các phương thức giao thức HTTP (GET, POST, PUT, DELETE) với định dạng dữ liệu trả về phổ biến là JSON \cite{REST_Reference}.
+\end{itemize}
 
-Với từng công nghệ/nền tảng/lý thuyết được trình bày, sinh viên phải phân tích rõ công nghệ/nền tảng/lý thuyết đó dùng để để giải quyết vấn đề/yêu cầu cụ thể nào ở Chương 2. Hơn nữa, với từng vấn đề/yêu cầu, sinh viên phải liệt kê danh sách các công nghệ/hướng tiếp cận tương tự có thể dùng làm lựa chọn thay thế, rồi giải thích rõ sự lựa chọn của mình.
+\subsection{Công nghệ giao tiếp thời gian thực (WebSockets)}
+\begin{itemize}
+    \item \textbf{Ứng dụng trong hệ thống:} Giải quyết trực tiếp yêu cầu "Giám sát hành trình (Real-time tracking)" và liên lạc được nêu ở Chương 2. Cho phép truyền tọa độ GPS liên tục từ máy tài xế lên server và đẩy về máy phụ huynh ngay lập tức.
+    \item \textbf{Lý thuyết cơ bản:} WebSocket là giao thức hỗ trợ duy trì kết nối hai chiều (full-duplex) liên tục qua một TCP socket duy nhất. Khác với mô hình Request-Response của HTTP, WebSockets giảm thiểu độ trễ tối đa, rất phù hợp cho ứng dụng theo dõi GPS \cite{WebSocket_Reference}.
+\end{itemize}
 
-Lưu ý: Nội dung ĐATN phải có tính chất liên kết, liền mạch, và nhất quán. Vì vậy, các công nghệ/thuật toán trình bày trong chương này phải khớp với nội dung giới thiệu của sinh viên ở phần trước đó. 
+\section{Công nghệ phát triển phía máy chủ (Backend)}
 
-Trong chương này, để tăng tính khoa học và độ tin cậy, sinh viên nên chỉ rõ nguồn kiến thức mình thu thập được ở tài liệu nào, đồng thời đưa tài liệu đó vào trong danh sách tài liệu tham khảo rồi tạo các tham chiếu chéo (xem hướng dẫn ở phụ lục A.7).
+\subsection{Node.js và Express.js}
+\begin{itemize}
+    \item \textbf{Giải quyết yêu cầu:} Xây dựng hệ thống API hiệu năng cao, xử lý đồng thời số lượng lớn các kết nối (đáp ứng yêu cầu phi chức năng về hiệu năng, chịu tải cao ở Chương 2).
+    \item \textbf{Các lựa chọn thay thế:} Java (Spring Boot) hoặc Python (Django).
+    \item \textbf{Lý do lựa chọn:} Node.js hoạt động dựa trên cơ chế non-blocking I/O và hướng sự kiện (event-driven), vô cùng phù hợp với các ứng dụng yêu cầu I/O liên tục như ứng dụng gọi xe, đặc biệt tối ưu khi kết hợp với WebSockets \cite{Nodejs_Reference}. Express.js là framework linh hoạt, gọn nhẹ giúp thiết lập server nhanh chóng.
+\end{itemize}
 
+\subsection{Cơ sở dữ liệu MongoDB}
+\begin{itemize}
+    \item \textbf{Giải quyết yêu cầu:} Lưu trữ dữ liệu hệ thống, đáp ứng yêu cầu về khả năng mở rộng (Scalability) và tối ưu hóa việc lưu trữ, tìm kiếm theo không gian địa lý.
+    \item \textbf{Các lựa chọn thay thế:} Hệ quản trị cơ sở dữ liệu quan hệ (RDBMS) như MySQL hoặc PostgreSQL.
+    \item \textbf{Lý do lựa chọn:} MongoDB là một cơ sở dữ liệu NoSQL, lưu trữ dữ liệu dưới dạng document linh hoạt. Ứng dụng đặt xe thường có cấu trúc dữ liệu chuyến đi có thể thay đổi/mở rộng. \cite{MongoDB_Reference}.
+\end{itemize}
 
+\subsection{Socket.IO}
+\begin{itemize}
+    \item \textbf{Giải quyết yêu cầu:} Đảm bảo kết nối thời gian thực ổn định, xử lý các sự kiện phát sinh như cảnh báo di chuyển, cập nhật trạng thái chuyến đi liên tục.
+    \item \textbf{Các lựa chọn thay thế:} Native WebSockets hoặc Firebase Realtime Database.
+    \item \textbf{Lý do lựa chọn:} Mặc dù Native WebSockets nhẹ hơn, nhưng Socket.IO cung cấp sẵn các cơ chế vô cùng quan trọng cho ứng dụng: tự động kết nối lại (auto-reconnect) khi mất mạng 3G/4G, cơ chế fallback về HTTP long-polling nếu môi trường mạng chặn WebSockets, và khả năng phân chia các phòng (rooms) để dễ dàng tách các kết nối và gửi thông báo đến nhiều thiết bị của cùng một người dùng cùng lúc. \cite{SocketIO_Reference}.
+\end{itemize}
+
+\section{Công nghệ phát triển phía máy khách (Frontend)}
+
+\subsection{Thư viện React và Công cụ Vite}
+\begin{itemize}
+    \item \textbf{Giải quyết yêu cầu:} Xây dựng giao diện ứng dụng (UI/UX) thân thiện, trực quan và đáp ứng tính dễ sử dụng cho cả phụ huynh và tài xế như đã khảo sát ở Chương 2.
+    \item \textbf{Các lựa chọn thay thế:} Vue.js hoặc Angular.
+    \item \textbf{Lý do lựa chọn:} React áp dụng kiến trúc component-based giúp tái sử dụng mã nguồn hiệu quả, sở hữu hệ sinh thái rộng lớn, rất phù hợp khi muốn phát triển tính năng phức tạp. Kết hợp với Vite làm công cụ build (thay cho Create React App cũ) mang lại tốc độ khởi động cực nhanh và Hot Module Replacement (HMR) hiệu quả, tối ưu quá trình phát triển \cite{React_Reference,Vite_Reference}.
+\end{itemize}
+
+\subsection{Quản lý trạng thái (State Management) với Zustand}
+\begin{itemize}
+    \item \textbf{Giải quyết yêu cầu:} Quản lý dữ liệu tập trung ở Client (ví dụ: trạng thái đăng nhập, dữ liệu người dùng, dữ liệu chuyến xe).
+    \item \textbf{Các lựa chọn thay thế:} Redux Toolkit hoặc React Context API.
+    \item \textbf{Lý do lựa chọn:} Context API dễ gặp vấn đề về hiệu năng (re-render toàn bộ) khi state thay đổi liên tục. Redux Toolkit thì đòi hỏi thiết lập phức tạp (boilerplate code). Zustand được lựa chọn vì tính đơn giản, gọn nhẹ, cú pháp trực quan, dễ bảo trì và vẫn mang lại hiệu năng cao trong việc cập nhật state liên tục \cite{Zustand_Reference}.
+\end{itemize}
+
+\subsection{Thư viện bản đồ Leaflet}
+\begin{itemize}
+    \item \textbf{Giải quyết yêu cầu:} Cung cấp giao diện bản đồ nhúng vào ứng dụng để phụ huynh theo dõi vị trí trực tiếp của xe.
+    \item \textbf{Các lựa chọn thay thế:} Google Maps SDK.
+    \item \textbf{Lý do lựa chọn:} Google Maps SDK yêu cầu chi phí khá lớn khi ứng dụng mở rộng số lượng người dùng. Ngược lại, Leaflet là một thư viện mã nguồn mở miễn phí, rất nhẹ, thân thiện với thiết bị di động, hoạt động mượt mà và hoàn toàn đáp ứng được đầy đủ các nhu cầu hiển thị bản đồ, vẽ tuyến đường (cùng với polyline) trong hệ thống KidGo \cite{Leaflet_Reference}.
+\end{itemize}
 \end{document}

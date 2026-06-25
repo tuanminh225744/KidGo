@@ -78,7 +78,7 @@ Chức năng này mô tả quy trình làm việc của Tài xế. Khi có chuy�
 
 \subsection{Biểu đồ use case phân rã Xác thực an toàn}
 \label{subsection:2.2.6}
-Đảm bảo an toàn cho trẻ em là ưu tiên hàng đầu của hệ thống KidGo. Biểu đồ này mô tả quá trình xác thực hai chiều khi trẻ lên xe và xuống xe. Cả tài xế và trẻ em/phụ huynh đều tham gia vào quá trình này thông qua ứng dụng, có thể bằng việc quét mã QR, chụp ảnh xác thực, hoặc mã PIN một lần (OTP). Nếu việc xác thực có bất kỳ bất thường nào, hệ thống sẽ tự động gửi cảnh báo cho phụ huynh và báo cáo lên hệ thống để xử lý kịp thời.
+Đảm bảo an toàn cho trẻ em là ưu tiên hàng đầu của hệ thống KidGo. Biểu đồ này mô tả quá trình xác thực hai chiều khi trẻ lên xe và xuống xe. Cả tài xế và trẻ em/phụ huynh đều tham gia vào quá trình này thông qua việc trả lời câu hỏi bí mật, chụp ảnh xác thực, hoặc sử dụng mã PIN một lần (OTP). Nếu việc xác thực có bất kỳ bất thường nào, hệ thống sẽ tự động gửi cảnh báo cho phụ huynh và báo cáo lên hệ thống để xử lý kịp thời.
 
 \begin{figure}[H]
     \centering
@@ -160,7 +160,7 @@ Sinh viên lựa chọn từ 4 đến 7 use case quan trọng nhất của đồ
           \end{enumerate}
     \item \textbf{Luồng sự kiện phát sinh}:
           \begin{itemize}
-              \item \textit{Lỗi xác thực}: Nếu thông tin xác thực không khớp (sai mã QR, chụp ảnh nhận diện sai, OTP không đúng), hệ thống báo lỗi đỏ cảnh báo. Tài xế không thể bắt đầu/kết thúc hành trình. Tài xế phải gọi điện cho phụ huynh để xác nhận lại, hoặc có thể phải liên hệ tổng đài Admin hỗ trợ.
+              \item \textit{Lỗi xác thực}: Nếu thông tin xác thực không khớp (sai câu trả lời cho câu hỏi bí mật, chụp ảnh nhận diện sai, OTP không đúng), hệ thống báo lỗi đỏ cảnh báo. Tài xế không thể bắt đầu/kết thúc hành trình. Tài xế phải gọi điện cho phụ huynh để xác nhận lại, hoặc có thể phải liên hệ tổng đài Admin hỗ trợ.
               \item \textit{Ngoại lệ phương thức}: Có thể tài xế sẽ không phải xác thực lại toàn bộ các phương thức xác thực. Việc lựa chọn các phương thức xác thực là của phụ huynh.
           \end{itemize}
 \end{itemize}
@@ -171,24 +171,47 @@ Sinh viên lựa chọn từ 4 đến 7 use case quan trọng nhất của đồ
     \item \textbf{Tác nhân}: Phụ huynh
     \item \textbf{Mô tả ngắn}: Cho phép phụ huynh xem vị trí trực tiếp của xe chở trẻ và theo dõi trạng thái chuyến đi theo thời gian thực.
     \item \textbf{Tiền điều kiện}: Chuyến đi đang ở trạng thái "Tài xế đang đến" hoặc "Đang diễn ra".
-    \item \textbf{Hậu điều kiện}: Phụ huynh nắm bắt được vị trí chính xác của trẻ và thời gian dự kiến đến nơi.
+    \item \textbf{Hậu điều kiện}: Phụ huynh nắm bắt được vị trí chính xác của trẻ.
     \item \textbf{Luồng sự kiện chính}:
           \begin{enumerate}
               \item Phụ huynh mở ứng dụng và nhấn vào thẻ thông tin của chuyến đi đang diễn ra.
               \item Hệ thống tải giao diện bản đồ và render vị trí hiện tại của xe.
               \item Hệ thống liên tục nhận tọa độ GPS từ máy tài xế và cập nhật vị trí xe di chuyển trên bản đồ mỗi 5 giây.
-              \item Trong chuyến xe hệ thống có cơ chế tự kiểm tra an toàn cho trẻ: dừng lại bất thường, mất GPS, đi lệch tuyến, tốc độ quá cao. Nếu phát hiện các vấn đề này hệ thống sẽ gửi thông báo nhắc nhở đến máy của tài xế và máy của phụ huynh.
               \item Khi chuyến đi kết thúc, màn hình giám sát hiển thị thông báo thành công và chuyển sang màn hình đánh giá.
           \end{enumerate}
     \item \textbf{Luồng sự kiện phát sinh}:
           \begin{itemize}
-              \item \textit{Lỗi kết nối}: Nếu mất tín hiệu GPS hoặc mạng từ điện thoại tài xế quá 1 phút, hệ thống hiển thị biểu tượng "Mất kết nối vị trí" màu xám trên bản đồ phụ huynh và tự động gửi tin nhắn cảnh báo cho tài xế để kiểm tra lại mạng.
+              \item \textit{Phát hiện vấn đề}: Trong chuyến xe hệ thống có cơ chế tự kiểm tra an toàn cho trẻ: dừng lại bất thường, mất GPS, đi lệch tuyến, tốc độ quá cao. Nếu phát hiện các vấn đề này hệ thống sẽ gửi thông báo nhắc nhở đến máy của tài xế và máy của phụ huynh.
           \end{itemize}
 \end{itemize}
 
 \section{Yêu cầu phi chức năng}
 \label{section:2.4}
-Trong phần này, sinh viên đưa ra các yêu cầu khác nếu có, bao gồm các yêu cầu phi chức năng như hiệu năng, độ tin cậy, tính dễ dùng, tính dễ bảo trì, hoặc các yêu cầu về mặt kỹ thuật như về CSDL, công nghệ sử dụng, v.v.
+\begin{itemize}
+    \item \textbf{Hiệu năng (Performance)}:
+          \begin{itemize}
+              \item Hệ thống phản hồi các thao tác thông thường (như tìm kiếm chuyến xe, xem thông tin) trong thời gian dưới 2 giây.
+              \item Dữ liệu vị trí GPS trên bản đồ được cập nhật liên tục với độ trễ tối đa là 5 giây để đảm bảo tính năng theo dõi thời gian thực.
+              \item Hệ thống có khả năng xử lý đồng thời số lượng lớn các yêu cầu đặt xe và kết nối trong giờ cao điểm (như giờ đi học, giờ tan trường của học sinh).
+          \end{itemize}
+    \item \textbf{Bảo mật và An toàn dữ liệu (Security)}:
+          \begin{itemize}
+              \item Mật khẩu và các dữ liệu nhạy cảm được băm (hash) và bảo vệ nghiêm ngặt.
+              \item Áp dụng các phương thức xác thực an toàn nhiều lớp đối với tài xế.
+          \end{itemize}
+    \item \textbf{Độ tin cậy và Tính sẵn sàng (Reliability \& Availability)}:
+          \begin{itemize}
+              \item Hệ thống đảm bảo hoạt động ổn định và xuyên suốt, thời gian sẵn sàng (uptime) đạt tối thiểu 99.9\%.
+          \end{itemize}
+    \item \textbf{Khả năng mở rộng (Scalability)}:
+          \begin{itemize}
+              \item Kiến trúc hệ thống được thiết kế để dễ dàng mở rộng (scale-up hoặc scale-out) nhằm đáp ứng lượng người dùng và tài xế đăng ký tăng lên trong tương lai.
+          \end{itemize}
+    \item \textbf{Tính dễ sử dụng (Usability)}:
+          \begin{itemize}
+              \item Giao diện ứng dụng (UI/UX) trực quan, các nút chức năng rõ ràng, thân thiện với cả phụ huynh và tài xế.
+          \end{itemize}
+\end{itemize}
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

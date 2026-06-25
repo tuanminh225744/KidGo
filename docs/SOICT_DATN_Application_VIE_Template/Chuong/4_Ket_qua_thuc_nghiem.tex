@@ -3,8 +3,23 @@
 
 \section{Thiết kế kiến trúc}
 \subsection{Lựa chọn kiến trúc phần mềm}
-Mục này có độ dài từ một đến ba trang. Sinh viên cần lựa chọn kiến trúc phần mềm cho ứng dụng của mình như: kiến trúc ba lớp MVC, MVP, SOA, Microservice, v.v. rồi giải thích sơ bộ về kiến trúc đó (không giải thích chi tiết/dài dòng).
-Sử dụng kiến trúc phần mềm đã chọn ở trên, sinh viên mô tả kiến trúc cụ thể cho ứng dụng của mình. Gợi ý: sinh viên áp dụng lý thuyết chung vào hệ thống/sản phẩm của mình như thế nào, có thay đổi, bổ sung hoặc cải tiến gì không. Ví dụ, thành phần M trong kiến trúc lý thuyết MVC sẽ là những thành phần cụ thể nào (ví dụ: là interface I + class C1 + class C2, v.v.) trong kiến trúc phần mềm của sinh viên.
+Hệ thống KidGo được xây dựng dựa trên \textbf{Kiến trúc Nguyên khối phân tầng (Layered Monolithic Architecture)} kết hợp với mô hình \textbf{MVC biến thể dành cho RESTful API} (còn gọi là mô hình Controller-Service-Model).
+
+\textbf{Lý thuyết kiến trúc cơ bản:}
+Kiến trúc phân tầng (Layered Architecture) chia tách ứng dụng thành các lớp (layers) có vai trò và trách nhiệm riêng biệt. Các lớp ở tầng cao (như giao diện, điều khiển) sẽ gọi xuống các lớp ở tầng thấp hơn (như nghiệp vụ, dữ liệu). Việc áp dụng kiến trúc này giúp tăng tính module hóa, dễ dàng bảo trì và cô lập lỗi (Separation of Concerns). Đối với các hệ thống Web API, mô hình MVC truyền thống (Model-View-Controller) thường được tùy biến: thay vì Server trả về giao diện HTML (View) trực tiếp, Server sẽ trả về dữ liệu định dạng JSON, và phần "View" thực sự sẽ do các ứng dụng Client (React, Mobile App) đảm nhận.
+
+\textbf{Áp dụng vào hệ thống KidGo:}
+Trong dự án này, toàn bộ mã nguồn phía Backend được gói gọn trong một khối duy nhất (Monolithic) để dễ dàng triển khai và quản lý trong giai đoạn đầu phát triển. Hệ thống tuân thủ chặt chẽ mô hình Controller-Service-Model (CSM) với các thành phần cụ thể được ánh xạ như sau:
+
+\begin{itemize}
+    \item \textbf{Tầng View (Client-side):} Không nằm trực tiếp trên Backend. Vai trò hiển thị giao diện và tương tác với người dùng (Phụ huynh, Tài xế) được giao cho ứng dụng Frontend xây dựng bằng thư viện React. Giao diện này giao tiếp với Backend thông qua các RESTful API và WebSockets.
+    \item \textbf{Tầng Controller (Bộ điều khiển):} Tương ứng với thư mục \texttt{controllers/} trong mã nguồn. Nhiệm vụ của tầng này là tiếp nhận các HTTP Request từ tầng Route, trích xuất dữ liệu tham số đầu vào, gọi đến tầng Service để xử lý nghiệp vụ, sau đó định dạng kết quả và trả về cho Client dưới dạng HTTP Response (JSON).
+    \item \textbf{Tầng Service (Lõi nghiệp vụ):} Tương ứng với thư mục \texttt{services/}. Đây là một tầng bổ sung quan trọng, nhằm cô lập toàn bộ các quy tắc nghiệp vụ phức tạp (như tính toán chuyến đi, xác thực OTP, xử lý gọi xe). Việc tách Service giúp Controller không bị phình to logic và dễ dàng tái sử dụng mã nguồn.
+    \item \textbf{Tầng Model (Dữ liệu):} Tương ứng với thư mục \texttt{models/}. Tầng này sử dụng thư viện Mongoose (ODM) để định nghĩa cấu trúc (Schema) của các thực thể (như \texttt{User}, \texttt{Trip}, \texttt{Booking}) và trực tiếp thực hiện các thao tác truy vấn vào cơ sở dữ liệu MongoDB.
+    \item \textbf{Tầng Middleware và Sockets:} Hệ thống bổ sung thêm các tầng cắt ngang tương ứng với thư mục \texttt{middlewares/} (để xử lý xác thực token, kiểm tra quyền truy cập) và \texttt{sockets/} (để duy trì luồng kết nối định vị theo thời gian thực độc lập với luồng HTTP).
+\end{itemize}
+
+Việc áp dụng kiến trúc này giúp mã nguồn của KidGo được tổ chức vô cùng mạch lạc. Các luồng dữ liệu đi một chiều từ Route $\rightarrow$ Controller $\rightarrow$ Service $\rightarrow$ Model, không bị chồng chéo, giúp hệ thống dễ dàng bảo trì hoặc mở rộng chức năng trong tương lai.
 
 \subsection{Thiết kế tổng quan}
 Sinh viên vẽ biểu đồ gói UML (UML package diagram), nêu rõ sự phụ thuộc giữa các gói (package). SV cần vẽ các gói sao cho chúng được phân theo các tầng rõ ràng, không được sắp đặt package lộn xộn trong hình vẽ. Sinh viên chú ý các quy tắc thiết kế (Các gói không phụ thuộc lẫn nhau, gói tầng dưới không phụ thuộc gói tầng trên, không phụ thuộc bỏ qua tầng, v.v.) và cần giải thích sơ lược về mục đích/nhiệm vụ của từng package. SV tham khảo ví dụ minh họa trong Hình \ref{fig:Fig1}
@@ -19,7 +34,7 @@ Sinh viên thiết kế và lần lượt vẽ biểu đồ thiết kế cho t�
 
 Sinh viên cần vẽ rõ ràng quan hệ giữa các lớp trong biểu đồ. Các quan hệ bao gồm: phụ thuộc (dependency), kết hợp (association), kết tập (aggregation), hợp thành (composition), kế thừa (inheritance), và thực thi (implementation). Các quan hệ này đều đã được minh họa trong \ref{fig:Fig2}.
 
-Sau khi vẽ hình minh họa, sinh viên cần giải thích ngắn gọn về thiết kế của mình. 
+Sau khi vẽ hình minh họa, sinh viên cần giải thích ngắn gọn về thiết kế của mình.
 
 \begin{figure}[H]
     \centering
@@ -43,13 +58,13 @@ Phần này có độ dài từ hai đến bốn trang. Sinh viên thiết kế,
 Sinh viên liệt kê các công cụ, ngôn ngữ lập trình, API, thư viện, IDE, công cụ kiểm thử, v.v. mà mình sử dụng để phát triển ứng dụng. Mỗi công cụ phải được chỉ rõ phiên bản sử dụng. SV nên kẻ bảng mô tả tương tự như Bảng \ref{table:my_label}. Nếu có nhiều nội dung trình bày, sinh viên cần xoay ngang bảng.
 
 \begin{table}[H]
-\centering{}
+    \centering{}
     \begin{tabular}{lll}
         \hline
         \textbf{Mục đích} & \textbf{Công cụ}       & \textbf{Địa chỉ URL}    \\ \hline
         IDE lập trình     & Eclipse Oxygen a64 bit & http://www.eclipse.org/ \\ \hline
         v.v.              & v.v.                   & v.v.                    \\ \hline
-        \end{tabular}
+    \end{tabular}
     \caption{Danh sách thư viện và công cụ sử dụng}
     \label{fig:my_label}
 \end{table}
