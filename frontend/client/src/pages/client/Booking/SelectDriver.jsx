@@ -83,9 +83,9 @@ export default function SelectDriver() {
           <h2 className="text-2xl font-bold text-on-surface tracking-tight">
             Chọn tài xế
           </h2>
-          <p className="text-sm text-on-surface-variant mt-1">
+          {/* <p className="text-sm text-on-surface-variant mt-1">
             Phụ phí +10.000đ khi chọn tài xế ưu tiên
-          </p>
+          </p> */}
         </div>
 
         {/* Auto Match Card */}
@@ -96,8 +96,8 @@ export default function SelectDriver() {
               setSelectedDriverId(null);
             }}
             className={`w-full bg-surface-container-low border-2 rounded-[32px] p-6 shadow-xl relative overflow-hidden active-shadow transition-all text-left ${useAutoMatch
-                ? "border-primary ring-2 ring-primary/20 bg-primary/5"
-                : "border-primary-container"
+              ? "border-primary ring-2 ring-primary/20 bg-primary/5"
+              : "border-primary-container"
               }`}
           >
             <div className="flex items-center justify-between">
@@ -186,8 +186,8 @@ export default function SelectDriver() {
                       setUseAutoMatch(false);
                     }}
                     className={`min-w-[130px] bg-white rounded-3xl shadow-md border p-4 flex flex-col items-center gap-2.5 transition-all cursor-pointer ${isSelected
-                        ? "border-primary ring-2 ring-primary bg-primary/5 scale-105"
-                        : "border-outline-variant/10 active:scale-95"
+                      ? "border-primary ring-2 ring-primary bg-primary/5 scale-105"
+                      : "border-outline-variant/10 active:scale-95"
                       }`}
                   >
                     {/* Priority badge */}
@@ -236,8 +236,8 @@ export default function SelectDriver() {
                     {/* Chọn button */}
                     <button
                       className={`w-full py-2 rounded-xl text-[10px] font-bold transition-all ${isSelected
-                          ? "bg-primary text-white"
-                          : "bg-surface-container-high text-on-surface active:bg-outline-variant/30"
+                        ? "bg-primary text-white"
+                        : "bg-surface-container-high text-on-surface active:bg-outline-variant/30"
                         }`}
                     >
                       {isSelected ? "Đã chọn ✓" : "Chọn"}
@@ -261,7 +261,7 @@ export default function SelectDriver() {
             <p className="text-xs font-bold text-on-surface-variant">
               {useAutoMatch
                 ? "Hệ thống tự ghép tài xế"
-                : `Tài xế ưu tiên đã chọn · +10.000đ phụ phí`}
+                : `Tài xế ưu tiên đã chọn`}
             </p>
           </div>
         )}

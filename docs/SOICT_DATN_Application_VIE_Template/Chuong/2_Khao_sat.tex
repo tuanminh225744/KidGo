@@ -18,26 +18,173 @@ Phần \ref{section:2.2} này có nhiệm vụ tóm tắt các chức năng củ
 
 \subsection{Biểu đồ use case tổng quát}
 \label{subsection:2.2.1}
-Sinh viên vẽ biểu đồ use case tổng quan và giải thích các tác nhân tham gia là gì, nêu vai trò của từng tác nhân, và mô tả ngắn gọn các use case chính.
+Biểu đồ use case tổng quát của hệ thống KidGo mô tả các chức năng chính mà các tác nhân (Actor) có thể thực hiện, nhằm đáp ứng nhu cầu đưa đón trẻ em an toàn và tiện lợi. Các tác nhân tham gia vào hệ thống bao gồm: Phụ huynh (Parent), Tài xế (Driver), và Quản trị viên (Admin).
+\begin{itemize}
+    \item \textbf{Phụ huynh (Parent):} Có thể quản lý hồ sơ trẻ em, đặt chuyến đi, theo dõi chuyến đi, quản lý thanh toán, và đánh giá tài xế.
+    \item \textbf{Tài xế (Driver):} Có thể nhận và thực hiện chuyến đi, xem lịch sử chuyến đi, quản lý thu nhập, và xác thực an toàn chuyến đi.
+    \item \textbf{Quản trị viên (Admin):} Quản lý người dùng, duyệt hồ sơ tài xế, quản lý chuyến đi và giải quyết khiếu nại.
+\end{itemize}
 
-\subsection{Biểu đồ use case phân rã XYZ}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Hinhve/UseCaseTongQuat.png}
+    \caption{Biểu đồ use case tổng quát}
+    \label{fig:usecase_tongquat}
+\end{figure}
+
+\subsection{Biểu đồ use case phân rã Xác thực}
 \label{subsection:2.2.2}
-Với mỗi use case mức cao trong biểu đồ use case tổng quan, sinh viên tạo một mục riêng như mục \ref{subsection:2.2.2} và tiến hành phân rã use case đó. Lưu ý tên use case cần phân rã trong biểu đồ use case tổng quan phải khớp với tên đề mục.
+Biểu đồ này phân rã các chức năng liên quan đến quá trình xác thực và quản lý tài khoản người dùng. Phụ huynh, Tài xế và Quản trị viên đều có thể thực hiện đăng nhập và đăng xuất. Phụ huynh và Tài xế có thể đăng ký tài khoản mới và cập nhật hồ sơ cá nhân của mình. Việc xác thực đóng vai trò quan trọng trong việc định danh và bảo mật thông tin người dùng.
 
-Trong mỗi mục như vậy, sinh viên vẽ và giải thích ngắn gọn các use case phân rã.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Hinhve/UseCasePhanRaXacThuc.png}
+    \caption{Biểu đồ use case phân rã Xác thực}
+    \label{fig:usecase_xacthuc}
+\end{figure}
 
-\subsection{Quy trình nghiệp vụ}
+\subsection{Biểu đồ use case phân rã Quản lý hồ sơ trẻ em}
 \label{subsection:2.2.3}
-Nếu sản phẩm/hệ thống cần xây dựng có quy trình nghiệp vụ quan trọng/đáng chú ý, sinh viên cần mô tả và vẽ biểu đồ hoạt động minh họa quy trình nghiệp vụ đó. Sinh viên lưu ý đây không phải là luồng sự kiện của từng use case, mà là luồng hoạt động kết hợp nhiều use case để thực hiện một nghiệp vụ nào đó.
+Chức năng này dành cho Phụ huynh để quản lý thông tin của con em mình. Phụ huynh có thể thêm mới hồ sơ trẻ em, cập nhật thông tin cá nhân, cập nhật ảnh đại diện, và xóa hồ sơ trẻ em khỏi hệ thống. Những thông tin này giúp hệ thống lưu trữ dữ liệu cần thiết và hỗ trợ tài xế nhận diện đúng trẻ em trong các chuyến đi.
 
-Ví dụ, một hệ thống quản lý thư viện có quy trình nghiệp vụ mượn trả với mô tả sơ bộ như sau: Sinh viên làm thẻ mượn, sau đó sinh viên đăng ký mượn sách, thủ thư cho mượn, và cuối cùng sinh viên trả lại sách cho thư viện. Một hệ thống có thể có một vài quy trình nghiệp vụ quan trọng như vậy.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Hinhve/UseCasePhanRaQuanLyHoSoTreEm.png}
+    \caption{Biểu đồ use case phân rã Quản lý hồ sơ trẻ em}
+    \label{fig:usecase_hoso_treem}
+\end{figure}
+
+\subsection{Biểu đồ use case phân rã Đặt chuyến và lên lịch}
+\label{subsection:2.2.4}
+Đây là một trong những tính năng cốt lõi của hệ thống dành cho Phụ huynh. Phụ huynh có thể tạo mới yêu cầu đặt chuyến đi (một lần hoặc định kỳ), chọn điểm đón/trả, chỉ định trẻ em tham gia, chọn tài xế, xem dự kiến chi phí, và xác nhận đặt chuyến. Phụ huynh cũng có thể hủy hoặc thay đổi thông tin chuyến đi đã đặt trước khi chuyến đi bắt đầu, mang lại sự linh hoạt tối đa.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Hinhve/UsecasePhanRaDatChuyenLenLich.png}
+    \caption{Biểu đồ use case phân rã Đặt chuyến và lên lịch}
+    \label{fig:usecase_datchuyen}
+\end{figure}
+
+\subsection{Biểu đồ use case phân rã Nhận và thực hiện chuyến}
+\label{subsection:2.2.5}
+Chức năng này mô tả quy trình làm việc của Tài xế. Khi có chuyến đi phù hợp với lịch trình và vị trí, tài xế có thể xem chi tiết yêu cầu và quyết định chấp nhận hoặc từ chối chuyến đi. Khi thực hiện, tài xế sẽ thay đổi trạng thái chuyến đi: bắt đầu chuyến đi, di chuyển đến điểm đón, xác nhận đã đón trẻ, di chuyển đến điểm đến, xác nhận đã trả trẻ, và hoàn thành chuyến đi. Trong suốt quá trình này, hệ thống sẽ liên tục cập nhật vị trí và trạng thái chuyến đi cho phụ huynh theo dõi.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Hinhve/UseCasePhanRaNhanThucHienChuyen.png}
+    \caption{Biểu đồ use case phân rã Nhận và thực hiện chuyến}
+    \label{fig:usecase_thuchienchuyen}
+\end{figure}
+
+\subsection{Biểu đồ use case phân rã Xác thực an toàn}
+\label{subsection:2.2.6}
+Đảm bảo an toàn cho trẻ em là ưu tiên hàng đầu của hệ thống KidGo. Biểu đồ này mô tả quá trình xác thực hai chiều khi trẻ lên xe và xuống xe. Cả tài xế và trẻ em/phụ huynh đều tham gia vào quá trình này thông qua ứng dụng, có thể bằng việc quét mã QR, chụp ảnh xác thực, hoặc mã PIN một lần (OTP). Nếu việc xác thực có bất kỳ bất thường nào, hệ thống sẽ tự động gửi cảnh báo cho phụ huynh và báo cáo lên hệ thống để xử lý kịp thời.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.8\textwidth]{Hinhve/UseCasePhanRaXacThucAnToan.png}
+    \caption{Biểu đồ use case phân rã Xác thực an toàn}
+    \label{fig:usecase_xacthuc_antoan}
+\end{figure}
+
 \section{Đặc tả chức năng}
 \label{section:2.3}
 Sinh viên lựa chọn từ 4 đến 7 use case quan trọng nhất của đồ án để đặc tả chi tiết. Mỗi đặc tả bao gồm ít nhất các thông tin sau: (i) Tên use case, (ii) Luồng sự kiện (chính và phát sinh), (iii) Tiền điều kiện, và (iv) Hậu điều kiện. Sinh viên chỉ vẽ bổ sung biểu đồ hoạt động khi đặc tả use case phức tạp.
-\subsection{Đặc tả use case A}
-\hfill
-\subsection{Đặc tả use case B}
-\hfill
+\subsection{Đặc tả use case Đặt chuyến đi}
+\begin{itemize}
+    \item \textbf{Tên use case}: Đặt chuyến đi
+    \item \textbf{Tác nhân}: Phụ huynh
+    \item \textbf{Mô tả ngắn}: Phụ huynh sử dụng chức năng này để tạo một yêu cầu đưa đón mới cho trẻ em (có thể là một chuyến đi đơn lẻ hoặc định kỳ theo lịch).
+    \item \textbf{Tiền điều kiện}: Phụ huynh đã đăng nhập vào hệ thống và đã tạo ít nhất một hồ sơ trẻ em.
+    \item \textbf{Hậu điều kiện}: Một chuyến đi mới được tạo trên hệ thống. Với điều kiện là người dùng đặt chuyến ngay lập tức thì một chuyến xe sẽ được tạo và thực hiện ghép tài xế. Với điều kiện là người dùng đặt chuyến ở tương lai thì hệ thống sẽ tạo ra một lịch dự kiến cho chuyến xe đó. Khi đến lịch hệ thống sẽ tự động tạo chuyến cho người dùng.
+    \item \textbf{Luồng sự kiện chính}:
+          \begin{enumerate}
+              \item Phụ huynh chọn chức năng "Đặt chuyến đi" trên ứng dụng.
+              \item Hệ thống hiển thị giao diện nhập thông tin chuyến đi.
+              \item Phụ huynh chọn 1 trẻ trong danh sách hồ sơ trẻ để cho chuyến đi.
+              \item Phụ huynh chọn điểm đón, điểm trả của chuyến xe.
+              \item Phụ huynh chọn thời gian bắt đầu của chuyến xe (ngay bây giờ hoặc một ngày trong tương lai). Ngoài ra phụ huynh còn có thể chọn tần suất lặp lại (đặt 1 lần hoặc đặt lịch theo tháng, theo năm).
+              \item Phụ huynh còn có thể chọn cho con mình tài xế được chỉ định trong quá trình ghép xe hoặc để hệ thống tự tìm tài xế gần nhất.
+              \item Hệ thống tính toán và hiển thị lộ trình, khoảng cách, thời gian dự kiến và cước phí ước tính.
+              \item Phụ huynh xác nhận thông tin và nhấn "Đặt chuyến".
+              \item Hệ thống chuyển sang phần chức năng thanh toán. Ở đây người dùng có thể sử dụng 1 trong 2 phương pháp thanh toán là tiền mặt hoặc chuyển khoản.
+          \end{enumerate}
+    \item \textbf{Luồng sự kiện phát sinh (Ngoại lệ/Lỗi)}:
+          \begin{itemize}
+              \item \textit{Lỗi ở bước 3}: Nếu tài khoản phụ huynh chưa có hồ sơ trẻ em nào, hệ thống sẽ yêu cầu phụ huynh chuyển sang màn hình "Thêm hồ sơ trẻ em" trước khi tiếp tục.
+              \item \textit{Lỗi ở bước 5}: Nếu thời gian bắt đầu được chọn không hợp lệ (ví dụ: là một thời điểm trong quá khứ), hệ thống sẽ báo lỗi và yêu cầu chọn lại thời gian.
+              \item \textit{Lỗi ở bước 6}: Nếu tài xế được chỉ định hiện đang bận hoặc không hoạt động, hệ thống sẽ thông báo để phụ huynh chọn tài xế khác hoặc chuyển sang chế độ tự động ghép xe.
+          \end{itemize}
+\end{itemize}
+
+\subsection{Đặc tả use case Nhận và thực hiện chuyến xe}
+\begin{itemize}
+    \item \textbf{Tên use case}: Nhận và thực hiện chuyến xe
+    \item \textbf{Tác nhân}: Tài xế
+    \item \textbf{Mô tả ngắn}: Tài xế tiếp nhận yêu cầu chuyến đi từ hệ thống và tiến hành đưa đón để hoàn thành chuyến đi.
+    \item \textbf{Tiền điều kiện}: Tài xế đã đăng nhập, đang trong trạng thái "Sẵn sàng nhận cuốc" và tài khoản hợp lệ.
+    \item \textbf{Hậu điều kiện}: Chuyến đi chuyển sang trạng thái "Hoàn thành", tài khoản ví của tài xế được cộng tiền cước phí.
+    \item \textbf{Luồng sự kiện chính}:
+          \begin{enumerate}
+              \item Hệ thống gửi thông báo có chuyến đi mới (kèm điểm đón, trả, cước phí) đến ứng dụng của tài xế.
+              \item Tài xế nhấn "Chấp nhận chuyến" trong khoảng thời gian quy định.
+              \item Hệ thống cập nhật trạng thái chuyến đi thành "Đã nhận" và gửi thông báo cho phụ huynh.
+              \item Tài xế di chuyển đến điểm đón dựa trên bản đồ điều hướng và nhấn nút "Đã đến điểm đón".
+              \item Tài xế thực hiện xác thực an toàn lúc đón và nhấn "Bắt đầu hành trình".
+              \item Tài xế di chuyển theo lộ trình an toàn đến điểm đến.
+              \item Tài xế thực hiện xác thực an toàn lúc trả và nhấn nút "Hoàn thành chuyến".
+              \item Hệ thống kết thúc chuyến đi, cộng tiền vào ví tài xế và gửi thông báo yêu cầu phụ huynh đánh giá.
+          \end{enumerate}
+    \item \textbf{Luồng sự kiện phát sinh}:
+          \begin{itemize}
+              \item \textit{Lỗi ở bước 2}: Nếu tài xế từ chối hoặc không chấp nhận trong thời gian quy định, hệ thống sẽ tự động chuyển yêu cầu chuyến đi cho tài xế khác gần đó.
+              \item \textit{Lỗi chỉ định}: Nếu tài xế là tài xế được chỉ định của phụ huynh thì hệ thống sẽ hủy chuyến và gửi thông báo đến phụ huynh để làm chuyến mới.
+          \end{itemize}
+\end{itemize}
+
+\subsection{Đặc tả use case Xác thực an toàn (Lên/Xuống xe)}
+\begin{itemize}
+    \item \textbf{Tên use case}: Xác thực an toàn
+    \item \textbf{Tác nhân}: Tài xế, Trẻ em, Phụ huynh
+    \item \textbf{Mô tả ngắn}: Quy trình bắt buộc để đảm bảo tài xế đón đúng trẻ, trả đúng điểm và đúng người nhận, chống nhầm lẫn hoặc thất lạc.
+    \item \textbf{Tiền điều kiện}: Tài xế đang trong quá trình thực hiện chuyến xe (tại thời điểm đón hoặc trả trẻ).
+    \item \textbf{Hậu điều kiện}: Hệ thống ghi nhận bằng chứng xác thực thành công và cập nhật trạng thái di chuyển của trẻ.
+    \item \textbf{Luồng sự kiện chính}:
+          \begin{enumerate}
+              \item Khi tài xế đến điểm đón, ứng dụng sẽ yêu cầu thực hiện xác thực an toàn.
+              \item Tài xế lựa chọn phương thức xác thực: trả lời câu hỏi bí mật, nhập OTP, chụp ảnh đón.
+              \item Dữ liệu xác thực được gửi về server để đối chiếu với hồ sơ chuyến đi.
+              \item Nếu thông tin khớp, hệ thống chuyển sang giai đoạn đưa bé đến đích rồi gửi thông báo đến điện thoại của phụ huynh.
+              \item Khi đến đích tài xế cần chụp thêm hình ảnh xác thực đã tới đích để kết thúc chuyến xe.
+              \item Hệ thống xác nhận ảnh và gửi thông báo tới phụ huynh báo rằng chuyến xe đã kết thúc.
+          \end{enumerate}
+    \item \textbf{Luồng sự kiện phát sinh}:
+          \begin{itemize}
+              \item \textit{Lỗi xác thực}: Nếu thông tin xác thực không khớp (sai mã QR, chụp ảnh nhận diện sai, OTP không đúng), hệ thống báo lỗi đỏ cảnh báo. Tài xế không thể bắt đầu/kết thúc hành trình. Tài xế phải gọi điện cho phụ huynh để xác nhận lại, hoặc có thể phải liên hệ tổng đài Admin hỗ trợ.
+              \item \textit{Ngoại lệ phương thức}: Có thể tài xế sẽ không phải xác thực lại toàn bộ các phương thức xác thực. Việc lựa chọn các phương thức xác thực là của phụ huynh.
+          \end{itemize}
+\end{itemize}
+
+\subsection{Đặc tả use case Giám sát hành trình (Real-time tracking)}
+\begin{itemize}
+    \item \textbf{Tên use case}: Giám sát hành trình
+    \item \textbf{Tác nhân}: Phụ huynh
+    \item \textbf{Mô tả ngắn}: Cho phép phụ huynh xem vị trí trực tiếp của xe chở trẻ và theo dõi trạng thái chuyến đi theo thời gian thực.
+    \item \textbf{Tiền điều kiện}: Chuyến đi đang ở trạng thái "Tài xế đang đến" hoặc "Đang diễn ra".
+    \item \textbf{Hậu điều kiện}: Phụ huynh nắm bắt được vị trí chính xác của trẻ và thời gian dự kiến đến nơi.
+    \item \textbf{Luồng sự kiện chính}:
+          \begin{enumerate}
+              \item Phụ huynh mở ứng dụng và nhấn vào thẻ thông tin của chuyến đi đang diễn ra.
+              \item Hệ thống tải giao diện bản đồ và render vị trí hiện tại của xe.
+              \item Hệ thống liên tục nhận tọa độ GPS từ máy tài xế và cập nhật vị trí xe di chuyển trên bản đồ mỗi 5 giây.
+              \item Trong chuyến xe hệ thống có cơ chế tự kiểm tra an toàn cho trẻ: dừng lại bất thường, mất GPS, đi lệch tuyến, tốc độ quá cao. Nếu phát hiện các vấn đề này hệ thống sẽ gửi thông báo nhắc nhở đến máy của tài xế và máy của phụ huynh.
+              \item Khi chuyến đi kết thúc, màn hình giám sát hiển thị thông báo thành công và chuyển sang màn hình đánh giá.
+          \end{enumerate}
+    \item \textbf{Luồng sự kiện phát sinh}:
+          \begin{itemize}
+              \item \textit{Lỗi kết nối}: Nếu mất tín hiệu GPS hoặc mạng từ điện thoại tài xế quá 1 phút, hệ thống hiển thị biểu tượng "Mất kết nối vị trí" màu xám trên bản đồ phụ huynh và tự động gửi tin nhắn cảnh báo cho tài xế để kiểm tra lại mạng.
+          \end{itemize}
+\end{itemize}
 
 \section{Yêu cầu phi chức năng}
 \label{section:2.4}

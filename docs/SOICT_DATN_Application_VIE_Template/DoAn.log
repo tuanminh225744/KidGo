@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (MiKTeX 25.12) (preloaded format=xelatex 2026.6.24)  24 JUN 2026 17:48
+This is XeTeX, Version 3.141592653-2.6-0.999997 (MiKTeX 25.12) (preloaded format=xelatex 2026.6.24)  25 JUN 2026 10:05
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1423,18 +1423,22 @@ Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [1
 
-])
+]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+ [2])
 \tf@toc=\write6
 \openout6 = `DoAn.toc'.
 
 
-[2] (DoAn.lof)
+[3] [4
+
+
+] (DoAn.lof)
 \tf@lof=\write7
 \openout7 = `DoAn.lof'.
 
- [3
-
-
+ [5
 
 ] (DoAn.lot)
 \tf@lot=\write8
@@ -1450,9 +1454,9 @@ n input line 255.
 Package glossaries Info: Preparing to sort glossary `acronym' (total number of
 (glossaries)             referenced entries: 5)
 
-[4
+[6
 
-] [5
+] [7
 
 
 ]
@@ -1501,11 +1505,20 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 [4]
 Chương 2.
 (Chuong/2_Khao_sat.tex
+File: Hinhve/UseCaseTongQuat.png Graphic file (type bmp)
+<Hinhve/UseCaseTongQuat.png>
+
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
  [5
 
-])
+]
+File: Hinhve/UseCasePhanRaXacThuc.png Graphic file (type bmp)
+<Hinhve/UseCasePhanRaXacThuc.png>
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
 
 Package fancyhdr Warning: \headheight is too small (10.0pt): 
 (fancyhdr)                Make it at least 16.2645pt, for example:
@@ -1514,15 +1527,111 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
 
 [6]
+File: Hinhve/UseCasePhanRaQuanLyHoSoTreEm.png Graphic file (type bmp)
+<Hinhve/UseCasePhanRaQuanLyHoSoTreEm.png>
+File: Hinhve/UsecasePhanRaDatChuyenLenLich.png Graphic file (type bmp)
+<Hinhve/UsecasePhanRaDatChuyenLenLich.png>
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+
+Package fancyhdr Warning: \headheight is too small (10.0pt): 
+(fancyhdr)                Make it at least 16.2645pt, for example:
+(fancyhdr)                \setlength{\headheight}{16.2645pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
+
+[7]
+File: Hinhve/UseCasePhanRaNhanThucHienChuyen.png Graphic file (type bmp)
+<Hinhve/UseCasePhanRaNhanThucHienChuyen.png>
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+
+Package fancyhdr Warning: \headheight is too small (10.0pt): 
+(fancyhdr)                Make it at least 16.2645pt, for example:
+(fancyhdr)                \setlength{\headheight}{16.2645pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
+
+[8]
+File: Hinhve/UseCasePhanRaXacThucAnToan.png Graphic file (type bmp)
+<Hinhve/UseCasePhanRaXacThucAnToan.png>
+
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+
+Package fancyhdr Warning: \headheight is too small (10.0pt): 
+(fancyhdr)                Make it at least 16.2645pt, for example:
+(fancyhdr)                \setlength{\headheight}{16.2645pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
+
+[9]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+
+Package fancyhdr Warning: \headheight is too small (10.0pt): 
+(fancyhdr)                Make it at least 16.2645pt, for example:
+(fancyhdr)                \setlength{\headheight}{16.2645pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
+
+[10]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+
+Package fancyhdr Warning: \headheight is too small (10.0pt): 
+(fancyhdr)                Make it at least 16.2645pt, for example:
+(fancyhdr)                \setlength{\headheight}{16.2645pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
+
+[11]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+
+Package fancyhdr Warning: \headheight is too small (10.0pt): 
+(fancyhdr)                Make it at least 16.2645pt, for example:
+(fancyhdr)                \setlength{\headheight}{16.2645pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
+
+[12]
+Underfull \vbox (badness 10000) has occurred while \output is active []
+
+
+
+Package fancyhdr Warning: \headheight is too small (10.0pt): 
+(fancyhdr)                Make it at least 16.2645pt, for example:
+(fancyhdr)                \setlength{\headheight}{16.2645pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
+
+[13])
+
+Package fancyhdr Warning: \headheight is too small (10.0pt): 
+(fancyhdr)                Make it at least 16.2645pt, for example:
+(fancyhdr)                \setlength{\headheight}{16.2645pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
+
+[14]
 Chương 3.
-(Chuong/3_Cong_nghe.tex) [7
+(Chuong/3_Cong_nghe.tex) [15
 
 ]
 Chương 4.
 (Chuong/4_Ket_qua_thuc_nghiem.tex
 File: Hinhve/Picture1.png Graphic file (type bmp)
 <Hinhve/Picture1.png>
- [8
+ [16
 
 ]
 File: Hinhve/Picture2.png Graphic file (type bmp)
@@ -1535,9 +1644,9 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-21.86446pt}.
 
-[9]
+[17]
 
-LaTeX Warning: Reference `table:my_label' on page 10 undefined on input line 43
+LaTeX Warning: Reference `table:my_label' on page 18 undefined on input line 43
 .
 
 
@@ -1547,7 +1656,7 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-21.86446pt}.
 
-[10])
+[18])
 
 Package fancyhdr Warning: \headheight is too small (10.0pt): 
 (fancyhdr)                Make it at least 31.86446pt, for example:
@@ -1555,7 +1664,7 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-21.86446pt}.
 
-[11]
+[19]
 Chương 5.
 (Chuong/5_Giai_phap_dong_gop.tex
 LaTeX Font Info:    Calculating math sizes for size <10.83347> on input line 4.
@@ -1593,15 +1702,15 @@ LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <7.58339> not available
 LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <5.41673> not available
 (Font)              size <5> substituted on input line 4.
 
-) [12
+) [20
 
 ]
 Chương 6.
-(Chuong/6_Ket_luan.tex) [13
+(Chuong/6_Ket_luan.tex) [21
 
 ] (Chuong/7_Luu_y_tai_lieu_tham_khao.tex
 
-LaTeX Warning: Citation 'hovy1993automated' on page 14 undefined on input line 
+LaTeX Warning: Citation 'hovy1993automated' on page 22 undefined on input line 
 13.
 
 
@@ -1611,21 +1720,21 @@ ing discourse
  []
 
 
-LaTeX Warning: Citation 'peterson2007computer' on page 14 undefined on input li
+LaTeX Warning: Citation 'peterson2007computer' on page 22 undefined on input li
 ne 18.
 
 
-LaTeX Warning: Citation 'NguyenThucHai' on page 14 undefined on input line 20.
+LaTeX Warning: Citation 'NguyenThucHai' on page 22 undefined on input line 20.
 
 
-LaTeX Warning: Citation 'poesio2001discourse' on page 14 undefined on input lin
+LaTeX Warning: Citation 'poesio2001discourse' on page 22 undefined on input lin
 e 24.
 
 
-LaTeX Warning: Citation 'knott1996data' on page 14 undefined on input line 30.
+LaTeX Warning: Citation 'knott1996data' on page 22 undefined on input line 30.
 
 
-LaTeX Warning: Citation 'BernersTim' on page 14 undefined on input line 34.
+LaTeX Warning: Citation 'BernersTim' on page 22 undefined on input line 34.
 
 
 Overfull \hbox (30.34108pt too wide) in paragraph at lines 34--36
@@ -1644,11 +1753,11 @@ an(0)/m/n/13 (visited on 09/30/2010).
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [14
+ [22
 
 ]
 
-LaTeX Warning: Citation 'LectureA' on page 15 undefined on input line 37.
+LaTeX Warning: Citation 'LectureA' on page 23 undefined on input line 37.
 
 )
 
@@ -1658,18 +1767,18 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
 
-[15]
+[23]
 
 LaTeX Warning: Empty bibliography on input line 319.
 
-[16
+[24
 
 ]
 Phụ lục A.
 (Chuong/Phu_luc_A.tex
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [17
+ [25
 
 ]
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -1682,7 +1791,7 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
 
-[18]
+[26]
 File: Hinhve/IoT.png Graphic file (type bmp)
 <Hinhve/IoT.png>
 
@@ -1693,12 +1802,12 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
 
-[19]
+[27]
 
-LaTeX Warning: Citation 'scott2013sdn' on page 20 undefined on input line 92.
+LaTeX Warning: Citation 'scott2013sdn' on page 28 undefined on input line 92.
 
 
-LaTeX Warning: Citation 'ashton2009internet' on page 20 undefined on input line
+LaTeX Warning: Citation 'ashton2009internet' on page 28 undefined on input line
  92.
 
 
@@ -1719,7 +1828,7 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
 
-[20]
+[28]
 
 Package fancyhdr Warning: \headheight is too small (10.0pt): 
 (fancyhdr)                Make it at least 16.2645pt, for example:
@@ -1727,9 +1836,9 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
 
-[21]
+[29]
 Phụ lục B.
-(Chuong/Phu_luc_B.tex) [22
+(Chuong/Phu_luc_B.tex) [30
 
 ] (DoAn.aux)
  ***********
@@ -1751,7 +1860,7 @@ LaTeX Warning: There were undefined references.
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `DoAn.out' has not changed.
-(rerunfilecheck)             Checksum: 3D7B251B1DD230D66D27C4FFBFC8C267;9207.
+(rerunfilecheck)             Checksum: F6C6CA8F05C937F0E20AA96B148F0CD7;11449.
 
 Package biblatex Warning: Please (re)run BibTeX on the file(s):
 (biblatex)                DoAn
@@ -1762,12 +1871,12 @@ Package logreq Info: Writing requests to 'DoAn.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 34096 strings out of 402986
- 684643 string characters out of 5448503
+ 34163 strings out of 402986
+ 687132 string characters out of 5448503
  1446124 words of memory out of 5000000
- 62340 multiletter control sequences out of 15000+600000
+ 62401 multiletter control sequences out of 15000+600000
  637359 words of font info for 111 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  108i,12n,107p,2565b,4803s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on DoAn.pdf (32 pages).
+Output written on DoAn.pdf (42 pages).
