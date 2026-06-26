@@ -3,7 +3,7 @@
  *
  * Core:       User, Kid, Driver, Vehicle
  * Ops:        Route, TripSchedule, Booking, Subscription, Trip
- * Support:    Review, Report, Notification, DriverCertification, PreferredDriver
+ * Support:    Review, Report, Notification, PreferredDriver
  */
 
 // Core
@@ -23,5 +23,4 @@ export { default as Trip } from "./operational/trip.model.js";
 export { default as Review } from "./support/review.model.js";
 export { default as Report } from "./support/report.model.js";
 export { default as Notification } from "./support/notification.model.js";
-export { default as DriverCertification } from "./support/driverCertification.model.js";
 export { default as PreferredDriver } from "./support/preferredDriver.model.js";

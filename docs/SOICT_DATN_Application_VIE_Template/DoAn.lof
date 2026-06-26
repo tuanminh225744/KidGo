@@ -8,14 +8,18 @@
 \contentsline {figure}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ use case phân rã Xác thực an toàn}}{10}{figure.caption.13}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Ví dụ biểu đồ phụ thuộc gói}}{19}{figure.caption.14}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Ví dụ thiết kế gói}}{20}{figure.caption.15}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ gói UML tổng quan hệ thống KidGo}}{19}{figure.caption.14}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Account \& Profile}}{21}{figure.caption.15}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Trip \& Booking}}{22}{figure.caption.16}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Payment \& Subscription}}{23}{figure.caption.17}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Feedback \& Support}}{23}{figure.caption.18}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Notification}}{24}{figure.caption.19}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {A.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Internet vạn vật}}{31}{figure.caption.22}%
-\contentsline {figure}{\numberline {A.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Qui cách đóng quyển đồ án}}{33}{figure.caption.25}%
-\contentsline {figure}{\numberline {A.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Qui cách đóng quyển đồ án}}{33}{figure.caption.26}%
+\contentsline {figure}{\numberline {A.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Internet vạn vật}}{35}{figure.caption.26}%
+\contentsline {figure}{\numberline {A.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Qui cách đóng quyển đồ án}}{37}{figure.caption.29}%
+\contentsline {figure}{\numberline {A.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Qui cách đóng quyển đồ án}}{37}{figure.caption.30}%
 \addvspace {10\p@ }
 \contentsfinish 
 \contentsfinish 

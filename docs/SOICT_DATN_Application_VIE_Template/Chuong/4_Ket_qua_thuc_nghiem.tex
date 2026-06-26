@@ -22,26 +22,117 @@ Trong dự án này, toàn bộ mã nguồn phía Backend được gói gọn tr
 Việc áp dụng kiến trúc này giúp mã nguồn của KidGo được tổ chức vô cùng mạch lạc. Các luồng dữ liệu đi một chiều từ Route $\rightarrow$ Controller $\rightarrow$ Service $\rightarrow$ Model, không bị chồng chéo, giúp hệ thống dễ dàng bảo trì hoặc mở rộng chức năng trong tương lai.
 
 \subsection{Thiết kế tổng quan}
-Sinh viên vẽ biểu đồ gói UML (UML package diagram), nêu rõ sự phụ thuộc giữa các gói (package). SV cần vẽ các gói sao cho chúng được phân theo các tầng rõ ràng, không được sắp đặt package lộn xộn trong hình vẽ. Sinh viên chú ý các quy tắc thiết kế (Các gói không phụ thuộc lẫn nhau, gói tầng dưới không phụ thuộc gói tầng trên, không phụ thuộc bỏ qua tầng, v.v.) và cần giải thích sơ lược về mục đích/nhiệm vụ của từng package. SV tham khảo ví dụ minh họa trong Hình \ref{fig:Fig1}
+Dựa trên yêu cầu và phân tích nghiệp vụ, kiến trúc của hệ thống KidGo được thiết kế và phân rã thành các gói chức năng (Packages) theo mô hình phân tầng hướng lĩnh vực (Domain-driven Layering). Việc phân chia này giúp giới hạn sự phụ thuộc giữa các chức năng, tăng tính đóng gói, dễ dàng mở rộng và bảo trì trong tương lai.
+
+Biểu đồ gói UML (Package Diagram) tổng quan của hệ thống được thể hiện trong Hình \ref{fig:bieu_do_goi_tong_quan}.
+
 \begin{figure}[H]
     \centering
-    \includegraphics{Hinhve/Picture1.png}
-    \caption{Ví dụ biểu đồ phụ thuộc gói}
-    \label{fig:Fig1}
+    \includegraphics[width=0.8\textwidth]{Hinhve/BieuDoGoiTongQuan.png}
+    \caption{Biểu đồ gói UML tổng quan hệ thống KidGo}
+    \label{fig:bieu_do_goi_tong_quan}
 \end{figure}
+
+Hệ thống được tổ chức thành 3 tầng (Layers) chính, với quy tắc phụ thuộc một chiều từ trên xuống dưới (các gói ở tầng trên chỉ được phép gọi và phụ thuộc vào tầng liền kề bên dưới nó):
+
+\begin{itemize}
+    \item \textbf{Tầng 1: Tầng Dịch vụ Mở rộng và Tiện ích (Extended Service Layer):} Tầng này cung cấp các tính năng giá trị gia tăng, tích hợp dịch vụ bên ngoài và tăng cường trải nghiệm người dùng cuối. Tầng này bao gồm:
+          \begin{itemize}
+              \item \textit{Gói Payment \& Subscription:} Xử lý các luồng giao dịch tài chính, thanh toán cước phí và đăng ký gói dịch vụ di chuyển định kỳ (thường tích hợp với các cổng thanh toán bên thứ ba).
+              \item \textit{Gói Notification:} Đảm nhiệm vai trò gửi thông báo tự động theo thời gian thực (Push Notification, Socket.io) về trạng thái hệ thống đến thiết bị của người dùng.
+              \item \textit{Gói Feedback \& Support:} Quản lý các đánh giá chất lượng tài xế và tiếp nhận báo cáo sự cố từ phụ huynh sau khi chuyến đi kết thúc.
+          \end{itemize}
+          Các gói ở tầng này không chứa logic điều phối cốt lõi mà chỉ đóng vai trò bổ trợ, hoạt động dựa trên các sự kiện và dữ liệu sinh ra từ Tầng 2 (ví dụ: kích hoạt thanh toán khi chuyến đi hoàn thành).
+
+    \item \textbf{Tầng 2: Tầng Nghiệp vụ Vận tải cốt lõi (Core Business Layer):} Đây là trái tim điều phối toàn bộ hoạt động kinh doanh chính của hệ thống.
+          \begin{itemize}
+              \item \textit{Gói Trip \& Booking:} Quản lý toàn vẹn vòng đời của một cuốc xe: từ lúc phụ huynh tạo yêu cầu (Booking), hệ thống ghép nối tài xế, cho đến quá trình định vị di chuyển thực tế (Trip) và hoàn thành. Tầng này phụ trách các quy tắc kinh doanh phức tạp nhất và cung cấp dữ liệu trạng thái cho Tầng 1 hoạt động.
+          \end{itemize}
+
+    \item \textbf{Tầng 3: Tầng Dữ liệu Nền tảng (Foundation Domain Layer):} Tầng đáy của kiến trúc, quản lý các thực thể độc lập, ít biến động nhất và mang tính định danh cơ sở.
+          \begin{itemize}
+              \item \textit{Gói Account \& Profile:} Lưu trữ cấu trúc hồ sơ định danh của Phụ huynh (User), Trẻ em (Kid), Tài xế (Driver), Phương tiện (Vehicle) và các tùy chọn cá nhân (PreferredDriver). Gói này đóng vai trò là "chân đế", hoàn toàn độc lập và không phụ thuộc vào bất kỳ nghiệp vụ nào bên trên, nhưng lại là nguồn cung cấp dữ liệu xác thực (ID, hồ sơ) bắt buộc để Tầng 2 có thể khởi tạo một chuyến đi.
+          \end{itemize}
+\end{itemize}
+
+Kiến trúc này đảm bảo rằng sự thay đổi ở Tầng 1 (ví dụ: thay đổi cổng thanh toán hay định dạng thông báo) sẽ không làm ảnh hưởng đến logic của Chuyến đi ở Tầng 2 hay cấu trúc tài khoản ở Tầng 3.
 \subsection{Thiết kế chi tiết gói}
-Sinh viên thiết kế và lần lượt vẽ biểu đồ thiết kế cho từng package, hoặc một nhóm các package liên quan để giải quyết một vấn đề gì đó. Khi vẽ thiết kế gói, sinh viên chỉ cần đưa tên lớp, không cần chỉ ra các thành viên phương thức và thuộc tính. SV tham khảo ví dụ minh họa trong Hình \ref{fig:Fig2}.
+Trong phần này, kiến trúc bên trong của từng gói chức năng (Packages) sẽ được trình bày chi tiết thông qua các biểu đồ lớp (Class Diagram). Biểu đồ tập trung thể hiện các lớp cốt lõi/thực thể cùng với các mối quan hệ (Dependency, Association, Aggregation, Composition,...) mà không đi sâu vào chi tiết thuộc tính hay phương thức.
 
-Sinh viên cần vẽ rõ ràng quan hệ giữa các lớp trong biểu đồ. Các quan hệ bao gồm: phụ thuộc (dependency), kết hợp (association), kết tập (aggregation), hợp thành (composition), kế thừa (inheritance), và thực thi (implementation). Các quan hệ này đều đã được minh họa trong \ref{fig:Fig2}.
+Dưới đây là chi tiết thiết kế cho các gói cốt lõi của hệ thống KidGo.
 
-Sau khi vẽ hình minh họa, sinh viên cần giải thích ngắn gọn về thiết kế của mình.
+\subsubsection{Gói Account \& Profile}
 
 \begin{figure}[H]
     \centering
-    \includegraphics{Hinhve/Picture2.png}
-    \caption{Ví dụ thiết kế gói}
-    \label{fig:Fig2}
+    \includegraphics[width=0.5\textwidth]{Hinhve/BieuDoGoiAccount.png}
+    \caption{Biểu đồ chi tiết gói Account \& Profile}
+    \label{fig:pkg_account}
 \end{figure}
+
+\textbf{Giải thích thiết kế:}
+Gói này tập trung quản lý thông tin định danh và hồ sơ người dùng của hệ thống.
+\begin{itemize}
+    \item \textbf{Quan hệ Hợp thành (Composition)}: Một Phụ huynh (\texttt{User}) quản lý nhiều hồ sơ Trẻ em (\texttt{Kid}). Trẻ em không tự sử dụng ứng dụng mà phụ thuộc hoàn toàn vào tài khoản của Phụ huynh. Do đó, nếu tài khoản Phụ huynh bị xóa, hồ sơ Trẻ em cũng không còn tồn tại độc lập.
+    \item \textbf{Quan hệ Kết hợp (Association) giữa User và Driver}: Một người dùng (\texttt{User}) có thể đăng ký để trở thành tài xế (\texttt{Driver}) hoặc không. Mối quan hệ ở đây là "1" đối với \texttt{User} và "0 hoặc 1" đối với \texttt{Driver}. Hồ sơ tài xế được gắn với tài khoản người dùng gốc.
+    \item \textbf{Quan hệ Kết hợp (Association) giữa Driver và Vehicle}: Mỗi Tài xế (\texttt{Driver}) sở hữu hoặc đăng ký một Phương tiện (\texttt{Vehicle}) để hành nghề (quan hệ 1-1).
+    \item \textbf{Quan hệ Kết hợp (Association) cho PreferredDriver}: Một Phụ huynh (\texttt{User}) có thể thiết lập danh sách nhiều tài xế ưu thích (\texttt{PreferredDriver}), và mỗi mục \texttt{PreferredDriver} tham chiếu trực tiếp đến một \texttt{Driver} cụ thể trong hệ thống. Việc đưa \texttt{PreferredDriver} vào gói này là hợp lý vì nó phản ánh tùy chọn cá nhân trong hồ sơ của người dùng.
+\end{itemize}
+
+\subsubsection{Gói Trip \& Booking}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.2\textwidth]{Hinhve/BieuDoGoiTrip.png}
+    \caption{Biểu đồ chi tiết gói Trip \& Booking}
+    \label{fig:pkg_trip}
+\end{figure}
+
+\textbf{Giải thích thiết kế:}
+Đây là gói chứa lõi nghiệp vụ vận tải của hệ thống.
+\begin{itemize}
+    \item \textbf{Quan hệ Kết tập (Aggregation)}: Một Lịch trình định kỳ (\texttt{TripSchedule}) có thể sinh ra nhiều Lượt đặt xe đơn lẻ (\texttt{Booking}). Nếu người dùng hủy \texttt{TripSchedule}, các \texttt{Booking} đã hoàn thành trong quá khứ vẫn tồn tại để làm lịch sử đối soát.
+    \item \textbf{Quan hệ Kết hợp (Association)}: Một Yêu cầu đặt xe (\texttt{Booking}) sau khi được tài xế chấp nhận sẽ tạo ra một Chuyến đi thực tế (\texttt{Trip}).
+    \item \textbf{Quan hệ Hợp thành (Composition)}: Mỗi \texttt{Trip} được gắn liền chặt chẽ với một \texttt{Route} (Lộ trình chi tiết, ghi nhận tọa độ GPS). Khi chuyến đi bị hủy hoặc xóa bỏ thì lộ trình đó cũng không còn giá trị.
+\end{itemize}
+
+\subsubsection{Gói Payment \& Subscription}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{Hinhve/BieuDoGoiPayment.png}
+    \caption{Biểu đồ chi tiết gói Payment \& Subscription}
+    \label{fig:pkg_payment}
+\end{figure}
+
+\textbf{Giải thích thiết kế:}
+Gói này xử lý mọi vấn đề liên quan đến dòng tiền.
+\begin{itemize}
+    \item \textbf{Quan hệ Kết hợp (Association)}: Hệ thống hỗ trợ 2 hình thức thanh toán. Người dùng có thể thực hiện thanh toán trực tiếp cho một chuyến xe lẻ (\texttt{Trip}), khi này hệ thống sinh ra một \texttt{Payment} tương ứng. Nếu người dùng muốn đặt nhiều chuyến, họ sẽ đăng ký gói cước (\texttt{Subscription}) và thực hiện thanh toán một lần duy nhất lúc mua gói. Do vậy, một \texttt{Subscription} chỉ có duy nhất 1 \texttt{Payment}, và một \texttt{Payment} sẽ được liên kết với một \texttt{Trip} (chuyến lẻ) hoặc một \texttt{Subscription} (mua gói).
+\end{itemize}
+
+\subsubsection{Gói Feedback \& Support và Notification}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.4\textwidth]{Hinhve/BieuDoGoiSupport.png}
+    \caption{Biểu đồ chi tiết gói Feedback \& Support}
+    \label{fig:pkg_support}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.25\textwidth]{Hinhve/BieuDoGoiNotification.png}
+    \caption{Biểu đồ chi tiết gói Notification}
+    \label{fig:pkg_notification}
+\end{figure}
+
+\textbf{Giải thích thiết kế:}
+Hai gói này cung cấp các thực thể dịch vụ bổ trợ giúp tăng cường trải nghiệm người dùng và đảm bảo an toàn. Mặc dù các lớp trong gói Support không liên kết trực tiếp với nhau, nhưng chúng đều hướng tới việc bổ trợ cho thực thể lõi của hệ thống (như \texttt{Trip}).
+\begin{itemize}
+    \item \textbf{Gói Support}: \texttt{Review} và \texttt{Report} đều gắn liền với một \texttt{Trip} cụ thể (mỗi chuyến đi chỉ có tối đa 1 đánh giá, nhưng có thể có nhiều báo cáo sự cố).
+    \item \textbf{Gói Notification}: Chứa cấu trúc dữ liệu \texttt{Notification} lưu trữ các thông báo đẩy. Lớp này hoạt động độc lập và có thể liên kết lỏng lẻo với bất kỳ thực thể nào sinh ra thông báo.
+\end{itemize}
 
 \section{Thiết kế chi tiết}
 \subsection{Thiết kế giao diện}
