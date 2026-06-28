@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ArrowLeft, Phone, Navigation } from "lucide-react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import ClientLiveMap from "../client/current-trip/ClientLiveMap.jsx";
+import ClientLiveMap from "../client/Current-trip/ClientLiveMap.jsx";
 import { getDriverLocation } from "../../services/driver.service.js";
 import { getTripDetails } from "../../services/trip.service.js";
 import { useSocketStore } from "../../store/useSocketStore.js";
@@ -129,9 +129,9 @@ export default function AdminLiveTrip() {
           {trip && (
             <div className="ml-auto">
               <span className={`px-4 py-1.5 rounded-full text-sm font-bold ${trip.status === "picking_up" ? "bg-yellow-100 text-yellow-800" :
-                  trip.status === "in_progress" ? "bg-blue-100 text-blue-800" :
-                    trip.status === "completed" ? "bg-green-100 text-green-800" :
-                      "bg-gray-100 text-gray-800"
+                trip.status === "in_progress" ? "bg-blue-100 text-blue-800" :
+                  trip.status === "completed" ? "bg-green-100 text-green-800" :
+                    "bg-gray-100 text-gray-800"
                 }`}>
                 {trip.status === "picking_up" ? "Đang đi đón khách" :
                   trip.status === "in_progress" ? "Đang trên đường (đã đón khách)" :
