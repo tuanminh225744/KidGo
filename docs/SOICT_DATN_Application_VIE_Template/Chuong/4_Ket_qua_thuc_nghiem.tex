@@ -479,17 +479,86 @@ Quá trình xây dựng ứng dụng KidGo (bao gồm cả hệ thống máy ch�
 
 
 
+\newpage
 \subsection{Kết quả đạt được}
-Sinh viên trước tiên mô tả kết quả đạt được của mình là gì, ví dụ như các sản phẩm được đóng gói là gì, bao gồm những thành phần nào, ý nghĩa, vai trò?
-
-Sinh viên cần thống kê các thông tin về ứng dụng của mình như: số dòng code, số lớp, số gói, dung lượng toàn bộ mã nguồn, dung lượng của từng sản phẩm đóng gói, v.v. Tương tự như phần liệt kê về công cụ sử dụng, sinh viên cũng nên dùng bảng để mô tả phần thông tin thống kê này.
+Hệ thống KidGo đã được xây dựng hoàn thiện các phân hệ lõi, đáp ứng đủ các luồng nghiệp vụ đặt xe, nhận chuyến và theo dõi hành trình thời gian thực. Bảng dưới đây thống kê lại quy mô mã nguồn và kích thước của các thành phần trong dự án:
+\begin{table}[H]
+    \centering
+    \caption{Thống kê quy mô mã nguồn và sản phẩm đóng gói}
+    \label{table:source_stats}
+    \begin{tabular}{|l|c|c|p{4cm}|}
+        \hline
+        \textbf{Thành phần}        & \textbf{Số lượng file} & \textbf{Số dòng code}       & \textbf{Sản phẩm đóng gói (Dung lượng)}                               \\ \hline
+        \textbf{Backend (Node.js)} & 107 files              & $\sim$ 8.200 dòng           & Source Code nén ($\sim$ 200 KB) \newline Docker Image ($\sim$ 250 MB) \\ \hline
+        \textbf{Frontend (React)}  & 107 files              & $\sim$ 12.600 dòng          & Bản build tĩnh / \texttt{dist} ($\sim$ 3 MB)                          \\ \hline
+        \textbf{Tổng cộng}         & \textbf{214 files}     & \textbf{$\sim$ 20.800 dòng} &                                                                       \\ \hline
+    \end{tabular}
+\end{table}
+\textit{Ghi chú: Số dòng code được thống kê dựa trên các tệp mã nguồn tự phát triển (.js, .jsx, .css), không bao gồm các thư viện phụ thuộc (node\_modules) và các tệp sinh tự động.}
 
 \subsection{Minh họa các chức năng chính}
 Sinh viên lựa chọn và đưa ra màn hình cho các chức năng chính, quan trọng, và thú vị nhất. Mỗi giao diện cần phải có lời giải thích ngắn gọn. Khi giải thích, sinh viên có thể kết hợp với các chú thích ở trong hình ảnh giao diện.
 
 \section{Kiểm thử}
-Phần này có độ dài từ hai đến ba trang. Sinh viên thiết kế các trường hợp kiểm thử cho hai đến ba chức năng quan trọng nhất. Sinh viên cần chỉ rõ các kỹ thuật kiểm thử đã sử dụng. Chi tiết các trường hợp kiểm thử khác, nếu muốn trình bày, sinh viên đưa vào phần phụ lục.
-Sinh viên sau cùng tổng kết về số lượng các trường hợp kiểm thử và kết quả kiểm thử. Sinh viên cần phân tích lý do nếu kết quả kiểm thử không đạt.
+
+Trong quá trình phát triển dự án KidGo, kiểm thử phần mềm đóng vai trò then chốt để đảm bảo tính ổn định của hệ thống và sự an toàn tuyệt đối cho trẻ em. Hệ thống đã áp dụng các kỹ thuật kiểm thử Hộp đen (Black-box Testing), Phân vùng tương đương (Equivalence Partitioning) và Phân tích giá trị biên cho các module cốt lõi. Dưới đây là thiết kế các trường hợp kiểm thử (Test Cases) cho 3 chức năng quan trọng nhất của hệ thống.
+
+\newpage
+\subsection{Kiểm thử chức năng Giám sát an toàn trong chuyến đi}
+Tính năng này theo dõi các luồng tọa độ (GPS ticks) liên tục từ ứng dụng của tài xế để đưa ra cảnh báo tự động về phía phụ huynh nếu có rủi ro xảy ra.
+
+\begin{table}[H]
+    \centering
+    \caption{Kịch bản kiểm thử chức năng Giám sát an toàn}
+    \begin{tabular}{|l|p{3.5cm}|p{4.5cm}|p{4.5cm}|c|}
+        \hline
+        \textbf{Mã TC} & \textbf{Mô tả}                  & \textbf{Dữ liệu đầu vào (Input)}                                      & \textbf{Kết quả mong đợi}                                            & \textbf{Trạng thái} \\ \hline
+        SM-01          & Cảnh báo vượt quá tốc độ        & Tốc độ tài xế gửi lên \texttt{speed = 60km/h} (vượt giới hạn 50km/h). & Ghi nhận cảnh báo mức độ 1 (Alert), gửi thông báo cho phụ huynh.     & Đạt                 \\ \hline
+        SM-02          & Cảnh báo nguy hiểm do tốc độ    & Tốc độ liên tục > 50km/h kéo dài vượt quá 3 phút.                     & Nâng cấp cảnh báo mức độ 2 (Danger), gửi Push Notification liên tục. & Đạt                 \\ \hline
+        SM-03          & Dừng đỗ bất thường              & Vận tốc \texttt{< 5km/h} kéo dài trên 5 phút nhưng chưa tới điểm đến. & Hệ thống phát hiện bất thường và gửi cảnh báo dừng đỗ.               & Đạt                 \\ \hline
+        SM-04          & Mất tín hiệu định vị (GPS Loss) & Không nhận được tọa độ GPS mới từ tài xế trong vòng 2 phút.           & Gửi thông báo mất kết nối tới phụ huynh để gọi điện kiểm tra.        & Đạt                 \\ \hline
+        SM-05          & Chệch quỹ đạo lộ trình          & Tọa độ hiện tại cách tuyến đường dự kiến \texttt{> 200m}.             & Radar ghi nhận chệch hướng và báo động ngay lập tức.                 & Đạt                 \\ \hline
+    \end{tabular}
+\end{table}
+
+\newpage
+\subsection{Kiểm thử chức năng Xác thực an toàn Đón/Trả trẻ}
+Chức năng đảm bảo tài xế giao/nhận đúng trẻ thông qua các lớp bảo mật (OTP, Ảnh chụp, Câu hỏi) được thiết lập tùy chỉnh bởi phụ huynh.
+
+\begin{table}[H]
+    \centering
+    \caption{Kịch bản kiểm thử chức năng Xác thực an toàn}
+    \begin{tabular}{|l|p{3.5cm}|p{4.5cm}|p{4.5cm}|c|}
+        \hline
+        \textbf{Mã TC} & \textbf{Mô tả}                      & \textbf{Dữ liệu đầu vào (Input)}                           & \textbf{Kết quả mong đợi}                                                    & \textbf{Trạng thái} \\ \hline
+        SV-01          & Xác thực OTP thành công             & Nhập đúng mã OTP gồm 6 chữ số đang còn hiệu lực.           & Chuyển trạng thái OTP sang \texttt{passed}, xóa OTP khỏi Redis.              & Đạt                 \\ \hline
+        SV-02          & Xác thực OTP thất bại               & Nhập sai mã OTP hoặc mã OTP đã hết hạn (quá 2 giờ).        & Báo lỗi "Mã OTP không chính xác", từ chối xác nhận.                          & Đạt                 \\ \hline
+        SV-03          & Tải ảnh minh chứng                  & Phụ huynh bật yêu cầu chụp ảnh, tài xế upload ảnh thực tế. & Hệ thống lưu URL ảnh, trạng thái \texttt{pickupPhoto} thành \texttt{passed}. & Đạt                 \\ \hline
+        SV-04          & Trả lời câu hỏi bảo mật             & Tài xế nhập đúng câu trả lời cho câu hỏi bí mật của bé.    & Chuyển trạng thái \texttt{securityQuestion} sang \texttt{passed}.            & Đạt                 \\ \hline
+        SV-05          & Ràng buộc bắt đầu chuyến (Đủ ĐK)    & Các yêu cầu bảo mật (OTP/Ảnh/Câu hỏi) đều \texttt{passed}. & Cho phép bắt đầu chuyến (\texttt{status = in\_progress}), thông báo.         & Đạt                 \\ \hline
+        SV-06          & Ràng buộc bắt đầu chuyến (Thiếu ĐK) & Phụ huynh bật Câu hỏi bảo mật nhưng tài xế chưa trả lời.   & Hệ thống chặn thao tác, báo lỗi "Chưa xác thực câu hỏi", từ chối khởi hành.  & Đạt                 \\ \hline
+    \end{tabular}
+\end{table}
+
+\newpage
+\subsection{Kiểm thử luồng Đặt xe và Ghép chuyến}
+Kiểm tra khả năng phân luồng giao cuốc xe cho tài xế ưu tiên hoặc tìm kiếm tài xế lân cận theo thuật toán vệt dầu loang.
+
+\begin{table}[H]
+    \centering
+    \caption{Kịch bản kiểm thử luồng Đặt xe và Ghép chuyến}
+    \begin{tabular}{|l|p{3.5cm}|p{4.5cm}|p{4.5cm}|c|}
+        \hline
+        \textbf{Mã TC} & \textbf{Mô tả}                     & \textbf{Dữ liệu đầu vào (Input)}                                          & \textbf{Kết quả mong đợi}                                                          & \textbf{Trạng thái} \\ \hline
+        BF-01          & Đặt chuyến với tài xế chỉ định     & Tạo booking có truyền tham số \texttt{preferredDriverId}.                 & Booking lập tức \texttt{matched}, gắn tài xế đó, tạo timer 3 phút đếm ngược.       & Đạt                 \\ \hline
+        BF-02          & Hủy ghép chuyến do Timeout         & Chuyến xe đã \texttt{matched} nhưng tài xế ưu tiên không nhận quá 3 phút. & Tự động hủy (\texttt{cancelled}), gỡ \texttt{assignedDriverId} và báo về ứng dụng. & Đạt                 \\ \hline
+        BF-03          & Đặt chuyến tìm tài xế tự động      & Tạo booking bình thường, hệ thống không nhận \texttt{preferredDriverId}.  & Bắt đầu quy trình dò tìm lân cận (Sweep radius 2km -> 5km -> 10km).                & Đạt                 \\ \hline
+        BF-04          & Chuyển tiếp cuốc xe trong hàng đợi & Radar tìm thấy 2 tài xế rảnh, tài xế 1 bỏ qua sau 15s.                    & Đưa tài xế 1 vào danh sách đen 5 phút, tự động ping tiếp tài xế 2.                 & Đạt                 \\ \hline
+    \end{tabular}
+\end{table}
+
+\subsection{Tổng kết kết quả kiểm thử}
+Toàn bộ các kịch bản kiểm thử trên đã được tin học hóa thành các đoạn mã Unit Test tự động bằng framework \textbf{Jest}. Việc sử dụng mã kiểm thử tự động kết hợp với các kỹ thuật giả lập dữ liệu (Mocking như \texttt{jest.unstable\_mockModule} đối chiếu Redis, Mongoose) giúp dễ dàng kiểm chứng lại độ an toàn của hệ thống ở bất kỳ chu kỳ cập nhật nào.
 \section{Triển khai}
 Sinh viên trình bày mô hình và/hoặc cách thức triển khai thử nghiệm/thực tế. Ứng dụng của sinh viên được triển khai trên server/thiết bị gì, cấu hình như thế nào. Kết quả triển khai thử nghiệm nếu có (số lượng người dùng, số lượng truy cập, thời gian phản hồi, phản hồi người dùng, khả năng chịu tải, các thống kê, v.v.)
 

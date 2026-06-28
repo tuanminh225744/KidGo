@@ -1,4 +1,4 @@
-This is XeTeX, Version 3.141592653-2.6-0.999997 (MiKTeX 25.12) (preloaded format=xelatex 2026.6.24)  28 JUN 2026 09:15
+This is XeTeX, Version 3.141592653-2.6-0.999997 (MiKTeX 25.12) (preloaded format=xelatex 2026.6.24)  28 JUN 2026 10:10
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -1925,9 +1925,6 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-21.86446pt}.
 
 [35]
-Underfull \vbox (badness 10000) has occurred while \output is active []
-
-
 
 Package fancyhdr Warning: \headheight is too small (10.0pt): 
 (fancyhdr)                Make it at least 31.86446pt, for example:
@@ -1935,7 +1932,7 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-21.86446pt}.
 
-[36])
+[36]
 
 Package fancyhdr Warning: \headheight is too small (10.0pt): 
 (fancyhdr)                Make it at least 31.86446pt, for example:
@@ -1944,6 +1941,193 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                \addtolength{\topmargin}{-21.86446pt}.
 
 [37]
+Underfull \hbox (badness 1552) in paragraph at lines 516--516
+[]|\TU/TimesNewRoman(0)/m/n/13 Tốc độ tài xế gửi lên
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 517--517
+[]|\TU/TimesNewRoman(0)/m/n/13 Cảnh báo nguy
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 518--518
+[]|\TU/TimesNewRoman(0)/m/n/13 Dừng đỗ bất
+ []
+
+
+Underfull \hbox (badness 4217) in paragraph at lines 520--520
+[]|\TU/TimesNewRoman(0)/m/n/13 Tọa độ hiện tại cách
+ []
+
+
+Underfull \hbox (badness 2941) in paragraph at lines 520--520
+[]|\TU/TimesNewRoman(0)/m/n/13 Radar ghi nhận chệch
+ []
+
+
+Overfull \hbox (89.97414pt too wide) in paragraph at lines 513--522
+ [][] 
+ []
+
+
+Package fancyhdr Warning: \headheight is too small (10.0pt): 
+(fancyhdr)                Make it at least 31.86446pt, for example:
+(fancyhdr)                \setlength{\headheight}{31.86446pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-21.86446pt}.
+
+[38]
+Underfull \hbox (badness 10000) in paragraph at lines 534--534
+[]|\TU/TimesNewRoman(0)/m/n/13 Xác thực OTP
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 536--536
+[]|\TU/TimesNewRoman(0)/m/n/13 Tải ảnh minh
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 537--537
+[]|\TU/TimesNewRoman(0)/m/n/13 Chuyển trạng thái
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 537--537
+\TU/lmtt/m/n/13 securityQuestion
+ []
+
+
+Underfull \hbox (badness 2799) in paragraph at lines 538--538
+[]|\TU/TimesNewRoman(0)/m/n/13 Các yêu cầu bảo mật
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 538--538
+[]|\TU/TimesNewRoman(0)/m/n/13 Cho phép bắt đầu
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 538--538
+\TU/TimesNewRoman(0)/m/n/13 chuyến (\TU/lmtt/m/n/13 status =
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 538--538
+\TU/lmtt/m/n/13 in_progress\TU/TimesNewRoman(0)/m/n/13 ), thông
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 539--539
+[]|\TU/TimesNewRoman(0)/m/n/13 Ràng buộc bắt
+ []
+
+
+Underfull \hbox (badness 2285) in paragraph at lines 539--539
+\TU/TimesNewRoman(0)/m/n/13 bảo mật nhưng tài xế
+ []
+
+
+Underfull \hbox (badness 1184) in paragraph at lines 539--539
+\TU/TimesNewRoman(0)/m/n/13 câu hỏi”, từ chối khởi
+ []
+
+
+Overfull \hbox (89.97414pt too wide) in paragraph at lines 531--541
+ [][] 
+ []
+
+
+Package fancyhdr Warning: \headheight is too small (10.0pt): 
+(fancyhdr)                Make it at least 31.86446pt, for example:
+(fancyhdr)                \setlength{\headheight}{31.86446pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-21.86446pt}.
+
+[39]
+Underfull \hbox (badness 10000) in paragraph at lines 553--553
+[]|\TU/TimesNewRoman(0)/m/n/13 Tạo booking có
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 553--553
+\TU/TimesNewRoman(0)/m/n/13 truyền tham số
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 553--553
+[]|\TU/TimesNewRoman(0)/m/n/13 Booking lập tức
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 553--553
+\TU/lmtt/m/n/13 matched\TU/TimesNewRoman(0)/m/n/13 , gắn tài xế
+ []
+
+
+Underfull \hbox (badness 1424) in paragraph at lines 554--554
+[]|\TU/TimesNewRoman(0)/m/n/13 Hủy ghép chuyến
+ []
+
+
+Underfull \hbox (badness 4832) in paragraph at lines 554--554
+\TU/TimesNewRoman(0)/m/n/13 nhưng tài xế ưu tiên
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 554--554
+[]|\TU/TimesNewRoman(0)/m/n/13 Tự động hủy
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 554--554
+\TU/TimesNewRoman(0)/m/n/13 (\TU/lmtt/m/n/13 cancelled\TU/TimesNewRoman(0)/m/n/13 ), gỡ
+ []
+
+
+Underfull \hbox (badness 3657) in paragraph at lines 554--554
+\TU/lmtt/m/n/13 assignedDriverId \TU/TimesNewRoman(0)/m/n/13 và
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 555--555
+[]|\TU/TimesNewRoman(0)/m/n/13 Tạo booking
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 555--555
+\TU/TimesNewRoman(0)/m/n/13 bình thường, hệ
+ []
+
+
+Underfull \hbox (badness 10000) in paragraph at lines 555--555
+\TU/TimesNewRoman(0)/m/n/13 thống không nhận
+ []
+
+
+Underfull \hbox (badness 2173) in paragraph at lines 555--555
+\TU/TimesNewRoman(0)/m/n/13 lân cận (Sweep radius
+ []
+
+
+Underfull \hbox (badness 1852) in paragraph at lines 556--556
+[]|\TU/TimesNewRoman(0)/m/n/13 Chuyển tiếp cuốc
+ []
+
+
+Overfull \hbox (89.97414pt too wide) in paragraph at lines 550--558
+ [][] 
+ []
+
+)
+
+Package fancyhdr Warning: \headheight is too small (10.0pt): 
+(fancyhdr)                Make it at least 31.86446pt, for example:
+(fancyhdr)                \setlength{\headheight}{31.86446pt}.
+(fancyhdr)                You might also make \topmargin smaller:
+(fancyhdr)                \addtolength{\topmargin}{-21.86446pt}.
+
+[40]
 Chương 5.
 (Chuong/5_Giai_phap_dong_gop.tex
 LaTeX Font Info:    Calculating math sizes for size <10.83347> on input line 4.
@@ -1980,11 +2164,11 @@ LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <7.58339> not available
 LaTeX Font Warning: Font shape `OT1/cmr/m/n' in size <5.41673> not available
 (Font)              size <5> substituted on input line 4.
 
-) [38
+) [41
 
 ]
 Chương 6.
-(Chuong/6_Ket_luan.tex) [39
+(Chuong/6_Ket_luan.tex) [42
 
 ] (Chuong/7_Luu_y_tai_lieu_tham_khao.tex
 Overfull \hbox (1.56705pt too wide) in paragraph at lines 24--27
@@ -2004,7 +2188,7 @@ Overfull \hbox (0.28038pt too wide) in paragraph at lines 34--36
 
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [40
+ [43
 
 ])
 
@@ -2014,7 +2198,7 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
 
-[41]
+[44]
 
 Package biblatex Warning: Using fallback definition for \mkbibdatelong.
 (biblatex)                The command should be defined in the .lbx file.
@@ -2259,16 +2443,16 @@ Package biblatex Warning: Bibliography string 'september' untranslated
 Package biblatex Warning: Bibliography string 'url' untranslated
 (biblatex)                at entry 'LectureA' on input line 319.
 
-[42
+[45
 
-] [43
+] [46
 
 ]
 Phụ lục A.
 (Chuong/Phu_luc_A.tex
 Underfull \vbox (badness 10000) has occurred while \output is active []
 
- [44
+ [47
 
 ]
 Underfull \vbox (badness 10000) has occurred while \output is active []
@@ -2281,7 +2465,7 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
 
-[45]
+[48]
 File: Hinhve/IoT.png Graphic file (type bmp)
 <Hinhve/IoT.png>
 
@@ -2292,12 +2476,12 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
 
-[46]
+[49]
 
-LaTeX Warning: Citation 'scott2013sdn' on page 47 undefined on input line 92.
+LaTeX Warning: Citation 'scott2013sdn' on page 50 undefined on input line 92.
 
 
-LaTeX Warning: Citation 'ashton2009internet' on page 47 undefined on input line 92.
+LaTeX Warning: Citation 'ashton2009internet' on page 50 undefined on input line 92.
 
 
 Overfull \hbox (5.02641pt too wide) in paragraph at lines 92--93
@@ -2316,7 +2500,7 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
 
-[47]
+[50]
 
 Package fancyhdr Warning: \headheight is too small (10.0pt): 
 (fancyhdr)                Make it at least 16.2645pt, for example:
@@ -2324,9 +2508,9 @@ Package fancyhdr Warning: \headheight is too small (10.0pt):
 (fancyhdr)                You might also make \topmargin smaller:
 (fancyhdr)                \addtolength{\topmargin}{-6.2645pt}.
 
-[48]
+[51]
 Phụ lục B.
-(Chuong/Phu_luc_B.tex) [49
+(Chuong/Phu_luc_B.tex) [52
 
 ] (DoAn.aux)
  ***********
@@ -2348,7 +2532,7 @@ LaTeX Warning: There were undefined references.
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `DoAn.out' has not changed.
-(rerunfilecheck)             Checksum: 08CCF6098887546AE35B37BB8A802F17;14059.
+(rerunfilecheck)             Checksum: 5C66E7EB8CC2CE70D6228FCBC8B995C2;15297.
 
 Package biblatex Warning: Please (re)run BibTeX on the file(s):
 (biblatex)                DoAn
@@ -2359,12 +2543,12 @@ Package logreq Info: Writing requests to 'DoAn.run.xml'.
 
  ) 
 Here is how much of TeX's memory you used:
- 34344 strings out of 402986
- 693528 string characters out of 5448503
- 1464667 words of memory out of 5000000
- 62571 multiletter control sequences out of 15000+600000
+ 34346 strings out of 402986
+ 693561 string characters out of 5448503
+ 1466035 words of memory out of 5000000
+ 62573 multiletter control sequences out of 15000+600000
  637367 words of font info for 112 fonts, out of 8000000 for 9000
  1348 hyphenation exceptions out of 8191
  108i,12n,107p,2565b,5068s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
-Output written on DoAn.xdv (61 pages, 971012 bytes).
+Output written on DoAn.xdv (64 pages, 1027468 bytes).
