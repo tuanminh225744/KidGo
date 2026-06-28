@@ -40,32 +40,32 @@ export const updateProfile = async (req, res, next) => {
   }
 };
 
-/**
- * PUT /api/v1/users/me/device-token
- * Cập nhật FCM token
- */
-export const updateDeviceToken = async (req, res, next) => {
-  try {
-    const { deviceToken } = req.body;
-    if (!deviceToken) {
-      throw new AppError("Vui lòng cung cấp deviceToken", 400);
-    }
+// /**
+//  * PUT /api/v1/users/me/device-token
+//  * Cập nhật FCM token
+//  */
+// export const updateDeviceToken = async (req, res, next) => {
+//   try {
+//     const { deviceToken } = req.body;
+//     if (!deviceToken) {
+//       throw new AppError("Vui lòng cung cấp deviceToken", 400);
+//     }
 
-    const fetchResult = await getUserById(req.user.id);
-    const user = fetchResult.data;
+//     const fetchResult = await getUserById(req.user.id);
+//     const user = fetchResult.data;
 
-    // Thêm token nếu chưa tồn tại
-    let deviceTokens = user.deviceTokens || [];
-    if (!deviceTokens.includes(deviceToken)) {
-      deviceTokens.push(deviceToken);
-      await updateUser(req.user.id, { deviceTokens });
-    }
+//     // Thêm token nếu chưa tồn tại
+//     let deviceTokens = user.deviceTokens || [];
+//     if (!deviceTokens.includes(deviceToken)) {
+//       deviceTokens.push(deviceToken);
+//       await updateUser(req.user.id, { deviceTokens });
+//     }
 
-    return success(res, null, "Cập nhật Device Token thành công", 200);
-  } catch (error) {
-    next(error);
-  }
-};
+//     return success(res, null, "Cập nhật Device Token thành công", 200);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
 
 /**
  * POST /api/v1/users/upload-avatar

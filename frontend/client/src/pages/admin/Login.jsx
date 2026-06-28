@@ -42,8 +42,8 @@ export default function Login() {
     } catch (err) {
       setError(
         err.response?.data?.message ||
-          err.message ||
-          "Đăng nhập thất bại. Vui lòng thử lại.",
+        err.message ||
+        "Đăng nhập thất bại. Vui lòng thử lại.",
       );
     } finally {
       setLoading(false);
@@ -52,7 +52,7 @@ export default function Login() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4 md:p-8">
-      <div className="w-full max-w-5xl bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row">
+      <div className="w-full max-w-6xl bg-white rounded-[2rem] shadow-2xl overflow-hidden flex flex-col md:flex-row">
         {/* Left Side - Branding / Decorative */}
         <div className="md:w-1/2 bg-blue-600 p-10 flex flex-col justify-between relative overflow-hidden hidden md:flex text-white">
           <div className="absolute inset-0 bg-gradient-to-br from-blue-500 to-blue-800 opacity-90" />

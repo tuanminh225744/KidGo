@@ -395,7 +395,7 @@ export const listDriversAdmin = async ({
  */
 export const getDriverDetailAdmin = async (driverId) => {
   const driver = await Driver.findById(driverId)
-    .populate("user", "-password -deviceTokens")
+    .populate("user", "-password")
     .populate("vehicles")
     .lean();
   if (!driver) throw new Error("Tài xế không tồn tại.");
@@ -405,7 +405,7 @@ export const getDriverDetailAdmin = async (driverId) => {
     driverId,
     status: { $in: ["scheduled", "picking_up", "in_progress"] },
   }).sort({ createdAt: -1 });
-  
+
   if (activeTrip) {
     driver.activeTripId = activeTrip._id;
   }

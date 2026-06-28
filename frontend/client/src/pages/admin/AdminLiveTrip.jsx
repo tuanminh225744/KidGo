@@ -85,8 +85,8 @@ export default function AdminLiveTrip() {
     const r = trip.routeId;
     const pickup =
       r.actualPickupCoords &&
-      r.actualPickupCoords.coordinates &&
-      r.actualPickupCoords.coordinates.length === 2
+        r.actualPickupCoords.coordinates &&
+        r.actualPickupCoords.coordinates.length === 2
         ? r.actualPickupCoords.coordinates
         : r.estimatedPickupCoords && r.estimatedPickupCoords.coordinates
           ? r.estimatedPickupCoords.coordinates
@@ -94,8 +94,8 @@ export default function AdminLiveTrip() {
 
     const dropoff =
       r.actualDropoffCoords &&
-      r.actualDropoffCoords.coordinates &&
-      r.actualDropoffCoords.coordinates.length === 2
+        r.actualDropoffCoords.coordinates &&
+        r.actualDropoffCoords.coordinates.length === 2
         ? r.actualDropoffCoords.coordinates
         : r.estimatedDropoffCoords && r.estimatedDropoffCoords.coordinates
           ? r.estimatedDropoffCoords.coordinates
@@ -110,7 +110,7 @@ export default function AdminLiveTrip() {
 
   return (
     <div className="flex-1 flex flex-col bg-gray-50 h-full overflow-hidden p-4 md:p-8">
-      <div className="max-w-5xl mx-auto w-full h-full flex flex-col gap-6">
+      <div className="max-w-6xl mx-auto w-full h-full flex flex-col gap-6">
         {/* Header */}
         <div className="flex items-center gap-4 bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
           <button
@@ -125,18 +125,17 @@ export default function AdminLiveTrip() {
             </h1>
             <p className="text-sm text-gray-500">ID: {tripId}</p>
           </div>
-          
+
           {trip && (
             <div className="ml-auto">
-              <span className={`px-4 py-1.5 rounded-full text-sm font-bold ${
-                trip.status === "picking_up" ? "bg-yellow-100 text-yellow-800" :
-                trip.status === "in_progress" ? "bg-blue-100 text-blue-800" :
-                trip.status === "completed" ? "bg-green-100 text-green-800" :
-                "bg-gray-100 text-gray-800"
-              }`}>
+              <span className={`px-4 py-1.5 rounded-full text-sm font-bold ${trip.status === "picking_up" ? "bg-yellow-100 text-yellow-800" :
+                  trip.status === "in_progress" ? "bg-blue-100 text-blue-800" :
+                    trip.status === "completed" ? "bg-green-100 text-green-800" :
+                      "bg-gray-100 text-gray-800"
+                }`}>
                 {trip.status === "picking_up" ? "Đang đi đón khách" :
-                 trip.status === "in_progress" ? "Đang trên đường (đã đón khách)" :
-                 trip.status === "completed" ? "Đã hoàn thành" : trip.status}
+                  trip.status === "in_progress" ? "Đang trên đường (đã đón khách)" :
+                    trip.status === "completed" ? "Đã hoàn thành" : trip.status}
               </span>
             </div>
           )}

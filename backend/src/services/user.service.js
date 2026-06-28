@@ -10,7 +10,7 @@ import Kid from "../models/core/kid.model.js";
 export const getUserById = async (userId) => {
   try {
     const user = await User.findById(userId)
-      .select("-password -deviceTokens")
+      .select("-password")
       .populate("driverId"); // Populate driver info if available
 
     if (!user || !user.isActive) {
@@ -34,7 +34,7 @@ export const updateUser = async (userId, updateData) => {
       userId,
       { $set: updateData },
       { returnDocument: "after", runValidators: true },
-    ).select("-password -deviceTokens");
+    ).select("-password");
     if (!updatedUser) {
       throw new Error("User not found");
     }
@@ -55,7 +55,7 @@ export const softDeleteUser = async (userId) => {
       userId,
       { isActive: false },
       { returnDocument: "after" },
-    ).select("-password -deviceTokens");
+    ).select("-password");
     if (!deletedUser) {
       throw new Error("User not found");
     }
@@ -77,7 +77,7 @@ export const toggleUserStatus = async (userId, isActive) => {
       userId,
       { isActive },
       { returnDocument: "after", runValidators: true },
-    ).select("-password -deviceTokens");
+    ).select("-password");
     if (!updatedUser) {
       throw new Error("User not found");
     }
@@ -116,7 +116,7 @@ export const listParents = async ({
   const skip = (page - 1) * limit;
   const [users, total] = await Promise.all([
     User.find(query)
-      .select("-password -deviceTokens")
+      .select("-password")
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit),
@@ -134,7 +134,7 @@ export const listParents = async ({
  * Chi tiết một phụ huynh theo userId
  */
 export const getParentById = async (userId) => {
-  const user = await User.findById(userId).select("-password -deviceTokens").lean();
+  const user = await User.findById(userId).select("-password").lean();
   if (!user || user.role !== "parent")
     throw new Error("Phụ huynh không tồn tại.");
 
@@ -152,7 +152,7 @@ export const suspendUser = async (userId) => {
     userId,
     { isActive: false },
     { new: true },
-  ).select("-password -deviceTokens");
+  ).select("-password");
   if (!user) throw new Error("Người dùng không tồn tại.");
   return { success: true, message: "User suspended", data: user };
 };
@@ -165,7 +165,7 @@ export const reactivateUser = async (userId) => {
     userId,
     { isActive: true },
     { new: true },
-  ).select("-password -deviceTokens");
+  ).select("-password");
   if (!user) throw new Error("Người dùng không tồn tại.");
   return { success: true, message: "User reactivated", data: user };
 };

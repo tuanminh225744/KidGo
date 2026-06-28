@@ -10,7 +10,6 @@ const UserSchema = new Schema(
     avatar: { type: String },
     role: { type: String, enum: ['parent', 'driver', 'admin'], default: 'parent' },
     isVerified: { type: Boolean, default: false },
-    deviceTokens: { type: [String], default: [] }, // FCM tokens
     isActive: { type: Boolean, default: true },
     driverId: { type: Schema.Types.ObjectId, ref: "Driver", unique: true, sparse: true },
   },

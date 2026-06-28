@@ -1,19 +1,19 @@
 # Fdb version 4
-["bibtex DoAn"] 1782448533.8619 "DoAn.aux" "DoAn.bbl" "DoAn" 1782448544.63747 0
+["bibtex DoAn"] 1782612924.50239 "DoAn.aux" "DoAn.bbl" "DoAn" 1782612966.21079 0
   "./Danh_sach_tai_lieu_tham_khao.bib" 1782385035 3525 429afefd605cb1b9678efbc3f41011db ""
-  "./DoAn-blx.bib" 1782448539 343 eecd58be191eac03682f8fda492bb690 ""
+  "./DoAn-blx.bib" 1782612960 343 eecd58be191eac03682f8fda492bb690 ""
   "C:/Users/Admin/AppData/Local/Programs/MiKTeX/bibtex/bst/biblatex/biblatex.bst" 1752408733 65510 9a2a51799b543ff279b8ea2dd91ec499 ""
-  "DoAn.aux" 1782448539 25619 f7634a6bd30e0572a2bbb3b10a0ccee7 "xelatex"
+  "DoAn.aux" 1782612960 29519 168ff631eec1ba34cd63c82f8b453dde "xelatex"
   (generated)
   "DoAn.bbl"
   "DoAn.blg"
   (rewritten before read)
-["xdvipdfmx"] 1782448541.72394 "DoAn.xdv" "DoAn.pdf" "DoAn" 1782448544.65937 0
-  "DoAn.xdv" 1782448539 766892 86ae925d81f082c6dbaa56bbff22379e "xelatex"
+["xdvipdfmx"] 1782612962.92347 "DoAn.xdv" "DoAn.pdf" "DoAn" 1782612966.22548 0
+  "DoAn.xdv" 1782612960 971012 62c1aaf095db209f957e2675cd214d64 "xelatex"
   (generated)
   "DoAn.pdf"
   (rewritten before read)
-["xelatex"] 1782448534.28847 "d:/FileStudy/KidGo/docs/SOICT_DATN_Application_VIE_Template/DoAn.tex" "DoAn.xdv" "DoAn" 1782448544.63993 0
+["xelatex"] 1782612956.10715 "d:/FileStudy/KidGo/docs/SOICT_DATN_Application_VIE_Template/DoAn.tex" "DoAn.xdv" "DoAn" 1782612966.21149 0
   "Bia.tex" 1782295224 1905 ec26de4e0be552947a33219a3f65bbf1 ""
   "Bia_lot.tex" 1782384137 1787 f26a73a36359b4dec10a43083532b9f4 ""
   "C:/Users/Admin/AppData/Local/MiKTeX/miktex/data/le/xetex/xelatex.fmt" 1782291592 27176734 10823c63cbd31f9deeb1b922b03f2761 ""
@@ -193,27 +193,30 @@
   "Chuong/1_Gioi_thieu.tex" 1782298083 11109 e51a7d6be5a772b67a7d2cf7af2d82a6 ""
   "Chuong/2_Khao_sat.tex" 1782378031 19641 dbdee50c9af2b35e40093a33747981b1 ""
   "Chuong/3_Cong_nghe.tex" 1782385267 6655 117c56ee09aeb1d8b4b320964affeeba ""
-  "Chuong/4_Ket_qua_thuc_nghiem.tex" 1782448525 18547 bfebe8e66fb74f450aad141857dba7bc ""
+  "Chuong/4_Ket_qua_thuc_nghiem.tex" 1782612955 53286 7c33c2aa285826cc3dea5ad87135804f ""
   "Chuong/5_Giai_phap_dong_gop.tex" 1782290144 2243 8f8f53b9a7d3193c2570ff1de5f3ab6a ""
   "Chuong/6_Ket_luan.tex" 1782290144 924 e439869f20b865668f514348aeb8e0a0 ""
   "Chuong/7_Luu_y_tai_lieu_tham_khao.tex" 1782290144 2973 808afe2b73ced552fe7399ab9250d935 ""
   "Chuong/Phu_luc_A.tex" 1782290144 9378 3e8888d4f8ea75fb89c3c4469cc97c55 ""
   "Chuong/Phu_luc_B.tex" 1782290144 404 f941ff7d7d51c116a1fd2785a57b73bf ""
-  "DoAn.aux" 1782448539 25619 f7634a6bd30e0572a2bbb3b10a0ccee7 "xelatex"
-  "DoAn.bbl" 1782448534 9969 45e1ac0222b26c73767765ee3d9fc73b "bibtex DoAn"
-  "DoAn.lof" 1782448539 2661 3e945b2ebe437933d224ea0f4cf42d82 "xelatex"
-  "DoAn.lot" 1782448539 511 0f28581ca5944c5993a8e4d79671203e "xelatex"
-  "DoAn.out" 1782448539 14059 84b42867d19713329c0d4ae727feb2f8 "xelatex"
-  "DoAn.run.xml" 1782448539 2641 c007de01a04f6884cb8d718cd6051bf8 "xelatex"
+  "DoAn.aux" 1782612960 29519 168ff631eec1ba34cd63c82f8b453dde "xelatex"
+  "DoAn.bbl" 1782612924 9969 45e1ac0222b26c73767765ee3d9fc73b "bibtex DoAn"
+  "DoAn.lof" 1782612960 3943 9b5b7a779004eb1312006958352fde95 "xelatex"
+  "DoAn.lot" 1782612960 883 5c542c639d1ffee75afa715acc04f8da "xelatex"
+  "DoAn.out" 1782612960 14059 08ccf6098887546ae35b37bb8a802f17 "xelatex"
+  "DoAn.run.xml" 1782612960 2641 c007de01a04f6884cb8d718cd6051bf8 "xelatex"
   "DoAn.tex" 1782383284 10799 8ee6b1e4316275794aefcd7527d74816 ""
-  "DoAn.toc" 1782448539 7687 2dcd7d49877c11edda13caca8e6ebf30 "xelatex"
+  "DoAn.toc" 1782612960 7687 70e56c37eb5a5ffefb2082b33e6a5b95 "xelatex"
   "Hinhve/Bia.PNG" 1782290145 413113 1120723241f65ec38aa44fc56f88c7bd ""
+  "Hinhve/BieuDoER.png" 1782610230 44633 9597612de2d1093d34e1d38705fe64f6 ""
   "Hinhve/BieuDoGoiAccount.png" 1782445778 21269 0d8045503ec05c7110a457c93d80bca9 ""
   "Hinhve/BieuDoGoiNotification.png" 1782446449 10455 8b45106765465f76b84c797d1844c9b0 ""
-  "Hinhve/BieuDoGoiPayment.png" 1782445881 24285 07d5572fab7c9b1ab3812a8a3a667317 ""
+  "Hinhve/BieuDoGoiPayment.png" 1782449485 16160 fe468d907b71b69993d3fc17352e0868 ""
   "Hinhve/BieuDoGoiSupport.png" 1782447842 32501 b6deef91dcb8b4ed5b03d2371f2f1acf ""
   "Hinhve/BieuDoGoiTongQuan.png" 1782446769 80407 0b48c3ea2955b91828871b6602a05c59 ""
   "Hinhve/BieuDoGoiTrip.png" 1782442514 10279 5bf80666cf2afc17a0cd03a703ce0069 ""
+  "Hinhve/BieuDoTrinhTuDatXe.png" 1782596065 44167 a04c4263ae3894dfbabca2841562962f ""
+  "Hinhve/BieuDoTrinhTuThucHienChuyenDi.png" 1782598705 585729 f7804add97cc40cac2ece33a1263bd18 ""
   "Hinhve/GayBia.PNG" 1782290145 191331 fb437dd28560b8528e71b2e66491ec72 ""
   "Hinhve/IoT.png" 1782290145 78538 5c31825013155aa5dc0d253bd3321463 ""
   "Hinhve/UseCasePhanRaNhanThucHienChuyen.png" 1782351177 24362 45efa4b3da010e6df2cfc2da02611ef0 ""

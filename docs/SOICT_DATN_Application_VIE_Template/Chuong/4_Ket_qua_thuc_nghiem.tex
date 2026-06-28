@@ -6,7 +6,7 @@
 Hệ thống KidGo được xây dựng dựa trên \textbf{Kiến trúc Nguyên khối phân tầng (Layered Monolithic Architecture)} kết hợp với mô hình \textbf{MVC biến thể dành cho RESTful API} (còn gọi là mô hình Controller-Service-Model).
 
 \textbf{Lý thuyết kiến trúc cơ bản:}
-Kiến trúc phân tầng (Layered Architecture) chia tách ứng dụng thành các lớp (layers) có vai trò và trách nhiệm riêng biệt. Các lớp ở tầng cao (như giao diện, điều khiển) sẽ gọi xuống các lớp ở tầng thấp hơn (như nghiệp vụ, dữ liệu). Việc áp dụng kiến trúc này giúp tăng tính module hóa, dễ dàng bảo trì và cô lập lỗi (Separation of Concerns). Đối với các hệ thống Web API, mô hình MVC truyền thống (Model-View-Controller) thường được tùy biến: thay vì Server trả về giao diện HTML (View) trực tiếp, Server sẽ trả về dữ liệu định dạng JSON, và phần "View" thực sự sẽ do các ứng dụng Client (React, Mobile App) đảm nhận.
+Kiến trúc phân tầng (Layered Architecture) chia tách ứng dụng thành các lớp (layers) có vai trò và trách nhiệm riêng biệt. Các lớp ở tầng cao (như giao diện, điều khiển) sẽ gọi xuống các lớp ở tầng thấp hơn (như nghiệp vụ, dữ liệu). Việc áp dụng kiến trúc này giúp tăng tính module hóa, dễ dàng bảo trì và cô lập lỗi (Separation of Concerns). Đối với các hệ thống Web API, mô hình MVC truyền thống (Model-View-Controller) thường được tùy biến: thay vì Server trả về giao diện HTML (View) trực tiếp, Server sẽ trả về dữ liệu định dạng JSON, và phần "View" thực sự sẽ do các ứng dụng Client (React) đảm nhận.
 
 \textbf{Áp dụng vào hệ thống KidGo:}
 Trong dự án này, toàn bộ mã nguồn phía Backend được gói gọn trong một khối duy nhất (Monolithic) để dễ dàng triển khai và quản lý trong giai đoạn đầu phát triển. Hệ thống tuân thủ chặt chẽ mô hình Controller-Service-Model (CSM) với các thành phần cụ thể được ánh xạ như sau:
@@ -108,7 +108,7 @@ Gói này tập trung quản lý thông tin định danh và hồ sơ người d
 \textbf{Giải thích thiết kế:}
 Gói này xử lý mọi vấn đề liên quan đến dòng tiền.
 \begin{itemize}
-    \item \textbf{Quan hệ Kết hợp (Association)}: Hệ thống hỗ trợ 2 hình thức thanh toán. Người dùng có thể thực hiện thanh toán trực tiếp cho một chuyến xe lẻ (\texttt{Trip}), khi này hệ thống sinh ra một \texttt{Payment} tương ứng. Nếu người dùng muốn đặt nhiều chuyến, họ sẽ đăng ký gói cước (\texttt{Subscription}) và thực hiện thanh toán một lần duy nhất lúc mua gói. Do vậy, một \texttt{Subscription} chỉ có duy nhất 1 \texttt{Payment}, và một \texttt{Payment} sẽ được liên kết với một \texttt{Trip} (chuyến lẻ) hoặc một \texttt{Subscription} (mua gói).
+    \item \textbf{Quan hệ Kết hợp (Association)}: Hệ thống hỗ trợ 2 hình thức thanh toán. Người dùng có thể thực hiện thanh toán trực tiếp cho một chuyến xe lẻ (\texttt{Trip})hoặc thanh toán cho nhiều chuyến, khi này hệ thống sinh ra một \texttt{Payment} tương ứng. Nếu người dùng muốn đặt nhiều chuyến, họ sẽ đăng ký gói cước (\texttt{Subscription}) và thực hiện thanh toán một lần duy nhất lúc mua gói.
 \end{itemize}
 
 \subsubsection{Gói Feedback \& Support và Notification}
@@ -136,29 +136,348 @@ Hai gói này cung cấp các thực thể dịch vụ bổ trợ giúp tăng c�
 
 \section{Thiết kế chi tiết}
 \subsection{Thiết kế giao diện}
-Phần này có độ dài từ hai đến ba trang. Sinh viên đặc tả thông tin về màn hình mà ứng dụng của mình hướng tới, bao gồm độ phân giải màn hình, kích thước màn hình, số lượng màu sắc hỗ trợ, v.v. Tiếp đến, sinh viên đưa ra các thống nhất/chuẩn hóa của mình khi thiết kế giao diện như thiết kế nút, điều khiển, vị trí hiển thị thông điệp phản hồi, phối màu, v.v. Sau cùng sinh viên đưa ra một số hình ảnh minh họa thiết kế giao diện cho các chức năng quan trọng nhất. Lưu ý, sinh viên không nhầm lẫn giao diện thiết kế với giao diện của sản phẩm sau cùng.
-\subsection{Thiết kế lớp}
-Phần này có độ dài từ ba đến bốn trang. Sinh viên trình bày thiết kế chi tiết các thuộc tính và phương thức cho một số lớp chủ đạo/quan trọng nhất của ứng dụng (từ 2-4 lớp). Thiết kế chi tiết cho các lớp khác, nếu muốn trình bày, sinh viên đưa vào phần phụ lục.
+\textbf{1. Đặc tả thiết bị và màn hình hướng tới} \\
+Hệ thống KidGo cung cấp giao diện dành cho Phụ huynh và Tài xế, được tối ưu hóa cho thiết bị di động (Mobile-First Design) thông qua ứng dụng Web (PWA/Responsive Web). Đồng thời, hệ thống cũng cung cấp trang Quản trị (Admin) dành cho nhân viên điều hành với thiết kế tối ưu cho máy tính để bàn (Desktop).
+\begin{itemize}
+    \item \textbf{Kích thước màn hình tiêu chuẩn đối với Phụ huynh/Tài xế:} Giao diện được thiết kế để hiển thị tối ưu trên màn hình dọc (portrait). Ứng dụng giới hạn chiều rộng tối đa là 430px (sử dụng thuộc tính \texttt{max-w-[430px]} trong Tailwind CSS), tương đương với kích thước của các dòng điện thoại thông minh cỡ lớn như iPhone Pro Max. Chiều cao được thiết lập toàn màn hình (\texttt{h-screen} và \texttt{min-h-screen}).
+    \item \textbf{Kích thước màn hình tiêu chuẩn đối với trang Quản trị (Admin):} Giao diện được thiết kế mở rộng dành cho máy tính (Desktop-First), giới hạn chiều rộng ở mức \texttt{max-w-6xl} (1152px) kết hợp với \texttt{mx-auto} để cung cấp không gian rộng rãi cho việc hiển thị các bảng dữ liệu phức tạp (như danh sách phụ huynh, tài xế, duyệt tài xế).
+    \item \textbf{Hỗ trợ màu sắc:} Chuẩn màu 24-bit True Color (16.7 triệu màu), cho phép hiển thị dải màu phong phú và độ tương phản cao, đặc biệt cho bản đồ nền tùy chỉnh (\texttt{map-bg}).
+\end{itemize}
 
-Để minh họa thiết kế lớp, sinh viên thiết kế luồng truyền thông điệp giữa các đối tượng tham gia cho 2 đến 3 use case quan trọng nào đó bằng biểu đồ trình tự (hoặc biểu đồ giao tiếp).
+\textbf{2. Chuẩn hóa thiết kế giao diện} \\
+Để đảm bảo tính nhất quán và trải nghiệm người dùng (UX) tốt nhất, hệ thống thiết kế (Design System) của KidGo được xây dựng thông qua cấu hình Tailwind CSS tùy chỉnh (\texttt{@theme}) như sau:
+\begin{itemize}
+    \item \textbf{Hệ thống màu sắc (Color Palette):}
+          \begin{itemize}
+              \item \textit{Màu chủ đạo (Primary \& Primary Container):} Xanh lam đậm (\#3629b0) và Xanh dương (\#4f46c8), được sử dụng xuyên suốt cho các nút bấm chính, biểu tượng đang hoạt động và nền nổi bật.
+              \item \textit{Màu nền (Surface):} Nền chính của ứng dụng sử dụng xám nhạt (\#f9f9ff), màu nền thẻ chứa (\#e7eefe), kết hợp với màu nền bản đồ tĩnh đặc biệt (\#E8EDF5).
+              \item \textit{Màu văn bản (On-Surface):} Chữ chính màu đen đậm (\#151c27) và chữ phụ màu xám (\#474554) đảm bảo độ tương phản khi đọc.
+              \item \textit{Màu cảnh báo và trạng thái:} Đỏ (\#ba1a1a) cho thông báo lỗi; ngoài ra còn kết hợp các tông màu xanh lá/vàng cho trạng thái thành công hoặc chờ xử lý.
+          \end{itemize}
+    \item \textbf{Kiểu chữ (Typography):} Sử dụng kết hợp \texttt{Plus Jakarta Sans} cho các tiêu đề (Heading) tạo sự hiện đại, rõ ràng, và \texttt{Nunito Sans} cho nội dung văn bản (Body, Font-sans) giúp dễ đọc trên mọi kích cỡ màn hình.
+    \item \textbf{Thành phần điều khiển (Nút, Input):} Các khối tương tác (Card, Bottom Sheet) được bo góc lớn (\texttt{rounded-[32px]}, \texttt{rounded-[40px]}), các nút bấm được bo góc vừa phải (\texttt{rounded-2xl}, \texttt{rounded-3xl}). Hệ thống dùng hiệu ứng đổ bóng tùy chỉnh (\texttt{soft-shadow}, \texttt{active-shadow}) để tạo chiều sâu và làm nổi bật các thành phần đè lên bản đồ.
+    \item \textbf{Thông điệp phản hồi (Feedback/Messages):} Các thông báo trạng thái, thẻ nổi chứa thông tin cuốc xe được đặt cố định phía trên hoặc dưới màn hình (\texttt{fixed top-0}, \texttt{fixed bottom-0}) với nền trắng trong suốt làm mờ (\texttt{backdrop-blur-md}), đảm bảo người dùng có thể đọc rõ chữ mà không che khuất hoàn toàn bản đồ phía dưới.
+\end{itemize}
+
+\textbf{3. Hình ảnh minh họa thiết kế một số chức năng quan trọng} \\
+Dưới đây là thiết kế giao diện (Mockup/Wireframe) cho một số luồng nghiệp vụ cốt lõi của người dùng.
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.35\textwidth]{Hinhve/UI_HomeBooking.png}
+    \caption{Thiết kế giao diện Màn hình Trang chủ và Đặt xe}
+    \label{fig:ui_home_booking}
+\end{figure}
+\textit{Mô tả:} Màn hình Trang chủ của Phụ huynh được thiết kế với bản đồ làm nền tảng. Phía dưới là thẻ thông tin (Bottom Sheet) kéo lên được, chứa các nút chọn trẻ em, địa điểm đón/trả và xem báo giá dự kiến. Nút "Đặt xe" (Primary Button) được làm nổi bật với màu xanh chủ đạo.
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.35\textwidth]{Hinhve/UI_Tracking.png}
+    \caption{Thiết kế giao diện Màn hình Theo dõi chuyến đi theo thời gian thực}
+    \label{fig:ui_tracking}
+\end{figure}
+\textit{Mô tả:} Giao diện Theo dõi chuyến đi hiển thị vị trí thực tế của xe trên bản đồ. Các thông tin quan trọng như thông tin tài xế, biển số xe, và thời gian dự kiến đến (ETA) được trình bày rõ ràng trên nền trắng. Nút liên lạc được bố trí thuận tiện.
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.35\textwidth]{Hinhve/UI_KidProfile.png}
+    \caption{Thiết kế giao diện Màn hình Quản lý hồ sơ trẻ em}
+    \label{fig:ui_kid_profile}
+\end{figure}
+\textit{Mô tả:} Màn hình quản lý hồ sơ cung cấp các biểu mẫu nhập liệu thân thiện. Các nhóm thông tin được phân tách bằng các thẻ (Cards) có hiệu ứng đổ bóng nhẹ, tạo không gian thoáng đãng và dễ nhìn cho người sử dụng.
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.8\textwidth]{Hinhve/UI_AdminDashboard.png}
+    \caption{Thiết kế giao diện Trang Quản trị (Admin)}
+    \label{fig:ui_admin_dashboard}
+\end{figure}
+\textit{Mô tả:} Giao diện Admin được thiết kế dàn trải trên không gian rộng lớn của màn hình Desktop (\texttt{max-w-6xl}), hiển thị dữ liệu dạng bảng (Table) hoặc các thẻ thống kê để nhân viên điều hành dễ dàng quản lý danh sách phụ huynh, tài xế và phê duyệt tài khoản mới.
+\subsection{Thiết kế lớp}
+Hệ thống KidGo sử dụng Mongoose (ODM) để định nghĩa cấu trúc dữ liệu trên nền tảng MongoDB. Do đặc thù kiến trúc, các lớp thực thể đóng vai trò cấu trúc hóa dữ liệu (Schema), trong khi các phương thức nghiệp vụ chủ yếu được quản lý ở tầng Service tương ứng. Dưới đây là thiết kế chi tiết cho 4 lớp quan trọng nhất: \texttt{User}, \texttt{Driver}, \texttt{Booking}, và \texttt{Trip}.
+
+\textbf{1. Lớp \texttt{User} (Người dùng / Phụ huynh)}
+Lớp này đại diện cho hồ sơ định danh chung của mọi người dùng trong hệ thống.
+\begin{itemize}
+    \item \textit{Thuộc tính:} \texttt{\_id} (ObjectId), \texttt{phone} (Số điện thoại, duy nhất), \texttt{email} (Email, duy nhất), \texttt{password} (Mật khẩu đã mã hóa), \texttt{fullName} (Họ và tên), \texttt{avatar} (Đường dẫn ảnh), \texttt{role} (Vai trò: parent, driver, admin), \texttt{isVerified} (Trạng thái xác thực), \texttt{isActive} (Trạng thái hoạt động), \texttt{driverId} (Khóa ngoại nếu là tài xế).
+    \item \textit{Phương thức nghiệp vụ:} \texttt{register(data)}, \texttt{login(phone, password)}, \texttt{getCurrentProfile()}, \texttt{updateProfile(data)}, \texttt{verifyOTP(otp)}.
+\end{itemize}
+
+\textbf{2. Lớp \texttt{Driver} (Tài xế)}
+Lớp mở rộng từ User, chứa các thông tin đặc thù dành cho nghiệp vụ vận tải.
+\begin{itemize}
+    \item \textit{Thuộc tính:} \texttt{\_id} (ObjectId), \texttt{user} (Tham chiếu đến User), \texttt{licenseNumber} (Số GPLX), \texttt{licenseExpiry} (Hết hạn GPLX), \texttt{status} (Trạng thái duyệt: pending, active, suspended, rejected), \texttt{isOnline} (Sẵn sàng nhận chuyến), \texttt{rideStatus} (Trạng thái chuyến đi), \texttt{currentLocation} (Tọa độ GPS hiện tại), \texttt{certificationLevel} (Cấp độ 0-5), \texttt{totalTrips} (Tổng chuyến), \texttt{vehicleId} (Phương tiện).
+    \item \textit{Phương thức nghiệp vụ:} \texttt{updateLocation(lat, lng)}, \texttt{acceptBooking(bookingId)}, \texttt{rejectBooking(bookingId)}, \texttt{getDriverProfile()}, \texttt{updateDriverProfile(data)}.
+\end{itemize}
+
+\textbf{3. Lớp \texttt{Booking} (Yêu cầu đặt xe)}
+Lớp quản lý vòng đời của một yêu cầu tìm tài xế trước khi chuyến đi diễn ra.
+\begin{itemize}
+    \item \textit{Thuộc tính:} \texttt{\_id} (ObjectId), \texttt{parentId} (Người đặt), \texttt{kidId} (Trẻ em), \texttt{routeId} (Lộ trình), \texttt{scheduleId} (Lịch trình định kỳ), \texttt{preferredDriverId} (Tài xế ưu tiên), \texttt{assignedDriverId} (Tài xế nhận chuyến), \texttt{status} (pending, matched, confirmed, cancelled), \texttt{scheduledTime} (Thời gian bắt đầu), \texttt{type} (one\_time, recurring), \texttt{paymentId} (Thanh toán).
+    \item \textit{Phương thức nghiệp vụ:} \texttt{createBooking(data)}, \texttt{findAvailableDrivers(route, time)}, \texttt{assignDriver(driverId)}, \texttt{cancelBooking(reason)}.
+\end{itemize}
+
+\textbf{4. Lớp \texttt{Trip} (Chuyến đi thực tế)}
+Lớp lưu trữ và theo dõi các bước thực hiện chuyến đi sau khi ghép nối thành công.
+\begin{itemize}
+    \item \textit{Thuộc tính:} \texttt{\_id} (ObjectId), \texttt{bookingId} (Yêu cầu gốc), \texttt{driverId} (Tài xế), \texttt{kidId} (Trẻ em), \texttt{status} (scheduled, picking\_up, waiting, verifying, in\_progress, completed, cancelled), \texttt{otp} (Trạng thái xác thực), \texttt{pickupPhoto} (Minh chứng đón), \texttt{dropoffPhoto} (Minh chứng trả).
+    \item \textit{Phương thức nghiệp vụ:} \texttt{startTrip()}, \texttt{verifyPickup(otp, photo)}, \texttt{completeDropoff(photo)}.
+\end{itemize}
+
+\textbf{Biểu đồ trình tự minh họa các Use Case quan trọng}
+
+Để minh họa sự tương tác giữa các đối tượng (Object/Controller/Service) trong hệ thống, dưới đây là biểu đồ trình tự cho 2 Use Case cốt lõi: Đặt xe và Thực hiện chuyến đi.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Hinhve/BieuDoTrinhTuDatXe.png}
+    \caption{Biểu đồ trình tự Use Case: Đặt xe (Booking)}
+    \label{fig:seq_booking}
+\end{figure}
+\textit{Mô tả luồng:} Phụ huynh gửi yêu cầu đặt xe lên hệ thống thông qua \texttt{BookingService}. Dịch vụ này sẽ tạo \texttt{Booking} ở trạng thái chờ (\textit{pending}), sau đó truy vấn cơ sở dữ liệu để tìm tài xế khả dụng gần nhất và phát tín hiệu (Emit) qua \texttt{SocketServer} đến ứng dụng của Tài xế. Khi Tài xế bấm "Nhận chuyến", hệ thống gán tài xế, cập nhật trạng thái thành \textit{matched} và thông báo ngược lại cho Phụ huynh.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Hinhve/BieuDoTrinhTuThucHienChuyenDi.png}
+    \caption{Biểu đồ trình tự Use Case: Thực hiện chuyến đi}
+    \label{fig:seq_executing_trip}
+\end{figure}
+\textit{Mô tả luồng:} Tài xế tương tác liên tục với \texttt{TripModel} thông qua Service. Các bước lần lượt là: chuyển trạng thái sang \textit{waiting} (Đã đến điểm đón và đang chờ bé), \textit{verifying} (Đã gặp bé và đang chờ xác thực). Tiếp theo, tài xế xác thực thông qua API verify-otp, question, photo. Nếu hợp lệ, chuyến đi chuyển sang \textit{in\_progress} và phát sự kiện \textit{kid\_picked\_up} cho Phụ huynh. Quá trình di chuyển sẽ cập nhật GPS liên tục qua socket cho đến khi hoàn thành chuyến (\textit{completed}) và trả bé an toàn.
 \subsection{Thiết kế cơ sở dữ liệu}
-Phần này có độ dài từ hai đến bốn trang. Sinh viên thiết kế, vẽ và giải thích biểu đồ thực thể liên kết (E-R diagram). Từ đó, sinh viên thiết kế cơ sở dữ liệu tùy theo hệ quản trị cơ sở dữ liệu mà mình sử dụng (SQL, NoSQL, Firebase, v.v.)
+Hệ thống KidGo lưu trữ dữ liệu trên nền tảng \textbf{MongoDB} – một hệ quản trị cơ sở dữ liệu phi cấu trúc (NoSQL) hướng tài liệu (Document-based). Quá trình tương tác với cơ sở dữ liệu được thực hiện thông qua thư viện Mongoose (ODM), cho phép định nghĩa các khuôn mẫu dữ liệu (Schema) một cách chặt chẽ, hỗ trợ kiểm tra kiểu dữ liệu và thiết lập các mối quan hệ tham chiếu (References) giữa các Collections (tương tự như khóa ngoại trong cơ sở dữ liệu quan hệ SQL).
+
+\textbf{1. Biểu đồ Thực thể - Liên kết (Entity-Relationship Diagram)}
+
+Mặc dù MongoDB là hệ quản trị cơ sở dữ liệu NoSQL, nhưng việc chuẩn hóa cấu trúc dữ liệu dưới dạng biểu đồ thực thể liên kết (E-R Diagram) vẫn vô cùng cần thiết để mô tả bức tranh tổng quan về các luồng nghiệp vụ lõi và sự phụ thuộc dữ liệu.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{Hinhve/BieuDoER.png}
+    \caption{Biểu đồ Thực thể - Liên kết (E-R Diagram) của hệ thống}
+    \label{fig:er_diagram}
+\end{figure}
+
+\textit{Giải thích các mối quan hệ trọng tâm:}
+\begin{itemize}
+    \item \textbf{USER - KID (1-N):} Một Phụ huynh (\texttt{User}) có thể đăng ký hồ sơ cho nhiều Trẻ em (\texttt{Kid}). Một trẻ em luôn phải thuộc sự quản lý của một phụ huynh duy nhất.
+    \item \textbf{USER - DRIVER - VEHICLE (1-1-1):} Khi một Người dùng đăng ký làm Tài xế, hệ thống sinh ra một hồ sơ \texttt{Driver} gắn liền với \texttt{User} đó (quan hệ 1-1). Mỗi tài xế sẽ đăng ký một phương tiện \texttt{Vehicle} để hành nghề.
+    \item \textbf{BOOKING - TRIP (1-1):} Yêu cầu đặt xe (\texttt{Booking}) sau khi được ghép nối thành công với tài xế sẽ sinh ra một chuyến đi thực tế (\texttt{Trip}).
+    \item \textbf{BOOKING - TRIP\_SCHEDULE (N-1):} Một lịch trình đặt xe định kỳ (\texttt{TripSchedule}) có thể sinh ra tự động nhiều yêu cầu đặt xe (\texttt{Booking}) theo các ngày trong tuần.
+\end{itemize}
+
+\textbf{2. Thiết kế chi tiết Cơ sở dữ liệu (Database Schema)}
+
+Dựa trên biểu đồ E-R, dữ liệu được ánh xạ thành các Document Schema lưu trong các Collection của MongoDB. Dưới đây là chi tiết toàn bộ các trường dữ liệu của 6 Collection cốt lõi nhất đại diện cho nhóm Nền tảng (Core) và Vận hành (Operational).
+
+\textbf{2.1. Bảng \texttt{users} (Tài khoản người dùng)} \\
+Lưu trữ thông tin xác thực và hồ sơ cơ bản của mọi người dùng (Phụ huynh, Tài xế, Quản trị viên).
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|p{4cm}|p{5cm}|}
+        \hline
+        \textbf{Trường dữ liệu} & \textbf{Kiểu} & \textbf{Ràng buộc / Mặc định}                           & \textbf{Mô tả}                      \\ \hline
+        \texttt{\_id}           & ObjectId      & Khóa chính                                              & Mã định danh tự sinh                \\ \hline
+        \texttt{phone}          & String        & Unique, Required                                        & Số điện thoại đăng nhập             \\ \hline
+        \texttt{email}          & String        & Unique, Required, Index                                 & Email liên hệ                       \\ \hline
+        \texttt{password}       & String        & Required                                                & Mật khẩu (đã băm mã hóa)            \\ \hline
+        \texttt{fullName}       & String        & Required                                                & Họ và tên đầy đủ                    \\ \hline
+        \texttt{avatar}         & String        & Tự chọn                                                 & Đường dẫn ảnh đại diện              \\ \hline
+        \texttt{role}           & String        & Enum (\texttt{parent}, \texttt{driver}, \texttt{admin}) & Vai trò (Mặc định: \texttt{parent}) \\ \hline
+        \texttt{isVerified}     & Boolean       & Default: \texttt{false}                                 & Trạng thái đã xác thực              \\ \hline
+        \texttt{isActive}       & Boolean       & Default: \texttt{true}                                  & Trạng thái hoạt động                \\ \hline
+        \texttt{driverId}       & ObjectId      & Ref: \texttt{Driver}, Unique                            & Khóa ngoại tham chiếu tài xế        \\ \hline
+        \texttt{createdAt}      & Date          & Tự động sinh                                            & Thời điểm tạo tài khoản             \\ \hline
+        \texttt{updatedAt}      & Date          & Tự động sinh                                            & Thời điểm cập nhật cuối             \\ \hline
+    \end{tabular}
+\end{table}
+
+\textbf{2.2. Bảng \texttt{kids} (Hồ sơ trẻ em)} \\
+Lưu trữ thông tin của các bé được phụ huynh thêm vào để đặt chuyến.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|p{4cm}|p{5cm}|}
+        \hline
+        \textbf{Trường dữ liệu}     & \textbf{Kiểu} & \textbf{Ràng buộc / Mặc định}       & \textbf{Mô tả}              \\ \hline
+        \texttt{\_id}               & ObjectId      & Khóa chính                          & Mã định danh tự sinh        \\ \hline
+        \texttt{parentId}           & ObjectId      & Ref: \texttt{User}, Required, Index & Phụ huynh quản lý hồ sơ bé  \\ \hline
+        \texttt{fullName}           & String        & Required                            & Họ và tên của bé            \\ \hline
+        \texttt{dateOfBirth}        & Date          & Tự chọn                             & Ngày tháng năm sinh         \\ \hline
+        \texttt{avatar}             & String        & Tự chọn                             & Ảnh đại diện của bé         \\ \hline
+        \texttt{phone}              & String        & Tự chọn                             & Số điện thoại riêng của bé  \\ \hline
+        \texttt{school}             & String        & Tự chọn                             & Tên trường học              \\ \hline
+        \texttt{notes}              & String        & Tự chọn                             & Ghi chú đặc biệt            \\ \hline
+        \texttt{isActive}           & Boolean       & Default: \texttt{true}              & Trạng thái hiển thị hồ sơ   \\ \hline
+        \texttt{securitySettings}   & Object        & Nested                              & Cấu hình bảo mật đón/trả    \\ \hline
+        \texttt{..otp}              & Boolean       & Default: \texttt{false}             & Yêu cầu nhập OTP            \\ \hline
+        \texttt{..pickupPhoto}      & Boolean       & Default: \texttt{false}             & Bắt buộc chụp ảnh đón       \\ \hline
+        \texttt{..dropoffPhoto}     & Boolean       & Default: \texttt{false}             & Bắt buộc chụp ảnh trả       \\ \hline
+        \texttt{..securityQuestion} & Boolean       & Default: \texttt{false}             & Yêu cầu hỏi câu hỏi bảo mật \\ \hline
+        \texttt{securityQuestion}   & String        & Tự chọn                             & Nội dung câu hỏi bảo mật    \\ \hline
+        \texttt{securityAnswer}     & String        & Tự chọn                             & Câu trả lời bảo mật khớp    \\ \hline
+        \texttt{createdAt}          & Date          & Tự động sinh                        & Thời điểm tạo hồ sơ         \\ \hline
+    \end{tabular}
+\end{table}
+
+\textbf{2.3. Bảng \texttt{drivers} (Hồ sơ tài xế)} \\
+Chứa thông tin chuyên môn vận tải, trạng thái nhận chuyến và vị trí của tài xế.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|p{4cm}|p{5cm}|}
+        \hline
+        \textbf{Trường dữ liệu}     & \textbf{Kiểu} & \textbf{Ràng buộc / Mặc định}        & \textbf{Mô tả}                                       \\ \hline
+        \texttt{\_id}               & ObjectId      & Khóa chính                           & Mã định danh tự sinh                                 \\ \hline
+        \texttt{user}               & ObjectId      & Ref: \texttt{User}, Required, Unique & Tham chiếu bảng User gốc                             \\ \hline
+        \texttt{licenseNumber}      & String        & Required, Unique                     & Số bằng lái xe                                       \\ \hline
+        \texttt{licenseExpiry}      & Date          & Tự chọn                              & Ngày hết hạn bằng lái                                \\ \hline
+        \texttt{status}             & String        & Enum, Default: \texttt{pending}      & Trạng thái duyệt hồ sơ                               \\ \hline
+        \texttt{isOnline}           & Boolean       & Default: \texttt{false}, Index       & Sẵn sàng nhận chuyến                                 \\ \hline
+        \texttt{rideStatus}         & String        & Enum, Default: \texttt{free}, Index  & Trạng thái cuốc (\texttt{free}, \texttt{in\_trip}..) \\ \hline
+        \texttt{currentLocation}    & Point         & 2dsphere Index                       & Tọa độ GPS (GeoJSON)                                 \\ \hline
+        \texttt{certificationLevel} & Number        & Min: 0, Max: 5, Default: 0           & Cấp độ chứng nhận                                    \\ \hline
+        \texttt{totalTrips}         & Number        & Default: 0                           & Tổng số chuyến đã thực hiện                          \\ \hline
+        \texttt{isActive}           & Boolean       & Default: \texttt{true}               & Trạng thái tài khoản                                 \\ \hline
+        \texttt{vehicleId}          & ObjectId      & Ref: \texttt{Vehicle}                & Phương tiện đang dùng                                \\ \hline
+        \texttt{createdAt}          & Date          & Tự động sinh                         & Thời điểm nộp hồ sơ                                  \\ \hline
+    \end{tabular}
+\end{table}
+
+\textbf{2.4. Bảng \texttt{vehicles} (Phương tiện)} \\
+Thông tin về phương tiện mà tài xế sử dụng để chuyên chở.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|p{4cm}|p{5cm}|}
+        \hline
+        \textbf{Trường dữ liệu}   & \textbf{Kiểu} & \textbf{Ràng buộc / Mặc định} & \textbf{Mô tả}                \\ \hline
+        \texttt{\_id}             & ObjectId      & Khóa chính                    & Mã định danh tự sinh          \\ \hline
+        \texttt{licensePlate}     & String        & Required, Unique              & Biển số xe                    \\ \hline
+        \texttt{brand}            & String        & Tự chọn                       & Hãng xe                       \\ \hline
+        \texttt{model}            & String        & Tự chọn                       & Dòng xe                       \\ \hline
+        \texttt{color}            & String        & Tự chọn                       & Màu sắc xe                    \\ \hline
+        \texttt{seatCount}        & Number        & Tự chọn                       & Số chỗ ngồi                   \\ \hline
+        \texttt{inspectionExpiry} & Date          & Tự chọn                       & Hạn kiểm định / bảo hiểm      \\ \hline
+        \texttt{photo}            & String        & Tự chọn                       & Ảnh chụp phương tiện          \\ \hline
+        \texttt{isActive}         & Boolean       & Default: \texttt{false}       & Trạng thái được duyệt sử dụng \\ \hline
+    \end{tabular}
+\end{table}
+
+\textbf{2.5. Bảng \texttt{bookings} (Yêu cầu đặt xe)} \\
+Lưu trữ toàn bộ thông tin của một yêu cầu đặt xe trước khi được tài xế nhận.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|p{4cm}|p{5cm}|}
+        \hline
+        \textbf{Trường dữ liệu}    & \textbf{Kiểu} & \textbf{Ràng buộc / Mặc định}                 & \textbf{Mô tả}                                     \\ \hline
+        \texttt{\_id}              & ObjectId      & Khóa chính                                    & Mã định danh tự sinh                               \\ \hline
+        \texttt{parentId}          & ObjectId      & Ref: \texttt{User}, Required                  & Phụ huynh tạo yêu cầu                              \\ \hline
+        \texttt{kidId}             & ObjectId      & Ref: \texttt{Kid}, Required                   & Trẻ em được đưa đón                                \\ \hline
+        \texttt{routeId}           & ObjectId      & Ref: \texttt{Route}, Required                 & Tuyến đường di chuyển                              \\ \hline
+        \texttt{scheduleId}        & ObjectId      & Ref: \texttt{TripSchedule}                    & Cuốc sinh ra từ lịch trình định kỳ                 \\ \hline
+        \texttt{preferredDriverId} & ObjectId      & Ref: \texttt{Driver}                          & Tài xế ưu tiên yêu cầu                             \\ \hline
+        \texttt{assignedDriverId}  & ObjectId      & Ref: \texttt{Driver}                          & Tài xế chính thức nhận chuyến                      \\ \hline
+        \texttt{status}            & String        & Enum, Default: \texttt{pending}               & Trạng thái (\texttt{pending}, \texttt{matched}...) \\ \hline
+        \texttt{scheduledTime}     & Date          & Required, Index                               & Giờ khởi hành dự kiến                              \\ \hline
+        \texttt{type}              & String        & Enum (\texttt{one\_time}, \texttt{recurring}) & Loại chuyến đi                                     \\ \hline
+        \texttt{paymentId}         & ObjectId      & Ref: \texttt{Payment}                         & Giao dịch thanh toán liên kết                      \\ \hline
+        \texttt{createdAt}         & Date          & Tự động sinh                                  & Thời điểm tạo yêu cầu                              \\ \hline
+    \end{tabular}
+\end{table}
+
+\textbf{2.6. Bảng \texttt{trips} (Chuyến đi thực tế)} \\
+Quản lý vòng đời chi tiết và quá trình di chuyển của một chuyến đi thực tế.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|p{4cm}|p{5cm}|}
+        \hline
+        \textbf{Trường dữ liệu}   & \textbf{Kiểu} & \textbf{Ràng buộc / Mặc định}     & \textbf{Mô tả}                \\ \hline
+        \texttt{\_id}             & ObjectId      & Khóa chính                        & Mã định danh tự sinh          \\ \hline
+        \texttt{bookingId}        & ObjectId      & Ref: \texttt{Booking}, Required   & Tham chiếu về yêu cầu gốc     \\ \hline
+        \texttt{driverId}         & ObjectId      & Ref: \texttt{Driver}, Required    & Tài xế thực hiện              \\ \hline
+        \texttt{kidId}            & ObjectId      & Ref: \texttt{Kid}, Required       & Trẻ em tham gia               \\ \hline
+        \texttt{parentId}         & ObjectId      & Ref: \texttt{User}, Required      & Phụ huynh giám sát            \\ \hline
+        \texttt{vehicleId}        & ObjectId      & Ref: \texttt{Vehicle}, Required   & Phương tiện thực hiện         \\ \hline
+        \texttt{routeId}          & ObjectId      & Ref: \texttt{Route}, Required     & Lộ trình di chuyển            \\ \hline
+        \texttt{status}           & String        & Enum, Default: \texttt{scheduled} & Trạng thái chi tiết chuyến đi \\ \hline
+        \texttt{otp}              & Object        & VerificationSchema                & Chứa trạng thái và mã OTP     \\ \hline
+        \texttt{pickupPhoto}      & Object        & VerificationSchema                & Ảnh minh chứng lúc đón        \\ \hline
+        \texttt{dropoffPhoto}     & Object        & VerificationSchema                & Ảnh minh chứng lúc trả        \\ \hline
+        \texttt{securityQuestion} & Object        & VerificationSchema                & Trạng thái câu hỏi bảo mật    \\ \hline
+        \texttt{paymentId}        & ObjectId      & Ref: \texttt{Payment}             & Biên lai thanh toán           \\ \hline
+        \texttt{createdAt}        & Date          & Tự động sinh                      & Giờ bắt đầu sinh chuyến       \\ \hline
+    \end{tabular}
+\end{table}
+
+
 
 \section{Xây dựng ứng dụng}
 \subsection{Thư viện và công cụ sử dụng}
-Sinh viên liệt kê các công cụ, ngôn ngữ lập trình, API, thư viện, IDE, công cụ kiểm thử, v.v. mà mình sử dụng để phát triển ứng dụng. Mỗi công cụ phải được chỉ rõ phiên bản sử dụng. SV nên kẻ bảng mô tả tương tự như Bảng \ref{table:my_label}. Nếu có nhiều nội dung trình bày, sinh viên cần xoay ngang bảng.
+Quá trình xây dựng ứng dụng KidGo (bao gồm cả hệ thống máy chủ Backend và giao diện người dùng Frontend) đã sử dụng nhiều công cụ lập trình, thư viện mã nguồn mở và các dịch vụ thiết yếu. Dưới đây là danh sách chi tiết các công cụ và thư viện được sử dụng, phân loại theo mục đích và phiên bản thực tế cài đặt tại thời điểm phát triển dự án.
 
 \begin{table}[H]
-    \centering{}
-    \begin{tabular}{lll}
-        \hline
-        \textbf{Mục đích} & \textbf{Công cụ}       & \textbf{Địa chỉ URL}    \\ \hline
-        IDE lập trình     & Eclipse Oxygen a64 bit & http://www.eclipse.org/ \\ \hline
-        v.v.              & v.v.                   & v.v.                    \\ \hline
-    \end{tabular}
-    \caption{Danh sách thư viện và công cụ sử dụng}
-    \label{fig:my_label}
+    \centering
+    \caption{Môi trường và Công cụ chung (Environment \& Tools)}
+    \label{table:tools_env}
+    \resizebox{\textwidth}{!}{
+        \begin{tabular}{|l|l|l|p{6.5cm}|}
+            \hline
+            \textbf{Mục đích} & \textbf{Công cụ / Thư viện} & \textbf{Phiên bản} & \textbf{Mô tả chi tiết}                                               \\ \hline
+            Môi trường chạy   & Node.js                     & v20+               & Nền tảng runtime cho Backend Javascript                               \\ \hline
+            IDE Lập trình     & Visual Studio Code          & Mới nhất           & Trình soạn thảo mã nguồn chính                                        \\ \hline
+            Công cụ Build     & Vite                        & 8.0.1              & Trình đóng gói siêu tốc và server phát triển cho Frontend             \\ \hline
+            Kiểm thử API      & Postman                     & Mới nhất           & Giao diện gọi và kiểm thử các điểm cuối (endpoints) RESTful API       \\ \hline
+            Quản lý CSDL      & MongoDB Compass             & Mới nhất           & Giao diện GUI để tương tác, xem và thao tác dữ liệu MongoDB trực quan \\ \hline
+        \end{tabular}
+    }
 \end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{Thư viện và công cụ phía Máy chủ (Backend - Node.js)}
+    \label{table:tools_backend}
+    \resizebox{\textwidth}{!}{
+        \begin{tabular}{|l|l|l|p{6.5cm}|}
+            \hline
+            \textbf{Mục đích} & \textbf{Công cụ / Thư viện} & \textbf{Phiên bản} & \textbf{Mô tả chi tiết}                                                          \\ \hline
+            Framework Web     & Express                     & 5.2.1              & Xây dựng hệ thống RESTful API cho Server                                         \\ \hline
+            Tương tác CSDL    & Mongoose                    & 9.3.1              & Công cụ ODM giúp kết nối và định nghĩa Schema chặt chẽ cho MongoDB               \\ \hline
+            Kết nối Realtime  & Socket.io                   & 4.8.3              & Thiết lập WebSockets để xử lý giao tiếp thời gian thực hai chiều                 \\ \hline
+            Xác thực (Auth)   & jsonwebtoken (JWT)          & 9.0.3              & Mã hóa và giải mã thông báo xác thực cho người dùng (Access Token)               \\ \hline
+            Mã hóa mật khẩu   & bcryptjs                    & 3.0.3              & Băm và kiểm tra mật khẩu nhằm bảo mật thông tin tài khoản                        \\ \hline
+            Xử lý tệp tin     & multer                      & 2.1.1              & Phân tích các luồng tải lên dạng multipart/form-data (ảnh đại diện, ảnh đón trả) \\ \hline
+            Bộ nhớ tạm/Queue  & ioredis / redis             & 5.10.1             & Tương tác với Redis để lưu cache tạm thời và quản lý hàng đợi                    \\ \hline
+            Dịch vụ Gửi Email & nodemailer                  & 8.0.5              & Cấu hình gửi email thông báo tự động (mã OTP, thông báo hệ thống)                \\ \hline
+            Bảo mật API       & helmet / cors               & 8.1.0              & Bảo vệ các HTTP headers và phân quyền truy cập tên miền chéo                     \\ \hline
+            Lập lịch (Cron)   & node-cron                   & 4.2.1              & Lập lịch chạy tự động nền (tự động sinh cuốc xe theo định kỳ)                    \\ \hline
+            Validate dữ liệu  & express-validator           & 7.3.1              & Kiểm tra tính hợp lệ của dữ liệu đầu vào (Middleware Validation)                 \\ \hline
+            Kiểm thử (Test)   & Jest                        & 30.4.2             & Framework phục vụ viết Unit Test đảm bảo chất lượng logic backend                \\ \hline
+        \end{tabular}
+    }
+\end{table}
+
+\begin{table}[H]
+    \centering
+    \caption{Thư viện và công cụ phía Người dùng (Frontend - React)}
+    \label{table:tools_frontend}
+    \resizebox{\textwidth}{!}{
+        \begin{tabular}{|l|l|l|p{6.5cm}|}
+            \hline
+            \textbf{Mục đích}    & \textbf{Công cụ / Thư viện} & \textbf{Phiên bản} & \textbf{Mô tả chi tiết}                                                                \\ \hline
+            Thư viện UI          & React / React DOM           & 19.2.4             & Thư viện Javascript xây dựng giao diện chia nhỏ thành phần (Component-based)           \\ \hline
+            Tạo kiểu (Styling)   & Tailwind CSS                & 4.2.2              & Framework CSS (Utility-first) dùng để thiết kế giao diện cực nhanh trực tiếp trên HTML \\ \hline
+            Quản lý Trạng thái   & Zustand                     & 5.0.13             & Thư viện quản lý state toàn cục (Global State) gọn nhẹ thay thế Redux                  \\ \hline
+            Điều hướng           & React Router DOM            & 7.13.1             & Xử lý chuyển trang (Routing) trực tiếp trên trình duyệt ở dạng SPA                     \\ \hline
+            Hiển thị Bản đồ      & Leaflet / React-Leaflet     & 1.9.4              & Thư viện vẽ và tương tác trên nền bản đồ mở mã nguồn                                   \\ \hline
+            Tìm đường (Routing)  & openrouteservice-js         & 0.4.1              & Gọi API dịch vụ tìm đường và ước tính khoảng cách/thời gian di chuyển                  \\ \hline
+            Vẽ lộ trình lên Map  & @mapbox/polyline            & 1.2.1              & Giải mã chuỗi polyline nhận từ server và hiển thị nét vẽ đường đi trên bản đồ          \\ \hline
+            Gọi API              & axios                       & 1.13.6             & Thư viện tạo các HTTP Requests (GET, POST, PUT) gửi lên Backend                        \\ \hline
+            Hiệu ứng (Animation) & motion                      & 12.38.0            & Cung cấp các hiệu ứng chuyển động mượt mà cho các phần tử UI                           \\ \hline
+            UI Components sẵn    & Ant Design (antd)           & 6.3.3              & Tận dụng các thành phần UI cao cấp có sẵn (Form, Modal, Drawer, Spin...)               \\ \hline
+            Giao tiếp Realtime   & socket.io-client            & 4.8.3              & Gói Client để kết nối Socket lắng nghe tọa độ GPS và nhận tín hiệu cuốc xe             \\ \hline
+            Giao diện Biểu tượng & lucide-react                & 1.14.0             & Cung cấp bộ Icon SVG hiện đại, dễ dàng tùy biến kích cỡ và màu sắc                     \\ \hline
+        \end{tabular}
+    }
+\end{table}
+
+
 
 \subsection{Kết quả đạt được}
 Sinh viên trước tiên mô tả kết quả đạt được của mình là gì, ví dụ như các sản phẩm được đóng gói là gì, bao gồm những thành phần nào, ý nghĩa, vai trò?

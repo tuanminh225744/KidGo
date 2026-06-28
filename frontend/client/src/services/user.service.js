@@ -8,10 +8,6 @@ export const updateProfile = async (profileData) => {
   return api.put("/users/me", profileData);
 };
 
-export const updateDeviceToken = async (tokenData) => {
-  return api.put("/users/me/device-token", tokenData);
-};
-
 export const uploadAvatar = async (file) => {
   const formData = new FormData();
   formData.append("avatar", file);
