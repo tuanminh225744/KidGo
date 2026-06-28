@@ -1,20 +1,31 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
-Chương này có độ dài từ 9 đến 11 trang.
-
-Với phương pháp phân tích thiết kế hướng đối tượng, sinh viên sử dụng biểu đồ use case theo hướng dẫn của template này. Với các phương pháp khác, sinh viên trao đổi với giáo viên hướng dẫn để đổi tên và sắp xếp lại đề mục cho phù hợp. Ví dụ, thay vì sử dụng biểu đồ use case, sinh viên đi theo hướng tiếp cận Agile có thể dùng User Story.
-
-
-\textbf{Lưu ý}: Mỗi chương nên có thêm 1 đoạn mở đầu chương và kết thúc chương, mở đầu giới thiệu những nội dung sẽ trình bày trong chương, kết thúc tổng kết lại các nội dung đã trình bày
 
 \section{Khảo sát hiện trạng}
 \label{section:2.1}
-Thông thường, khảo sát chi tiết về hiện trạng và yêu cầu của phần mềm sẽ được lấy từ ba nguồn chính, đó là (i) người dùng/khách hàng, (ii) các hệ thống đã có, (iii) và các ứng dụng tương tự.
-Sinh viên cần tiến hành phân tích, so sánh, đánh giá chi tiết ưu nhược điểm của các sản phẩm/nghiên cứu hiện có. Sinh viên có thể lập bảng so sánh nếu cần thiết. Kết hợp với khảo sát người dùng/khách hàng (nếu có), sinh viên nêu và mô tả sơ lược các tính năng phần mềm quan trọng cần phát triển.
+Trong những năm gần đây, sự bùng nổ của các nền tảng gọi xe công nghệ (Ride-hailing) tại Việt Nam đã làm thay đổi hoàn toàn thói quen di chuyển của người dân. Tuy nhiên, đối với nhóm hành khách đặc thù là trẻ em, việc sử dụng các dịch vụ này đang tồn tại những khoảng trống lớn về mặt quản lý và đảm bảo an toàn.
+
+Để có cái nhìn khách quan làm cơ sở phát triển hệ thống KidGo, đồ án đã tiến hành khảo sát và phân tích hiện trạng từ hai nguồn cung cấp dịch vụ vận chuyển chính hiện nay:
+\begin{itemize}
+    \item \textbf{Các ứng dụng gọi xe công nghệ đại chúng (Grab, Be, Xanh SM, v.v.):}
+          \begin{itemize}
+              \item \textit{Ưu điểm:} Nhanh chóng, tiện lợi, mạng lưới tài xế phủ sóng rộng khắp, dễ dàng đặt xe bất cứ lúc nào.
+              \item \textit{Nhược điểm:} Quy trình xác thực hành khách rất lỏng lẻo (chủ yếu qua số điện thoại người đặt). Khi phụ huynh đặt xe cho con em mình đi một mình, hệ thống không có cơ chế bắt buộc tài xế phải xác minh đúng mặt trẻ, dẫn đến nguy cơ đón/trả nhầm người. Bên cạnh đó, các ứng dụng này thiếu cơ chế cảnh báo an toàn ngầm (ví dụ: cảnh báo đi sai lộ trình, dừng đỗ bất thường) khiến phụ huynh không thể an tâm tuyệt đối.
+          \end{itemize}
+    \item \textbf{Dịch vụ xe đưa đón học sinh truyền thống (School Bus):}
+          \begin{itemize}
+              \item \textit{Ưu điểm:} Tuyến đường cố định, thường đi kèm với người giám sát (monitor) của nhà trường, có độ tin cậy cơ bản.
+              \item \textit{Nhược điểm:} Thiếu tính linh hoạt về mặt thời gian và địa điểm. Phụ huynh không thể theo dõi chính xác vị trí xe theo thời gian thực (Real-time tracking), và dịch vụ này không đáp ứng được các nhu cầu di chuyển phát sinh ngoài giờ học (như đi học thêm, ngoại khóa).
+          \end{itemize}
+\end{itemize}
+
+Từ kết quả khảo sát trên, có thể thấy nhu cầu về một dịch vụ vận chuyển vừa linh hoạt như xe công nghệ, vừa an toàn tuyệt đối cho trẻ em là cực kỳ lớn. Đây chính là tiền đề cốt lõi để xây dựng hệ thống \textbf{KidGo} – một nền tảng gọi xe chuyên biệt, đặt yếu tố xác thực đa lớp và giám sát hành trình thời gian thực lên hàng đầu, giúp phụ huynh hoàn toàn an tâm khi giao phó con em mình.
 
 \section{Tổng quan chức năng}
 \label{section:2.2}
-Phần \ref{section:2.2} này có nhiệm vụ tóm tắt các chức năng của phần mềm. Trong phần này, sinh viên lưu ý chỉ mô tả chức năng mức cao (tổng quan) mà không đặc tả chi tiết cho từng chức năng. Đặc tả chi tiết được trình bày trong phần \ref{section:2.3}.
+Dựa trên những phân tích từ quá trình khảo sát hiện trạng và bài toán thực tế đặt ra, hệ thống KidGo được thiết kế và xây dựng với mục tiêu cung cấp một luồng nghiệp vụ khép kín, an toàn và dễ sử dụng. Phần này sẽ tóm tắt tổng quan các chức năng cốt lõi của phần mềm trước khi đi vào đặc tả chi tiết.
+
+Về cơ bản, hệ thống KidGo cung cấp các nhóm chức năng chính nhằm phục vụ việc đặt chuyến, điều phối tài xế và giám sát an toàn. Chức năng của hệ thống được phân chia dựa trên ba nhóm đối tượng người dùng (Actor) chính: Phụ huynh (người đặt xe), Tài xế (người cung cấp dịch vụ) và Quản trị viên (người điều hành hệ thống). Các tính năng nổi bật bao gồm hệ thống thiết lập rào cản xác thực đa lớp (Mã OTP, Câu hỏi bí mật, Chụp ảnh minh chứng) và hệ thống phân tích cảnh báo tự động thông qua luồng tọa độ GPS.
 
 \subsection{Biểu đồ use case tổng quát}
 \label{subsection:2.2.1}
@@ -43,6 +54,7 @@ Biểu đồ này phân rã các chức năng liên quan đến quá trình xác
     \label{fig:usecase_xacthuc}
 \end{figure}
 
+\newpage
 \subsection{Biểu đồ use case phân rã Quản lý hồ sơ trẻ em}
 \label{subsection:2.2.3}
 Chức năng này dành cho Phụ huynh để quản lý thông tin của con em mình. Phụ huynh có thể thêm mới hồ sơ trẻ em, cập nhật thông tin cá nhân, cập nhật ảnh đại diện, và xóa hồ sơ trẻ em khỏi hệ thống. Những thông tin này giúp hệ thống lưu trữ dữ liệu cần thiết và hỗ trợ tài xế nhận diện đúng trẻ em trong các chuyến đi.
@@ -54,6 +66,7 @@ Chức năng này dành cho Phụ huynh để quản lý thông tin của con em
     \label{fig:usecase_hoso_treem}
 \end{figure}
 
+\newpage
 \subsection{Biểu đồ use case phân rã Đặt chuyến và lên lịch}
 \label{subsection:2.2.4}
 Đây là một trong những tính năng cốt lõi của hệ thống dành cho Phụ huynh. Phụ huynh có thể tạo mới yêu cầu đặt chuyến đi (một lần hoặc định kỳ), chọn điểm đón/trả, chỉ định trẻ em tham gia, chọn tài xế, xem dự kiến chi phí, và xác nhận đặt chuyến. Phụ huynh cũng có thể hủy hoặc thay đổi thông tin chuyến đi đã đặt trước khi chuyến đi bắt đầu, mang lại sự linh hoạt tối đa.
@@ -65,6 +78,7 @@ Chức năng này dành cho Phụ huynh để quản lý thông tin của con em
     \label{fig:usecase_datchuyen}
 \end{figure}
 
+\newpage
 \subsection{Biểu đồ use case phân rã Nhận và thực hiện chuyến}
 \label{subsection:2.2.5}
 Chức năng này mô tả quy trình làm việc của Tài xế. Khi có chuyến đi phù hợp với lịch trình và vị trí, tài xế có thể xem chi tiết yêu cầu và quyết định chấp nhận hoặc từ chối chuyến đi. Khi thực hiện, tài xế sẽ thay đổi trạng thái chuyến đi: bắt đầu chuyến đi, di chuyển đến điểm đón, xác nhận đã đón trẻ, di chuyển đến điểm đến, xác nhận đã trả trẻ, và hoàn thành chuyến đi. Trong suốt quá trình này, hệ thống sẽ liên tục cập nhật vị trí và trạng thái chuyến đi cho phụ huynh theo dõi.
@@ -76,6 +90,7 @@ Chức năng này mô tả quy trình làm việc của Tài xế. Khi có chuy�
     \label{fig:usecase_thuchienchuyen}
 \end{figure}
 
+\newpage
 \subsection{Biểu đồ use case phân rã Xác thực an toàn}
 \label{subsection:2.2.6}
 Đảm bảo an toàn cho trẻ em là ưu tiên hàng đầu của hệ thống KidGo. Biểu đồ này mô tả quá trình xác thực hai chiều khi trẻ lên xe và xuống xe. Cả tài xế và trẻ em/phụ huynh đều tham gia vào quá trình này thông qua việc trả lời câu hỏi bí mật, chụp ảnh xác thực, hoặc sử dụng mã PIN một lần (OTP). Nếu việc xác thực có bất kỳ bất thường nào, hệ thống sẽ tự động gửi cảnh báo cho phụ huynh và báo cáo lên hệ thống để xử lý kịp thời.
@@ -89,7 +104,7 @@ Chức năng này mô tả quy trình làm việc của Tài xế. Khi có chuy�
 
 \section{Đặc tả chức năng}
 \label{section:2.3}
-Sinh viên lựa chọn từ 4 đến 7 use case quan trọng nhất của đồ án để đặc tả chi tiết. Mỗi đặc tả bao gồm ít nhất các thông tin sau: (i) Tên use case, (ii) Luồng sự kiện (chính và phát sinh), (iii) Tiền điều kiện, và (iv) Hậu điều kiện. Sinh viên chỉ vẽ bổ sung biểu đồ hoạt động khi đặc tả use case phức tạp.
+Dựa trên sơ đồ Use Case tổng quát, phần này sẽ đi sâu vào đặc tả chi tiết các luồng nghiệp vụ cốt lõi và quan trọng nhất của hệ thống KidGo. Các chức năng được lựa chọn để đặc tả bao gồm những tiến trình có sự tương tác phức tạp giữa Phụ huynh, Tài xế và Hệ thống, đặc biệt là các khâu liên quan đến an toàn và giám sát lộ trình. Mỗi Use Case dưới đây sẽ được mô tả rõ ràng về mục đích, các điều kiện ràng buộc (tiền điều kiện, hậu điều kiện), luồng sự kiện chính (Happy path) cũng như các kịch bản ngoại lệ (Alternative/Error flows) có thể phát sinh trong thực tế triển khai.
 \subsection{Đặc tả use case Đặt chuyến đi}
 \begin{itemize}
     \item \textbf{Tên use case}: Đặt chuyến đi

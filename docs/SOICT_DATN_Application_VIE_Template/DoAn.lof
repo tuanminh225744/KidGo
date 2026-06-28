@@ -1,32 +1,26 @@
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {2.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ use case tổng quát}}{6}{figure.caption.8}%
-\contentsline {figure}{\numberline {2.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ use case phân rã Xác thực}}{6}{figure.caption.9}%
-\contentsline {figure}{\numberline {2.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ use case phân rã Quản lý hồ sơ trẻ em}}{7}{figure.caption.10}%
-\contentsline {figure}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ use case phân rã Đặt chuyến và lên lịch}}{8}{figure.caption.11}%
-\contentsline {figure}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ use case phân rã Nhận và thực hiện chuyến}}{9}{figure.caption.12}%
-\contentsline {figure}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ use case phân rã Xác thực an toàn}}{10}{figure.caption.13}%
+\contentsline {figure}{\numberline {2.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ use case tổng quát}}{5}{figure.caption.10}%
+\contentsline {figure}{\numberline {2.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ use case phân rã Xác thực}}{6}{figure.caption.11}%
+\contentsline {figure}{\numberline {2.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ use case phân rã Quản lý hồ sơ trẻ em}}{7}{figure.caption.12}%
+\contentsline {figure}{\numberline {2.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ use case phân rã Đặt chuyến và lên lịch}}{8}{figure.caption.13}%
+\contentsline {figure}{\numberline {2.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ use case phân rã Nhận và thực hiện chuyến}}{9}{figure.caption.14}%
+\contentsline {figure}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ use case phân rã Xác thực an toàn}}{10}{figure.caption.15}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ gói UML tổng quan hệ thống KidGo}}{19}{figure.caption.14}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Account \& Profile}}{21}{figure.caption.15}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Trip \& Booking}}{22}{figure.caption.16}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Payment \& Subscription}}{23}{figure.caption.17}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Feedback \& Support}}{23}{figure.caption.18}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Notification}}{24}{figure.caption.19}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Thiết kế giao diện Màn hình Trang chủ và Đặt xe}}{26}{figure.caption.20}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Thiết kế giao diện Màn hình Theo dõi chuyến đi theo thời gian thực}}{26}{figure.caption.21}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Thiết kế giao diện Màn hình Quản lý hồ sơ trẻ em}}{26}{figure.caption.22}%
-\contentsline {figure}{\numberline {4.10}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Thiết kế giao diện Trang Quản trị (Admin)}}{26}{figure.caption.23}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ trình tự Use Case: Đặt xe (Booking)}}{28}{figure.caption.24}%
-\contentsline {figure}{\numberline {4.12}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ trình tự Use Case: Thực hiện chuyến đi}}{28}{figure.caption.25}%
-\contentsline {figure}{\numberline {4.13}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ Thực thể - Liên kết (E-R Diagram) của hệ thống}}{29}{figure.caption.26}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ gói UML tổng quan hệ thống KidGo}}{20}{figure.caption.16}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Account \& Profile}}{22}{figure.caption.17}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Trip \& Booking}}{23}{figure.caption.18}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Payment \& Subscription}}{24}{figure.caption.19}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Feedback \& Support}}{24}{figure.caption.20}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Notification}}{25}{figure.caption.21}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Thiết kế giao diện Màn hình Trang chủ và Đặt xe}}{27}{figure.caption.22}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Thiết kế giao diện Màn hình Tài xế trong chuyến xe}}{27}{figure.caption.23}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Thiết kế giao diện Trang Quản trị (Admin)}}{28}{figure.caption.24}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ trình tự Use Case: Đặt xe (Booking)}}{30}{figure.caption.25}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ trình tự Use Case: Thực hiện chuyến đi}}{30}{figure.caption.26}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ Thực thể - Liên kết (E-R Diagram) của hệ thống}}{31}{figure.caption.27}%
 \addvspace {10\p@ }
-\addvspace {10\p@ }
-\addvspace {10\p@ }
-\contentsline {figure}{\numberline {A.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Internet vạn vật}}{49}{figure.caption.45}%
-\contentsline {figure}{\numberline {A.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Qui cách đóng quyển đồ án}}{51}{figure.caption.48}%
-\contentsline {figure}{\numberline {A.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Qui cách đóng quyển đồ án}}{51}{figure.caption.49}%
 \addvspace {10\p@ }
 \contentsfinish 
 \contentsfinish 

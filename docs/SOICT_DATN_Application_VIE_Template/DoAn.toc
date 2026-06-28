@@ -6,80 +6,84 @@
 \ttl@change@i {\@ne }{subsection}{1.0cm}{\vspace {0.3cm}}{\thecontentslabel \ }{}{\titlerule *[0.3pc]{.}\contentspage }\relax 
 \ttl@change@v {subsection}{}{}{}\relax 
 \thispagestyle {empty}
+\contentsline {chapter}{\hbox to\@tempdima {\hfil } DANH MỤC TỪ VIẾT TẮT}{vii}{section*.7}%
+\contentsline {chapter}{\hbox to\@tempdima {\hfil } DANH MỤC THUẬT NGỮ}{viii}{section*.9}%
 \contentsline {chapter}{\numberline {1}GIỚI THIỆU ĐỀ TÀI}{1}{chapter.1}%
 \contentsline {section}{\numberline {1.1}Đặt vấn đề}{1}{section.1.1}%
-\contentsline {section}{\numberline {1.2}Mục tiêu và phạm vi đề tài}{2}{section.1.2}%
+\contentsline {section}{\numberline {1.2}Mục tiêu và phạm vi đề tài}{1}{section.1.2}%
 \contentsline {section}{\numberline {1.3}Định hướng giải pháp}{2}{section.1.3}%
-\contentsline {section}{\numberline {1.4}Bố cục đồ án}{3}{section.1.4}%
-\contentsline {chapter}{\numberline {2}KHẢO SÁT VÀ PHÂN TÍCH YÊU CẦU}{5}{chapter.2}%
-\contentsline {section}{\numberline {2.1}Khảo sát hiện trạng}{5}{section.2.1}%
-\contentsline {section}{\numberline {2.2}Tổng quan chức năng}{5}{section.2.2}%
+\contentsline {section}{\numberline {1.4}Bố cục đồ án}{2}{section.1.4}%
+\contentsline {chapter}{\numberline {2}KHẢO SÁT VÀ PHÂN TÍCH YÊU CẦU}{4}{chapter.2}%
+\contentsline {section}{\numberline {2.1}Khảo sát hiện trạng}{4}{section.2.1}%
+\contentsline {section}{\numberline {2.2}Tổng quan chức năng}{4}{section.2.2}%
 \contentsline {subsection}{\numberline {2.2.1}Biểu đồ use case tổng quát}{5}{subsection.2.2.1}%
 \contentsline {subsection}{\numberline {2.2.2}Biểu đồ use case phân rã Xác thực}{6}{subsection.2.2.2}%
 \contentsline {subsection}{\numberline {2.2.3}Biểu đồ use case phân rã Quản lý hồ sơ trẻ em}{7}{subsection.2.2.3}%
-\contentsline {subsection}{\numberline {2.2.4}Biểu đồ use case phân rã Đặt chuyến và lên lịch}{7}{subsection.2.2.4}%
-\contentsline {subsection}{\numberline {2.2.5}Biểu đồ use case phân rã Nhận và thực hiện chuyến}{8}{subsection.2.2.5}%
-\contentsline {subsection}{\numberline {2.2.6}Biểu đồ use case phân rã Xác thực an toàn}{9}{subsection.2.2.6}%
+\contentsline {subsection}{\numberline {2.2.4}Biểu đồ use case phân rã Đặt chuyến và lên lịch}{8}{subsection.2.2.4}%
+\contentsline {subsection}{\numberline {2.2.5}Biểu đồ use case phân rã Nhận và thực hiện chuyến}{9}{subsection.2.2.5}%
+\contentsline {subsection}{\numberline {2.2.6}Biểu đồ use case phân rã Xác thực an toàn}{10}{subsection.2.2.6}%
 \contentsline {section}{\numberline {2.3}Đặc tả chức năng}{10}{section.2.3}%
 \contentsline {subsection}{\numberline {2.3.1}Đặc tả use case Đặt chuyến đi}{10}{subsection.2.3.1}%
-\contentsline {subsection}{\numberline {2.3.2}Đặc tả use case Nhận và thực hiện chuyến xe}{11}{subsection.2.3.2}%
+\contentsline {subsection}{\numberline {2.3.2}Đặc tả use case Nhận và thực hiện chuyến xe}{12}{subsection.2.3.2}%
 \contentsline {subsection}{\numberline {2.3.3}Đặc tả use case Xác thực an toàn (Lên/Xuống xe)}{12}{subsection.2.3.3}%
 \contentsline {subsection}{\numberline {2.3.4}Đặc tả use case Giám sát hành trình (Real-time tracking)}{13}{subsection.2.3.4}%
 \contentsline {section}{\numberline {2.4}Yêu cầu phi chức năng}{14}{section.2.4}%
-\contentsline {chapter}{\numberline {3}NỀN TẢNG LÝ THUYẾT VÀ CÔNG NGHỆ SỬ DỤNG}{15}{chapter.3}%
-\contentsline {section}{\numberline {3.1}Nền tảng lý thuyết}{15}{section.3.1}%
-\contentsline {subsection}{\numberline {3.1.1}Kiến trúc RESTful API}{15}{subsection.3.1.1}%
-\contentsline {subsection}{\numberline {3.1.2}Công nghệ giao tiếp thời gian thực (WebSockets)}{15}{subsection.3.1.2}%
-\contentsline {section}{\numberline {3.2}Công nghệ phát triển phía máy chủ (Backend)}{15}{section.3.2}%
-\contentsline {subsection}{\numberline {3.2.1}Node.js và Express.js}{15}{subsection.3.2.1}%
-\contentsline {subsection}{\numberline {3.2.2}Cơ sở dữ liệu MongoDB}{15}{subsection.3.2.2}%
-\contentsline {subsection}{\numberline {3.2.3}Socket.IO}{16}{subsection.3.2.3}%
-\contentsline {section}{\numberline {3.3}Công nghệ phát triển phía máy khách (Frontend)}{16}{section.3.3}%
-\contentsline {subsection}{\numberline {3.3.1}Thư viện React và Công cụ Vite}{16}{subsection.3.3.1}%
-\contentsline {subsection}{\numberline {3.3.2}Quản lý trạng thái (State Management) với Zustand}{16}{subsection.3.3.2}%
-\contentsline {subsection}{\numberline {3.3.3}Thư viện bản đồ Leaflet}{17}{subsection.3.3.3}%
-\contentsline {chapter}{\numberline {4}PHÂN TÍCH THIẾT KẾ, TRIỂN KHAI VÀ ĐÁNH GIÁ HỆ THỐNG}{18}{chapter.4}%
-\contentsline {section}{\numberline {4.1}Thiết kế kiến trúc}{18}{section.4.1}%
-\contentsline {subsection}{\numberline {4.1.1}Lựa chọn kiến trúc phần mềm}{18}{subsection.4.1.1}%
-\contentsline {subsection}{\numberline {4.1.2}Thiết kế tổng quan}{19}{subsection.4.1.2}%
-\contentsline {subsection}{\numberline {4.1.3}Thiết kế chi tiết gói}{21}{subsection.4.1.3}%
-\contentsline {subsubsection}{\numberline {a}Gói Account \& Profile}{21}{subsubsection.4.1.3.1}%
-\contentsline {subsubsection}{\numberline {b}Gói Trip \& Booking}{22}{subsubsection.4.1.3.2}%
-\contentsline {subsubsection}{\numberline {c}Gói Payment \& Subscription}{23}{subsubsection.4.1.3.3}%
-\contentsline {subsubsection}{\numberline {d}Gói Feedback \& Support và Notification}{23}{subsubsection.4.1.3.4}%
-\contentsline {section}{\numberline {4.2}Thiết kế chi tiết}{24}{section.4.2}%
-\contentsline {subsection}{\numberline {4.2.1}Thiết kế giao diện}{24}{subsection.4.2.1}%
-\contentsline {subsection}{\numberline {4.2.2}Thiết kế lớp}{26}{subsection.4.2.2}%
-\contentsline {subsection}{\numberline {4.2.3}Thiết kế cơ sở dữ liệu}{29}{subsection.4.2.3}%
-\contentsline {section}{\numberline {4.3}Xây dựng ứng dụng}{34}{section.4.3}%
-\contentsline {subsection}{\numberline {4.3.1}Thư viện và công cụ sử dụng}{34}{subsection.4.3.1}%
-\contentsline {subsection}{\numberline {4.3.2}Kết quả đạt được}{37}{subsection.4.3.2}%
-\contentsline {subsection}{\numberline {4.3.3}Minh họa các chức năng chính}{37}{subsection.4.3.3}%
-\contentsline {section}{\numberline {4.4}Kiểm thử}{37}{section.4.4}%
-\contentsline {subsection}{\numberline {4.4.1}Kiểm thử chức năng Giám sát an toàn trong chuyến đi}{38}{subsection.4.4.1}%
-\contentsline {subsection}{\numberline {4.4.2}Kiểm thử chức năng Xác thực an toàn Đón/Trả trẻ}{39}{subsection.4.4.2}%
-\contentsline {subsection}{\numberline {4.4.3}Kiểm thử luồng Đặt xe và Ghép chuyến}{40}{subsection.4.4.3}%
-\contentsline {subsection}{\numberline {4.4.4}Tổng kết kết quả kiểm thử}{40}{subsection.4.4.4}%
-\contentsline {section}{\numberline {4.5}Triển khai}{40}{section.4.5}%
-\contentsline {chapter}{\numberline {5}CÁC GIẢI PHÁP VÀ ĐÓNG GÓP NỔI BẬT}{41}{chapter.5}%
-\contentsline {chapter}{\numberline {6}KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}{42}{chapter.6}%
-\contentsline {section}{\numberline {6.1}Kết luận}{42}{section.6.1}%
-\contentsline {section}{\numberline {6.2}Hướng phát triển}{42}{section.6.2}%
-\contentsline {chapter}{TÀI LIỆU THAM KHẢO}{45}{section*.42}%
-\contentsline {chapter}{PHỤ LỤC}{47}{section*.43}%
-\ttl@change@i {\@ne }{chapter}{0.0cm}{\bfseries \vspace {0.3cm}}{{\bfseries {\scshape } \thecontentslabel .\ }}{}{\titlerule *[0.3pc]{.}\contentspage }\relax 
-\ttl@change@v {chapter}{}{}{}\relax 
-\contentsline {chapter}{\numberline {A}HƯỚNG DẪN VIẾT ĐỒ ÁN TỐT NGHIỆP}{47}{appendix.1.A}%
-\contentsline {section}{\numberline {A.1}Ngành học}{48}{section.1.A.1}%
-\contentsline {section}{\numberline {A.2}Đánh dấu (bullet) và đánh số (numering)}{48}{section.1.A.2}%
-\contentsline {section}{\numberline {A.3}Cách thêm bảng}{49}{section.1.A.3}%
-\contentsline {section}{\numberline {A.4}Chèn hình ảnh}{49}{section.1.A.4}%
-\contentsline {section}{\numberline {A.5}Tài liệu tham khảo}{50}{section.1.A.5}%
-\contentsline {paragraph}{Cách liệt kê}{50}{paragraph*.46}%
-\contentsline {paragraph}{Các loại tài liệu tham khảo}{50}{paragraph*.47}%
-\contentsline {section}{\numberline {A.6}Cách viết phương trình và công thức toán học}{50}{section.1.A.6}%
-\contentsline {section}{\numberline {A.7}Qui cách đóng quyển}{50}{section.1.A.7}%
-\contentsline {chapter}{\numberline {B}ĐẶC TẢ USE CASE}{52}{appendix.1.B}%
-\contentsline {section}{\numberline {B.1}Đặc tả use case ``Thống kê tình hình mượn sách''}{52}{section.1.B.1}%
-\contentsline {section}{\numberline {B.2}Đặc tả use case ``Đăng ký làm thẻ mượn''}{52}{section.1.B.2}%
+\contentsline {chapter}{\numberline {3}NỀN TẢNG LÝ THUYẾT VÀ CÔNG NGHỆ SỬ DỤNG}{16}{chapter.3}%
+\contentsline {section}{\numberline {3.1}Nền tảng lý thuyết}{16}{section.3.1}%
+\contentsline {subsection}{\numberline {3.1.1}Kiến trúc RESTful API}{16}{subsection.3.1.1}%
+\contentsline {subsection}{\numberline {3.1.2}Công nghệ giao tiếp thời gian thực (WebSockets)}{16}{subsection.3.1.2}%
+\contentsline {section}{\numberline {3.2}Công nghệ phát triển phía máy chủ (Backend)}{16}{section.3.2}%
+\contentsline {subsection}{\numberline {3.2.1}Node.js và Express.js}{16}{subsection.3.2.1}%
+\contentsline {subsection}{\numberline {3.2.2}Cơ sở dữ liệu MongoDB}{16}{subsection.3.2.2}%
+\contentsline {subsection}{\numberline {3.2.3}Socket.IO}{17}{subsection.3.2.3}%
+\contentsline {section}{\numberline {3.3}Công nghệ phát triển phía máy khách (Frontend)}{17}{section.3.3}%
+\contentsline {subsection}{\numberline {3.3.1}Thư viện React và Công cụ Vite}{17}{subsection.3.3.1}%
+\contentsline {subsection}{\numberline {3.3.2}Quản lý trạng thái (State Management) với Zustand}{17}{subsection.3.3.2}%
+\contentsline {subsection}{\numberline {3.3.3}Thư viện bản đồ Leaflet}{18}{subsection.3.3.3}%
+\contentsline {chapter}{\numberline {4}PHÂN TÍCH THIẾT KẾ, TRIỂN KHAI VÀ ĐÁNH GIÁ HỆ THỐNG}{19}{chapter.4}%
+\contentsline {section}{\numberline {4.1}Thiết kế kiến trúc}{19}{section.4.1}%
+\contentsline {subsection}{\numberline {4.1.1}Lựa chọn kiến trúc phần mềm}{19}{subsection.4.1.1}%
+\contentsline {subsection}{\numberline {4.1.2}Thiết kế tổng quan}{20}{subsection.4.1.2}%
+\contentsline {subsection}{\numberline {4.1.3}Thiết kế chi tiết gói}{22}{subsection.4.1.3}%
+\contentsline {subsubsection}{\numberline {a}Gói Account \& Profile}{22}{subsubsection.4.1.3.1}%
+\contentsline {subsubsection}{\numberline {b}Gói Trip \& Booking}{23}{subsubsection.4.1.3.2}%
+\contentsline {subsubsection}{\numberline {c}Gói Payment \& Subscription}{24}{subsubsection.4.1.3.3}%
+\contentsline {subsubsection}{\numberline {d}Gói Feedback \& Support và Notification}{24}{subsubsection.4.1.3.4}%
+\contentsline {section}{\numberline {4.2}Thiết kế chi tiết}{25}{section.4.2}%
+\contentsline {subsection}{\numberline {4.2.1}Thiết kế giao diện}{25}{subsection.4.2.1}%
+\contentsline {subsection}{\numberline {4.2.2}Thiết kế lớp}{28}{subsection.4.2.2}%
+\contentsline {subsection}{\numberline {4.2.3}Thiết kế cơ sở dữ liệu}{31}{subsection.4.2.3}%
+\contentsline {section}{\numberline {4.3}Xây dựng ứng dụng}{36}{section.4.3}%
+\contentsline {subsection}{\numberline {4.3.1}Thư viện và công cụ sử dụng}{36}{subsection.4.3.1}%
+\contentsline {subsection}{\numberline {4.3.2}Kết quả đạt được}{39}{subsection.4.3.2}%
+\contentsline {subsection}{\numberline {4.3.3}Minh họa các chức năng chính}{39}{subsection.4.3.3}%
+\contentsline {section}{\numberline {4.4}Kiểm thử}{39}{section.4.4}%
+\contentsline {subsection}{\numberline {4.4.1}Kiểm thử chức năng Giám sát an toàn trong chuyến đi}{40}{subsection.4.4.1}%
+\contentsline {subsection}{\numberline {4.4.2}Kiểm thử chức năng Xác thực an toàn Đón/Trả trẻ}{41}{subsection.4.4.2}%
+\contentsline {subsection}{\numberline {4.4.3}Kiểm thử luồng Đặt xe và Ghép chuyến}{42}{subsection.4.4.3}%
+\contentsline {subsection}{\numberline {4.4.4}Tổng kết kết quả kiểm thử}{42}{subsection.4.4.4}%
+\contentsline {section}{\numberline {4.5}Triển khai}{43}{section.4.5}%
+\contentsline {subsection}{\numberline {4.5.1}Mô hình triển khai}{43}{subsection.4.5.1}%
+\contentsline {subsection}{\numberline {4.5.2}Cấu hình môi trường}{43}{subsection.4.5.2}%
+\contentsline {chapter}{\numberline {5}CÁC GIẢI PHÁP VÀ ĐÓNG GÓP NỔI BẬT}{44}{chapter.5}%
+\contentsline {section}{\numberline {5.1}Giải pháp xác thực an toàn đa lớp linh hoạt khi đón/trả trẻ}{44}{section.5.1}%
+\contentsline {subsection}{\numberline {5.1.1}Bài toán đặt ra}{44}{subsection.5.1.1}%
+\contentsline {subsection}{\numberline {5.1.2}Giải pháp đề xuất}{44}{subsection.5.1.2}%
+\contentsline {subsection}{\numberline {5.1.3}Kết quả đạt được}{45}{subsection.5.1.3}%
+\contentsline {section}{\numberline {5.2}Thuật toán tìm kiếm và ghép cuốc xe theo cơ chế ``Vệt dầu loang''}{45}{section.5.2}%
+\contentsline {subsection}{\numberline {5.2.1}Bài toán đặt ra}{45}{subsection.5.2.1}%
+\contentsline {subsection}{\numberline {5.2.2}Giải pháp đề xuất}{45}{subsection.5.2.2}%
+\contentsline {subsection}{\numberline {5.2.3}Kết quả đạt được}{45}{subsection.5.2.3}%
+\contentsline {section}{\numberline {5.3}Cơ chế giám sát an toàn tự động dựa trên luồng tọa độ thời gian thực}{46}{section.5.3}%
+\contentsline {subsection}{\numberline {5.3.1}Bài toán đặt ra}{46}{subsection.5.3.1}%
+\contentsline {subsection}{\numberline {5.3.2}Giải pháp đề xuất}{46}{subsection.5.3.2}%
+\contentsline {subsection}{\numberline {5.3.3}Kết quả đạt được}{46}{subsection.5.3.3}%
+\contentsline {section}{\numberline {5.4}Kiến trúc truyền tải dữ liệu thời gian thực tối ưu hiệu năng (Real-time Architecture)}{46}{section.5.4}%
+\contentsline {subsection}{\numberline {5.4.1}Bài toán đặt ra}{46}{subsection.5.4.1}%
+\contentsline {subsection}{\numberline {5.4.2}Giải pháp đề xuất}{47}{subsection.5.4.2}%
+\contentsline {subsection}{\numberline {5.4.3}Kết quả đạt được}{47}{subsection.5.4.3}%
+\contentsline {chapter}{\numberline {6}KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN}{48}{chapter.6}%
+\contentsline {section}{\numberline {6.1}Kết luận}{48}{section.6.1}%
+\contentsline {section}{\numberline {6.2}Hướng phát triển}{49}{section.6.2}%
+\contentsline {chapter}{TÀI LIỆU THAM KHẢO}{50}{section*.42}%
 \contentsfinish 

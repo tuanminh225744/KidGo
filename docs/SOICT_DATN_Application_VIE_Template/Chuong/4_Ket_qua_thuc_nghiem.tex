@@ -164,7 +164,7 @@ Dưới đây là thiết kế giao diện (Mockup/Wireframe) cho một số lu�
 
 \begin{figure}[H]
     \centering
-    % \includegraphics[width=0.35\textwidth]{Hinhve/UI_HomeBooking.png}
+    \includegraphics[width=0.35\textwidth]{Hinhve/ManHinhTrangChuVaDatXe.png}
     \caption{Thiết kế giao diện Màn hình Trang chủ và Đặt xe}
     \label{fig:ui_home_booking}
 \end{figure}
@@ -172,23 +172,15 @@ Dưới đây là thiết kế giao diện (Mockup/Wireframe) cho một số lu�
 
 \begin{figure}[H]
     \centering
-    % \includegraphics[width=0.35\textwidth]{Hinhve/UI_Tracking.png}
-    \caption{Thiết kế giao diện Màn hình Theo dõi chuyến đi theo thời gian thực}
-    \label{fig:ui_tracking}
+    \includegraphics[width=0.35\textwidth]{Hinhve/ManHinhTaiXeTrongChuyenXe.png}
+    \caption{Thiết kế giao diện Màn hình Tài xế trong chuyến xe}
+    \label{fig:ui_driver_trip}
 \end{figure}
-\textit{Mô tả:} Giao diện Theo dõi chuyến đi hiển thị vị trí thực tế của xe trên bản đồ. Các thông tin quan trọng như thông tin tài xế, biển số xe, và thời gian dự kiến đến (ETA) được trình bày rõ ràng trên nền trắng. Nút liên lạc được bố trí thuận tiện.
+\textit{Mô tả:} Giao diện màn hình của Tài xế khi đang thực hiện chuyến đi hiển thị lộ trình di chuyển tới điểm đón/trả trẻ trên bản đồ. Modal phía dưới sẽ hiển thị các nút tùy theo trạng thái hiện tại của chuyến xe: Đã đến nơi đón, Đã gặp bé, Hiện các modal xác thực, Đã đến điểm trả, Kết thúc chuyến xe.
 
 \begin{figure}[H]
     \centering
-    % \includegraphics[width=0.35\textwidth]{Hinhve/UI_KidProfile.png}
-    \caption{Thiết kế giao diện Màn hình Quản lý hồ sơ trẻ em}
-    \label{fig:ui_kid_profile}
-\end{figure}
-\textit{Mô tả:} Màn hình quản lý hồ sơ cung cấp các biểu mẫu nhập liệu thân thiện. Các nhóm thông tin được phân tách bằng các thẻ (Cards) có hiệu ứng đổ bóng nhẹ, tạo không gian thoáng đãng và dễ nhìn cho người sử dụng.
-
-\begin{figure}[H]
-    \centering
-    % \includegraphics[width=0.8\textwidth]{Hinhve/UI_AdminDashboard.png}
+    \includegraphics[width=0.8\textwidth]{Hinhve/ManHinhAdmin.png}
     \caption{Thiết kế giao diện Trang Quản trị (Admin)}
     \label{fig:ui_admin_dashboard}
 \end{figure}
@@ -248,8 +240,6 @@ Hệ thống KidGo lưu trữ dữ liệu trên nền tảng \textbf{MongoDB} �
 
 \textbf{1. Biểu đồ Thực thể - Liên kết (Entity-Relationship Diagram)}
 
-Mặc dù MongoDB là hệ quản trị cơ sở dữ liệu NoSQL, nhưng việc chuẩn hóa cấu trúc dữ liệu dưới dạng biểu đồ thực thể liên kết (E-R Diagram) vẫn vô cùng cần thiết để mô tả bức tranh tổng quan về các luồng nghiệp vụ lõi và sự phụ thuộc dữ liệu.
-
 \begin{figure}[H]
     \centering
     \includegraphics[width=1\textwidth]{Hinhve/BieuDoER.png}
@@ -257,6 +247,7 @@ Mặc dù MongoDB là hệ quản trị cơ sở dữ liệu NoSQL, nhưng việ
     \label{fig:er_diagram}
 \end{figure}
 
+\newpage
 \textit{Giải thích các mối quan hệ trọng tâm:}
 \begin{itemize}
     \item \textbf{USER - KID (1-N):} Một Phụ huynh (\texttt{User}) có thể đăng ký hồ sơ cho nhiều Trẻ em (\texttt{Kid}). Một trẻ em luôn phải thuộc sự quản lý của một phụ huynh duy nhất.
@@ -559,7 +550,23 @@ Kiểm tra khả năng phân luồng giao cuốc xe cho tài xế ưu tiên ho�
 
 \subsection{Tổng kết kết quả kiểm thử}
 Toàn bộ các kịch bản kiểm thử trên đã được tin học hóa thành các đoạn mã Unit Test tự động bằng framework \textbf{Jest}. Việc sử dụng mã kiểm thử tự động kết hợp với các kỹ thuật giả lập dữ liệu (Mocking như \texttt{jest.unstable\_mockModule} đối chiếu Redis, Mongoose) giúp dễ dàng kiểm chứng lại độ an toàn của hệ thống ở bất kỳ chu kỳ cập nhật nào.
+
+\newpage
 \section{Triển khai}
-Sinh viên trình bày mô hình và/hoặc cách thức triển khai thử nghiệm/thực tế. Ứng dụng của sinh viên được triển khai trên server/thiết bị gì, cấu hình như thế nào. Kết quả triển khai thử nghiệm nếu có (số lượng người dùng, số lượng truy cập, thời gian phản hồi, phản hồi người dùng, khả năng chịu tải, các thống kê, v.v.)
+\subsection{Mô hình triển khai}
+Ứng dụng KidGo được đóng gói và triển khai thực tế trên môi trường Internet thông qua kiến trúc điện toán đám mây (Cloud Computing), tách biệt hoàn toàn giữa các dịch vụ để đảm bảo khả năng mở rộng (Scale) và chịu tải. Cụ thể:
+\begin{itemize}
+    \item \textbf{Cơ sở dữ liệu (Database):} Sử dụng dịch vụ lưu trữ đám mây MongoDB Atlas.
+    \item \textbf{Cache và Hàng đợi (Redis):} Triển khai trên dịch vụ Render Redis phục vụ việc đọc ghi tốc độ cao các dữ liệu tạm thời như tọa độ GPS theo thời gian thực và mã OTP.
+    \item \textbf{Máy chủ Ứng dụng (Backend):} Mã nguồn Node.js được chứa trong các bộ chứa Docker và triển khai lên nền tảng đám mây của Render.
+    \item \textbf{Giao diện Người dùng (Frontend):} Mã nguồn React/Vite được biên dịch thành file tĩnh (static files) và triển khai trên hạ tầng mạng phân phối nội dung (CDN) toàn cầu của Vercel.
+\end{itemize}
+\subsection{Cấu hình môi trường}
+Để đảm bảo ứng dụng vận hành trơn tru ở mức độ thử nghiệm, các thiết bị và máy chủ được cấu hình với thông số kỹ thuật như sau:
+\begin{itemize}
+    \item \textbf{Máy chủ Backend:} 1 vCPU, 512MB - 1GB RAM (Đủ để xử lý hàng nghìn kết nối Socket.IO đồng thời nhờ cơ chế non-blocking của Node.js).
+    \item \textbf{Cơ sở dữ liệu:} MongoDB Atlas Cluster Tier M0, bộ nhớ lưu trữ 512MB (Mức cơ bản cho thử nghiệm).
+    \item \textbf{Thiết bị kiểm thử (End-user):} Kiểm thử chéo trên trình duyệt máy tính (Chrome/Edge) và màn hình điện thoại di động (iOS/Android) thông qua giao diện Responsive web app.
+\end{itemize}
 
 \end{document}

@@ -1,12 +1,27 @@
 \documentclass[../DoAn.tex]{subfiles}
 \begin{document}
 \section{Kết luận}
-Sinh viên so sánh kết quả nghiên cứu hoặc sản phẩm của mình với các nghiên cứu hoặc sản phẩm tương tự.
+Sau một thời gian nghiêm túc nghiên cứu và thực hiện, đồ án "Hệ thống đặt xe chuyên biệt cho trẻ em - KidGo" đã cơ bản hoàn thành các mục tiêu đề ra ban đầu.
 
-Sinh viên phân tích trong suốt quá trình thực hiện ĐATN, mình đã làm được gì, chưa làm được gì, các đóng góp nổi bật là gì, và tổng hợp những bài học kinh nghiệm rút ra nếu có.
+\textbf{Những kết quả và bài học đạt được:}
+\begin{itemize}
+    \item \textbf{Hoàn thiện luồng nghiệp vụ cốt lõi:} Xây dựng thành công toàn bộ quy trình hoạt động của một ứng dụng đặt xe công nghệ (ride-hailing), từ việc phụ huynh tạo chuyến đi, thuật toán dò tìm và ghép chuyến với tài xế lân cận, cho đến cơ chế theo dõi vị trí trực tuyến trên bản đồ.
+    \item \textbf{Nghiên cứu và ứng dụng công nghệ:} Nắm vững và áp dụng thành công các công nghệ tiên tiến vào hệ thống, điển hình là việc tích hợp \textbf{Redis} làm bộ nhớ đệm (Cache) và xử lý không gian (Geospatial), kết hợp cùng mạng sự kiện (\textbf{Socket.IO}) để thiết lập kiến trúc truyền tải dữ liệu thời gian thực có hiệu năng cao.
+    \item \textbf{Giải quyết bài toán an toàn:} Cài đặt thành công cơ chế bảo mật đa lớp linh hoạt (OTP, Ảnh chụp, Câu hỏi bí mật) và hệ thống cảnh báo tự động thông qua phân tích luồng tọa độ GPS, đáp ứng hoàn toàn yêu cầu khắt khe về mặt an toàn cho trẻ nhỏ.
+\end{itemize}
+
+\textbf{Những mặt còn hạn chế:}
+Bên cạnh những kết quả đạt được, dự án vẫn còn một số điểm giới hạn cần khắc phục:
+\begin{itemize}
+    \item \textbf{Hạn chế về nền tảng:} Hệ thống hiện tại mới chỉ được triển khai dưới dạng ứng dụng Web Responsive. Việc chưa phát hành ứng dụng cài đặt trực tiếp trên thiết bị di động (Native Mobile App) làm giảm đi tính mượt mà trong trải nghiệm người dùng và bị giới hạn khả năng tiếp cận các API của hệ điều hành (như quyền duy trì định vị GPS chạy ngầm liên tục).
+    \item \textbf{Hạn chế về tính khả thi kinh tế (Business Model):} Mô hình vận chuyển chuyên biệt cho trẻ nhỏ có đặc thù là nhu cầu sử dụng (demand) chỉ tăng mạnh vào những \textbf{khung giờ cố định} trong ngày (giờ đi học buổi sáng sớm và giờ tan trường buổi chiều). Việc chưa tích hợp tính năng đặt xe thông thường khiến nguồn lực tài xế bị lãng phí ở các khung giờ thấp điểm, dẫn đến tính khả thi về mặt kinh tế để duy trì mạng lưới tài xế chưa thực sự cao.
+\end{itemize}
 
 \section{Hướng phát triển}
-Trong phần này, sinh viên trình bày định hướng công việc trong tương lai để hoàn thiện sản phẩm hoặc nghiên cứu của mình.
-
-Trước tiên, sinh viên trình bày các công việc cần thiết để hoàn thiện các chức năng/nhiệm vụ đã làm. Sau đó sinh viên phân tích các hướng đi mới cho phép cải thiện và nâng cấp các chức năng/nhiệm vụ đã làm.
+Từ những hạn chế đã được nhìn nhận trong quá trình thực hiện, định hướng phát triển tiếp theo của hệ thống KidGo trong tương lai bao gồm:
+\begin{itemize}
+    \item \textbf{Phát triển ứng dụng Mobile Native:} Chuyển đổi và phát triển ứng dụng di động độc lập đa nền tảng bằng React Native hoặc Flutter. Điều này giúp tối ưu hóa hiệu năng, cải thiện việc duy trì định vị GPS chạy ngầm (Background Location) chính xác hơn cho tài xế và đảm bảo việc nhận thông báo Push Notification ổn định hơn cho phụ huynh.
+    \item \textbf{Mở rộng mô hình kinh doanh (Cross-services):} Nâng cấp hệ thống để hỗ trợ tích hợp thêm người dùng đặt xe thông thường. Trong các khung giờ thấp điểm (ngoài giờ đưa đón học sinh), tài xế trên hệ thống KidGo có thể nhận các cuốc xe chở người lớn hoặc kết hợp giao hàng (Delivery). Giải pháp này giúp tối ưu hóa công suất hoạt động của tài xế, tăng thu nhập và giải quyết triệt để bài toán kinh tế để duy trì nền tảng.
+    \item \textbf{Ứng dụng trí tuệ nhân tạo (AI):} Tích hợp các mô hình Machine Learning/AI để nhận diện khuôn mặt (Face Recognition) nhằm tự động hóa quá trình xác minh hình ảnh đón/trả trẻ. Đồng thời, phân tích thói quen lái xe của tài xế dựa trên dữ liệu lịch sử để đánh giá và chấm điểm chất lượng dịch vụ tự động.
+\end{itemize}
 \end{document}
