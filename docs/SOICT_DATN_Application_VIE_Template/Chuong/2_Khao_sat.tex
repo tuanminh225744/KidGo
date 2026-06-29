@@ -132,6 +132,35 @@ Dựa trên sơ đồ Use Case tổng quát, phần này sẽ đi sâu vào đ�
           \end{itemize}
 \end{itemize}
 
+\subsection{Đặc tả use case Thanh toán}
+\begin{itemize}
+    \item \textbf{Tên use case}: Thanh toán
+    \item \textbf{Tác nhân}: Phụ huynh
+    \item \textbf{Mục đích}: Cho phép phụ huynh xem trước tổng số tiền dự kiến phải trả và thực hiện thanh toán cho lịch trình chuyến đi (bao gồm cả áp dụng các gói dịch vụ).
+    \item \textbf{Điều kiện tiên quyết}: Phụ huynh đã cấu hình xong thông tin chuyến đi (điểm đón, trả, thời gian, tài xế).
+    \item \textbf{Luồng sự kiện chính}:
+          \begin{enumerate}
+              \item Hệ thống tiếp nhận thông tin lịch trình đặt xe: thời gian bắt đầu, kết thúc, các thứ lặp lại trong tuần, khoảng cách di chuyển thực tế, và tùy chọn tài xế.
+              \item Hệ thống tính toán tổng số chuyến đi (\texttt{tripCount}) dựa vào chu kì lặp lại giữa khoảng thời gian đã chọn.
+              \item Hệ thống tính đơn giá cơ bản cho mỗi chuyến (\texttt{pricePerTrip}) theo công thức: 15.000 VNĐ (giá mở cửa) + Khoảng cách $\times$ 5.000 VNĐ/km.
+              \item Hệ thống kiểm tra tùy chọn tài xế. Nếu phụ huynh chỉ định đích danh "Tài xế ưu tiên", hệ thống cộng thêm phụ phí 10.000 VNĐ/chuyến.
+              \item Hệ thống kiểm tra gói đăng ký (\texttt{Subscription}) đang hoạt động của phụ huynh:
+                    \begin{itemize}
+                        \item Nếu đang dùng gói tháng (\texttt{monthly}): Giảm 5\% trên tổng hóa đơn.
+                        \item Nếu đang dùng gói năm (\texttt{yearly}): Giảm 10\% trên tổng hóa đơn.
+                    \end{itemize}
+              \item Hệ thống tính toán con số cuối cùng để hiển thị chi tiết lên màn hình báo giá cho phụ huynh.
+              \item Phụ huynh kiểm tra lại thông tin và lựa chọn phương thức thanh toán (Tiền mặt hoặc Quét mã QR).
+              \item Phụ huynh hoàn tất thủ tục và hệ thống tạo mới giao dịch thanh toán, ghi nhận chuyến đi thành công.
+          \end{enumerate}
+    \item \textbf{Luồng sự kiện phát sinh (Ngoại lệ/Lỗi)}:
+          \begin{itemize}
+              \item \textit{Lỗi ở bước 7}: Nếu phụ huynh chọn thanh toán qua mã QR (QRPayment) nhưng giao dịch ngân hàng thất bại hoặc quá thời gian chờ, hệ thống cảnh báo và yêu cầu thử lại hoặc đổi sang trả bằng tiền mặt.
+              \item \textit{Ngoại lệ thanh toán gói dịch vụ}: Nếu khách hàng chọn mua gói dịch vụ (Subscription) trong giao dịch, hệ thống chỉ cho phép phương thức thanh toán duy nhất là thanh toán chuyển khoản (Quét mã QR). Phương thức thanh toán tiền mặt sẽ không khả dụng.
+          \end{itemize}
+    \item \textbf{Ghi chú hệ thống (Thu nhập tài xế)}: Nền tảng KidGo áp dụng mức phí hoa hồng là 20\% cho mỗi giao dịch, do đó thu nhập của tài xế sẽ bằng 80\% tổng số tiền khách trả.
+\end{itemize}
+
 \subsection{Đặc tả use case Nhận và thực hiện chuyến xe}
 \begin{itemize}
     \item \textbf{Tên use case}: Nhận và thực hiện chuyến xe
@@ -197,6 +226,30 @@ Dựa trên sơ đồ Use Case tổng quát, phần này sẽ đi sâu vào đ�
     \item \textbf{Luồng sự kiện phát sinh}:
           \begin{itemize}
               \item \textit{Phát hiện vấn đề}: Trong chuyến xe hệ thống có cơ chế tự kiểm tra an toàn cho trẻ: dừng lại bất thường, mất GPS, đi lệch tuyến, tốc độ quá cao. Nếu phát hiện các vấn đề này hệ thống sẽ gửi thông báo nhắc nhở đến máy của tài xế và máy của phụ huynh.
+          \end{itemize}
+\end{itemize}
+
+\subsection{Đặc tả use case Báo cáo đến admin}
+\begin{itemize}
+    \item \textbf{Tên use case}: Báo cáo đến admin
+    \item \textbf{Tác nhân}: Phụ huynh, Quản trị viên (Admin)
+    \item \textbf{Mô tả ngắn}: Phụ huynh xem thông tin chuyến đi và gửi báo cáo khiếu nại nếu có vấn đề. Admin tiếp nhận, kiểm tra và phản hồi lại phụ huynh.
+    \item \textbf{Tiền điều kiện}: Phụ huynh đã đăng nhập và đang xem chi tiết một chuyến đi (\texttt{Trip}).
+    \item \textbf{Hậu điều kiện}: Báo cáo được gửi và chờ Admin xử lý. Sau khi xử lý, trạng thái chuyển sang \texttt{RESOLVED} kèm theo câu trả lời.
+    \item \textbf{Luồng sự kiện chính}:
+          \begin{enumerate}
+              \item Từ giao diện chi tiết chuyến xe, phụ huynh nhấn vào nút "Báo cáo".
+              \item Hệ thống hiển thị biểu mẫu nhập thông tin gồm: Tiêu đề (\texttt{title}) và Nội dung chi tiết (\texttt{content}).
+              \item Phụ huynh nhập liệu và nhấn gửi báo cáo lên hệ thống.
+              \item Hệ thống ghi nhận dữ liệu, tạo bản ghi \texttt{Report} với trạng thái mặc định là \texttt{PENDING} và liên kết với mã chuyến đi (\texttt{tripId}).
+              \item Hệ thống hiển thị thông báo gửi báo cáo thành công cho phụ huynh.
+              \item Admin đăng nhập vào trang quản trị, xem danh sách báo cáo và chọn báo cáo vừa gửi để xử lý.
+              \item Admin xem xét nội dung khiếu nại, đối chiếu với thông tin chuyến xe, sau đó nhập câu trả lời (\texttt{adminAnswer}).
+              \item Admin xác nhận hoàn tất xử lý. Hệ thống cập nhật trạng thái báo cáo thành \texttt{RESOLVED} và gửi thông báo kèm câu trả lời của Admin đến phụ huynh.
+          \end{enumerate}
+    \item \textbf{Luồng sự kiện phát sinh (Ngoại lệ/Lỗi)}:
+          \begin{itemize}
+              \item \textit{Để trống thông tin}: Nếu phụ huynh không nhập \texttt{title} hoặc \texttt{content}, hệ thống báo lỗi không cho gửi và yêu cầu nhập đầy đủ dữ liệu.
           \end{itemize}
 \end{itemize}
 

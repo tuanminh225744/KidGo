@@ -9,7 +9,7 @@ const NotificationSchema = new Schema(
       enum: ["parent", "driver", "admin"],
       required: true,
     },
-    type: { type: String }, // 'trip_start' | 'alert' | 'booking_confirm'…
+    type: { type: String },
     title: { type: String },
     body: { type: String },
     tripId: { type: Schema.Types.ObjectId, ref: "Trip" },

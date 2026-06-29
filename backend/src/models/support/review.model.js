@@ -8,7 +8,7 @@ const ReviewSchema = new Schema(
     driverId: { type: Schema.Types.ObjectId, ref: 'Driver', required: true, index: true },
     rating: { type: Number, min: 1, max: 5, required: true },
     comment: { type: String },
-    tags: { type: [String], default: [] }, // 'safe_driving' | 'punctual' | 'friendly'…
+    tags: { type: [String], default: [] },
   },
   { timestamps: { createdAt: true, updatedAt: false } }
 );

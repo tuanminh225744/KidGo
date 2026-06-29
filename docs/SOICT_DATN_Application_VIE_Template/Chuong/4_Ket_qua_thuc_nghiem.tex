@@ -256,6 +256,15 @@ Hệ thống KidGo lưu trữ dữ liệu trên nền tảng \textbf{MongoDB} �
     \item \textbf{BOOKING - TRIP\_SCHEDULE (N-1):} Một lịch trình đặt xe định kỳ (\texttt{TripSchedule}) có thể sinh ra tự động nhiều yêu cầu đặt xe (\texttt{Booking}) theo các ngày trong tuần.
 \end{itemize}
 
+\textit{Mô tả luồng liên kết logic nghiệp vụ giữa các thực thể:}
+\begin{itemize}
+    \item \textbf{1. Giai đoạn khởi tạo (User, Kid, Driver):} Hệ thống bắt đầu với thực thể hạt nhân là người dùng (\texttt{User}). Phụ huynh tạo mới các hồ sơ trẻ em (\texttt{Kid}) để quản lý. Trong khi đó, tài xế hoàn thiện hồ sơ đăng ký (\texttt{Driver}) và khai báo phương tiện di chuyển (\texttt{Vehicle}).
+    \item \textbf{2. Giai đoạn thiết lập nhu cầu (Booking, TripSchedule, Subscription, Payment):} Khi phụ huynh muốn đặt xe cho con, họ tạo ra một yêu cầu (\texttt{Booking}) gắn liền với một tuyến đường. Nếu đi học hàng ngày, họ thiết lập lịch trình định kỳ (\texttt{TripSchedule}). Lịch trình này đóng vai trò như một khuôn mẫu (template), từ đó hệ thống tự động sinh ra các thực thể \texttt{Booking} tương ứng cho từng ngày cụ thể. Sau khi đặt chuyến xong phụ huynh tiến hành thanh toán (\texttt{Payment}). Phụ huynh có thể thanh toán đơn một chuyến hoặc theo gói (\texttt{Subscription}).
+    \item \textbf{3. Giai đoạn ghép nối và vận hành (Booking chuyển hóa thành Trip):} Yêu cầu đặt xe (\texttt{Booking}) ban đầu ở trạng thái chờ. Khi một tài xế chấp nhận, hệ thống chính thức ghép nối và sinh ra một chuyến đi thực tế (\texttt{Trip}). Kể từ lúc này, mọi hoạt động điều hướng, giám sát GPS, xác thực OTP đón trả trẻ đều xoay quanh thực thể \texttt{Trip}.
+    \item \textbf{4. Giai đoạn hoàn tất và phản hồi (Review, Report):} Sau khi chuyến đi (\texttt{Trip}) kết thúc thành công, phụ huynh sau đó có thể viết đánh giá (\texttt{Review}) cho tài xế, hoặc tạo phiếu khiếu nại (\texttt{Report}) nếu có sự cố. Toàn bộ các thực thể vệ tinh này đều lấy \texttt{Trip} làm gốc tham chiếu.
+\end{itemize}
+
+\newpage
 \textbf{2. Thiết kế chi tiết Cơ sở dữ liệu (Database Schema)}
 
 Dựa trên biểu đồ E-R, dữ liệu được ánh xạ thành các Document Schema lưu trong các Collection của MongoDB. Dưới đây là chi tiết toàn bộ các trường dữ liệu của 6 Collection cốt lõi nhất đại diện cho nhóm Nền tảng (Core) và Vận hành (Operational).
@@ -282,6 +291,7 @@ Lưu trữ thông tin xác thực và hồ sơ cơ bản của mọi người d�
     \end{tabular}
 \end{table}
 
+\newpage
 \textbf{2.2. Bảng \texttt{kids} (Hồ sơ trẻ em)} \\
 Lưu trữ thông tin của các bé được phụ huynh thêm vào để đặt chuyến.
 \begin{table}[H]
@@ -309,6 +319,7 @@ Lưu trữ thông tin của các bé được phụ huynh thêm vào để đặ
     \end{tabular}
 \end{table}
 
+\newpage
 \textbf{2.3. Bảng \texttt{drivers} (Hồ sơ tài xế)} \\
 Chứa thông tin chuyên môn vận tải, trạng thái nhận chuyến và vị trí của tài xế.
 \begin{table}[H]
@@ -350,6 +361,7 @@ Thông tin về phương tiện mà tài xế sử dụng để chuyên chở.
         \texttt{isActive}         & Boolean       & Default: \texttt{false}       & Trạng thái được duyệt sử dụng \\ \hline
     \end{tabular}
 \end{table}
+
 
 \textbf{2.5. Bảng \texttt{bookings} (Yêu cầu đặt xe)} \\
 Lưu trữ toàn bộ thông tin của một yêu cầu đặt xe trước khi được tài xế nhận.
@@ -396,9 +408,121 @@ Quản lý vòng đời chi tiết và quá trình di chuyển của một chuy�
         \texttt{createdAt}        & Date          & Tự động sinh                      & Giờ bắt đầu sinh chuyến       \\ \hline
     \end{tabular}
 \end{table}
+\textbf{2.7. Bảng \texttt{payments} (Thanh toán)} \\
+Quản lý các giao dịch thanh toán của người dùng cho các chuyến đi.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|p{4cm}|p{5cm}|}
+        \hline
+        \textbf{Trường dữ liệu} & \textbf{Kiểu} & \textbf{Ràng buộc / Mặc định}                                    & \textbf{Mô tả}                   \\ \hline
+        \texttt{\_id}           & ObjectId      & Khóa chính                                                       & Mã định danh tự sinh             \\ \hline
+        \texttt{userId}         & ObjectId      & Ref: \texttt{User}, Required                                     & Người dùng thực hiện thanh toán  \\ \hline
+        \texttt{tripScheduleId} & ObjectId      & Ref: \texttt{TripSchedule}, Required                             & Lịch trình gốc tương ứng         \\ \hline
+        \texttt{amount}         & Number        & Required                                                         & Tổng tiền khách phải trả         \\ \hline
+        \texttt{driverEarning}  & Number        & Required                                                         & Số tiền tài xế nhận được         \\ \hline
+        \texttt{method}         & String        & Enum (\texttt{cash}, \texttt{QRPayment}), Default: \texttt{cash} & Phương thức thanh toán           \\ \hline
+        \texttt{status}         & String        & Enum, Default: \texttt{pending}                                  & Trạng thái giao dịch             \\ \hline
+        \texttt{paidAt}         & Date          & Default: \texttt{null}                                           & Thời điểm thanh toán thành công  \\ \hline
+        \texttt{createdAt}      & Date          & Tự động sinh                                                     & Thời điểm tạo yêu cầu thanh toán \\ \hline
+        \texttt{updatedAt}      & Date          & Tự động sinh                                                     & Thời điểm cập nhật trạng thái    \\ \hline
+    \end{tabular}
+\end{table}
 
+\textbf{2.8. Bảng \texttt{subscriptions} (Gói đăng ký)} \\
+Lưu trữ thông tin các gói dịch vụ định kỳ mà phụ huynh đã đăng ký.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|p{4cm}|p{5cm}|}
+        \hline
+        \textbf{Trường dữ liệu} & \textbf{Kiểu} & \textbf{Ràng buộc / Mặc định}                      & \textbf{Mô tả}                    \\ \hline
+        \texttt{\_id}           & ObjectId      & Khóa chính                                         & Mã định danh tự sinh              \\ \hline
+        \texttt{parentId}       & ObjectId      & Ref: \texttt{User}, Required, Index                & Phụ huynh đăng ký gói             \\ \hline
+        \texttt{plan}           & String        & Enum (\texttt{monthly}, \texttt{yearly}), Required & Loại gói dịch vụ                  \\ \hline
+        \texttt{status}         & String        & Enum, Default: \texttt{active}, Index              & Trạng thái gói đăng ký            \\ \hline
+        \texttt{startDate}      & Date          & Required                                           & Ngày bắt đầu hiệu lực             \\ \hline
+        \texttt{endDate}        & Date          & Required                                           & Ngày kết thúc hiệu lực            \\ \hline
+        \texttt{usedTrips}      & Number        & Default: 0                                         & Số chuyến đi đã sử dụng trong gói \\ \hline
+        \texttt{paymentId}      & ObjectId      & Ref: \texttt{Payment}, Default: \texttt{null}      & Giao dịch thanh toán mua gói      \\ \hline
+        \texttt{createdAt}      & Date          & Tự động sinh                                       & Thời điểm tạo đăng ký             \\ \hline
+    \end{tabular}
+\end{table}
 
+\textbf{2.9. Bảng \texttt{trip\_schedules} (Lịch trình định kỳ)} \\
+Quản lý các lịch trình đặt xe lặp lại theo tuần của phụ huynh.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|p{4cm}|p{5cm}|}
+        \hline
+        \textbf{Trường dữ liệu}    & \textbf{Kiểu} & \textbf{Ràng buộc / Mặc định}                      & \textbf{Mô tả}                      \\ \hline
+        \texttt{\_id}              & ObjectId      & Khóa chính                                         & Mã định danh tự sinh                \\ \hline
+        \texttt{parentId}          & ObjectId      & Ref: \texttt{User}, Required                       & Phụ huynh tạo lịch trình            \\ \hline
+        \texttt{kidId}             & ObjectId      & Ref: \texttt{Kid}, Required                        & Trẻ em tham gia lịch trình          \\ \hline
+        \texttt{preferredDriverId} & ObjectId      & Ref: \texttt{Driver}, Default: \texttt{null}       & Tài xế ưu tiên đón trả              \\ \hline
+        \texttt{routeId}           & ObjectId      & Ref: \texttt{Route}, Required                      & Lộ trình của lịch trình             \\ \hline
+        \texttt{repeatDays}        & Array[Number] & Default: \texttt{[]}                               & Các ngày lặp lại trong tuần (T2-CN) \\ \hline
+        \texttt{pickupTime}        & String        & \texttt{HH:mm}                                     & Giờ đón cố định mỗi ngày            \\ \hline
+        \texttt{isActive}          & Boolean       & Default: \texttt{true}, Index                      & Trạng thái hoạt động của lịch       \\ \hline
+        \texttt{startDate}         & Date          &                                                    & Ngày bắt đầu hiệu lực               \\ \hline
+        \texttt{endDate}           & Date          & Default: \texttt{null}                             & Ngày kết thúc hiệu lực              \\ \hline
+        \texttt{subscriptionId}    & ObjectId      & Ref: \texttt{Subscription}, Default: \texttt{null} & Gói đăng ký liên kết                \\ \hline
+        \texttt{paymentId}         & ObjectId      & Ref: \texttt{Payment}, Default: \texttt{null}      & Thanh toán gốc của lịch trình       \\ \hline
+    \end{tabular}
+\end{table}
 
+\textbf{2.10. Bảng \texttt{preferred\_drivers} (Tài xế ưu tiên)} \\
+Lưu trữ danh sách các tài xế mà phụ huynh tin tưởng và muốn ưu tiên gọi.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|p{4cm}|p{5cm}|}
+        \hline
+        \textbf{Trường dữ liệu} & \textbf{Kiểu} & \textbf{Ràng buộc / Mặc định}       & \textbf{Mô tả}                \\ \hline
+        \texttt{\_id}           & ObjectId      & Khóa chính                          & Mã định danh tự sinh          \\ \hline
+        \texttt{parentId}       & ObjectId      & Ref: \texttt{User}, Required, Index & Phụ huynh cấu hình            \\ \hline
+        \texttt{driverId}       & ObjectId      & Ref: \texttt{Driver}, Required      & Tài xế được đưa vào danh sách \\ \hline
+        \texttt{nickname}       & String        &                                     & Tên gợi nhớ cho tài xế        \\ \hline
+        \texttt{priority}       & Number        & Min: 1, Max: 5, Default: 1          & Độ ưu tiên (1 là cao nhất)    \\ \hline
+        \texttt{addedAt}        & Date          & Default: \texttt{Date.now}          & Thời điểm thêm vào danh sách  \\ \hline
+    \end{tabular}
+\end{table}
+
+\newpage
+\textbf{2.11. Bảng \texttt{reports} (Báo cáo sự cố)} \\
+Lưu trữ các báo cáo khiếu nại, sự cố từ phía người dùng liên quan đến chuyến đi.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|p{4cm}|p{5cm}|}
+        \hline
+        \textbf{Trường dữ liệu} & \textbf{Kiểu} & \textbf{Ràng buộc / Mặc định}                                         & \textbf{Mô tả}            \\ \hline
+        \texttt{\_id}           & ObjectId      & Khóa chính                                                            & Mã định danh tự sinh      \\ \hline
+        \texttt{tripId}         & ObjectId      & Ref: \texttt{Trip}, Required, Index                                   & Chuyến đi xảy ra sự cố    \\ \hline
+        \texttt{title}          & String        & Required, Max Length: 120                                             & Tiêu đề khiếu nại         \\ \hline
+        \texttt{content}        & String        & Required, Max Length: 5000                                            & Nội dung chi tiết         \\ \hline
+        \texttt{parentId}       & ObjectId      & Ref: \texttt{User}, Required, Index                                   & Người gửi báo cáo         \\ \hline
+        \texttt{status}         & String        & Enum (\texttt{PENDING}, \texttt{RESOLVED}), Default: \texttt{PENDING} & Trạng thái xử lý báo cáo  \\ \hline
+        \texttt{adminAnswer}    & String        & Max Length: 2000                                                      & Phản hồi từ quản trị viên \\ \hline
+        \texttt{createdAt}      & Date          & Tự động sinh                                                          & Thời điểm tạo báo cáo     \\ \hline
+    \end{tabular}
+\end{table}
+
+\textbf{2.12. Bảng \texttt{reviews} (Đánh giá)} \\
+Lưu trữ các đánh giá chất lượng và điểm số dành cho tài xế sau mỗi chuyến đi.
+\begin{table}[H]
+    \centering
+    \begin{tabular}{|l|l|p{4cm}|p{5cm}|}
+        \hline
+        \textbf{Trường dữ liệu} & \textbf{Kiểu} & \textbf{Ràng buộc / Mặc định}         & \textbf{Mô tả}                     \\ \hline
+        \texttt{\_id}           & ObjectId      & Khóa chính                            & Mã định danh tự sinh               \\ \hline
+        \texttt{tripId}         & ObjectId      & Ref: \texttt{Trip}, Required, Unique  & Chuyến đi được đánh giá            \\ \hline
+        \texttt{parentId}       & ObjectId      & Ref: \texttt{User}, Required          & Người dùng thực hiện đánh giá      \\ \hline
+        \texttt{driverId}       & ObjectId      & Ref: \texttt{Driver}, Required, Index & Tài xế nhận đánh giá               \\ \hline
+        \texttt{rating}         & Number        & Min: 1, Max: 5, Required              & Điểm số đánh giá (sao)             \\ \hline
+        \texttt{comment}        & String        &                                       & Nhận xét chi tiết                  \\ \hline
+        \texttt{tags}           & Array[String] & Default: \texttt{[]}                  & Các thẻ đặc điểm (vd: an toàn,...) \\ \hline
+        \texttt{createdAt}      & Date          & Tự động sinh                          & Thời điểm gửi đánh giá             \\ \hline
+    \end{tabular}
+\end{table}
+
+\newpage
 \section{Xây dựng ứng dụng}
 \subsection{Thư viện và công cụ sử dụng}
 Quá trình xây dựng ứng dụng KidGo (bao gồm cả hệ thống máy chủ Backend và giao diện người dùng Frontend) đã sử dụng nhiều công cụ lập trình, thư viện mã nguồn mở và các dịch vụ thiết yếu. Dưới đây là danh sách chi tiết các công cụ và thư viện được sử dụng, phân loại theo mục đích và phiên bản thực tế cài đặt tại thời điểm phát triển dự án.

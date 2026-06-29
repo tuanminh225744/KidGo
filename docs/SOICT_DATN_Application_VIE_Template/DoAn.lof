@@ -8,18 +8,18 @@
 \contentsline {figure}{\numberline {2.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ use case phân rã Xác thực an toàn}}{10}{figure.caption.15}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
-\contentsline {figure}{\numberline {4.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ gói UML tổng quan hệ thống KidGo}}{20}{figure.caption.16}%
-\contentsline {figure}{\numberline {4.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Account \& Profile}}{22}{figure.caption.17}%
-\contentsline {figure}{\numberline {4.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Trip \& Booking}}{23}{figure.caption.18}%
-\contentsline {figure}{\numberline {4.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Payment \& Subscription}}{24}{figure.caption.19}%
-\contentsline {figure}{\numberline {4.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Feedback \& Support}}{24}{figure.caption.20}%
-\contentsline {figure}{\numberline {4.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Notification}}{25}{figure.caption.21}%
-\contentsline {figure}{\numberline {4.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Thiết kế giao diện Màn hình Trang chủ và Đặt xe}}{27}{figure.caption.22}%
-\contentsline {figure}{\numberline {4.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Thiết kế giao diện Màn hình Tài xế trong chuyến xe}}{27}{figure.caption.23}%
-\contentsline {figure}{\numberline {4.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Thiết kế giao diện Trang Quản trị (Admin)}}{28}{figure.caption.24}%
-\contentsline {figure}{\numberline {4.10}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ trình tự Use Case: Đặt xe (Booking)}}{30}{figure.caption.25}%
-\contentsline {figure}{\numberline {4.11}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ trình tự Use Case: Thực hiện chuyến đi}}{30}{figure.caption.26}%
-\contentsline {figure}{\numberline {4.12}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ Thực thể - Liên kết (E-R Diagram) của hệ thống}}{31}{figure.caption.27}%
+\contentsline {figure}{\numberline {4.1}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ gói UML tổng quan hệ thống KidGo}}{22}{figure.caption.16}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Account \& Profile}}{24}{figure.caption.17}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Trip \& Booking}}{25}{figure.caption.18}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Payment \& Subscription}}{26}{figure.caption.19}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Feedback \& Support}}{26}{figure.caption.20}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ chi tiết gói Notification}}{27}{figure.caption.21}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Thiết kế giao diện Màn hình Trang chủ và Đặt xe}}{29}{figure.caption.22}%
+\contentsline {figure}{\numberline {4.8}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Thiết kế giao diện Màn hình Tài xế trong chuyến xe}}{29}{figure.caption.23}%
+\contentsline {figure}{\numberline {4.9}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Thiết kế giao diện Trang Quản trị (Admin)}}{30}{figure.caption.24}%
+\contentsline {figure}{\numberline {4.10}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ trình tự Use Case: Đặt xe (Booking)}}{32}{figure.caption.25}%
+\contentsline {figure}{\numberline {4.11}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ trình tự Use Case: Thực hiện chuyến đi}}{32}{figure.caption.26}%
+\contentsline {figure}{\numberline {4.12}{\ignorespaces \xpg@aux {}{vietnamese}\ignorespaces Biểu đồ Thực thể - Liên kết (E-R Diagram) của hệ thống}}{33}{figure.caption.27}%
 \addvspace {10\p@ }
 \addvspace {10\p@ }
 \contentsfinish 
