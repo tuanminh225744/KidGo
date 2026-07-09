@@ -22,10 +22,10 @@ export default function setupDriverSockets(io) {
     socket.on("authenticate", authenticateDriver);
 
     const handleLocationUpdate = async (data) => {
-      // console.log(
-      //   `[Socket] Received location update from driver ${currentDriverId}:`,
-      //   data,
-      // );
+      console.log(
+        `[Socket] Received location update from driver ${currentDriverId}:`,
+        data,
+      );
       if (!currentDriverId && data?.driverId) {
         currentDriverId = data.driverId;
       }
