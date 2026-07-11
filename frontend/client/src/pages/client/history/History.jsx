@@ -63,12 +63,12 @@ export default function HistoryPage() {
     <div className="flex-1 flex flex-col pb-24 bg-surface min-h-screen">
       {/* Header */}
       <header className="px-5 py-4 flex items-center gap-4 bg-white sticky top-0 z-40 shadow-sm">
-        <button
+        {/* <button
           onClick={() => navigate(-1)}
           className="w-10 h-10 rounded-full bg-surface-container flex items-center justify-center active:scale-95 transition-transform"
         >
           <ArrowLeft size={20} className="text-on-surface" />
-        </button>
+        </button> */}
         <h1 className="text-xl font-bold text-on-surface">
           Lịch sử di chuyển
         </h1>

@@ -60,16 +60,19 @@ export const updateDriverProfile = async (req, res, next) => {
  */
 export const toggleDriverStatus = async (req, res, next) => {
   try {
-    const { isOnline } = req.body;
+    const { isOnline, rideStatus } = req.body;
     const userRes = await driverService.getDriverByUserId(req.user.id);
     const user = userRes.data;
 
-    const updated = await driverService.updateDriver(user._id, { isOnline });
+    const updateData = {};
+    if (isOnline !== undefined) updateData.isOnline = isOnline;
+    if (rideStatus !== undefined) updateData.rideStatus = rideStatus;
+
+    const updated = await driverService.updateDriver(user._id, updateData);
     return success(
       res,
       updated.data,
-      updated.message ||
-      `${isOnline ? "Bật" : "Tắt"} trạng thái sẵn sàng thành công.`,
+      updated.message || "Cập nhật trạng thái thành công.",
       200,
     );
   } catch (error) {

@@ -60,7 +60,7 @@ export default function Notifications() {
       setLoading(true);
       const res = await getNotifications();
       console.log("danh sach thong bao:", res);
-      const list = res?.notifications || [];
+      const list = res?.data?.notifications || res?.notifications || [];
       setNotifications(
         list.map((item) => ({
           id: item._id,
@@ -116,14 +116,14 @@ export default function Notifications() {
     <div className="min-h-full bg-[linear-gradient(180deg,#f7fbf7_0%,#ffffff_36%,#f4f7fb_100%)]">
       <header className="sticky top-0 z-20 border-b border-white/70 bg-white/85 backdrop-blur px-4 py-4">
         <div className="flex items-center gap-3">
-          <button
+          {/* <button
             type="button"
             onClick={() => navigate(-1)}
             className="w-10 h-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-700 active:scale-95 transition-transform"
             aria-label="Quay lại"
           >
             <ArrowLeft size={18} />
-          </button>
+          </button> */}
           <div className="flex-1">
             {/* <p className="text-[11px] uppercase tracking-[0.25em] text-slate-400 font-semibold">
               Inbox
@@ -184,15 +184,15 @@ export default function Notifications() {
                           <p className="mt-1 text-[11px] text-slate-400">
                             {item.createdAt
                               ? new Date(item.createdAt).toLocaleString(
-                                  "vi-VN",
-                                  {
-                                    day: "2-digit",
-                                    month: "2-digit",
-                                    year: "numeric",
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  },
-                                )
+                                "vi-VN",
+                                {
+                                  day: "2-digit",
+                                  month: "2-digit",
+                                  year: "numeric",
+                                  hour: "2-digit",
+                                  minute: "2-digit",
+                                },
+                              )
                               : ""}
                           </p>
                         </div>
@@ -222,7 +222,7 @@ export default function Notifications() {
       </main>
 
       {selectedNotification && (
-        <div className="fixed inset-0 z-30 bg-slate-950/50 px-4 pb-46 py-6 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-slate-950/50 px-4 pb-20 py-6 backdrop-blur-sm z-500">
           <div className="mx-auto flex h-full max-w-md items-end">
             <div className="w-full rounded-[28px] bg-white p-5 shadow-2xl">
               <div className="mb-4 flex items-start justify-between gap-3">
@@ -269,16 +269,6 @@ export default function Notifications() {
                     </p>
                   </div>
 
-                  {detail && (
-                    <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-700">
-                      <p className="font-bold text-slate-900">
-                        Dữ liệu liên quan
-                      </p>
-                      <pre className="mt-2 overflow-auto whitespace-pre-wrap break-words text-xs leading-5 text-slate-600">
-                        {JSON.stringify(detail, null, 2)}
-                      </pre>
-                    </div>
-                  )}
 
                   <div className="grid grid-cols-2 gap-2">
                     <button
@@ -295,7 +285,7 @@ export default function Notifications() {
                       type="button"
                       onClick={() => {
                         if (selectedNotification.tripId) {
-                          openDetail(selectedNotification);
+                          navigate(`/client/current-trip?tripId=${selectedNotification.tripId}`);
                         }
                       }}
                       className="rounded-2xl bg-slate-900 px-4 py-3 text-sm font-bold text-white disabled:cursor-not-allowed disabled:bg-slate-300"

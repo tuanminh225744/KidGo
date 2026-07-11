@@ -5,6 +5,7 @@ import Route from "../models/operational/route.model.js";
 import { getIo } from "../sockets/socketManager.js";
 import redisClient from "../config/redisClient.js";
 import { AppError, NotFoundError } from "../utils/AppError.js";
+import { createNotification } from "./notification.service.js";
 
 /**
  * 1. Tài xế bắt đầu di chuyển đến điểm đón
@@ -77,6 +78,16 @@ export const driverStartPickup = async (tripId) => {
       message: "Tài xế đã bắt đầu di chuyển đến điểm đón bé.",
       tripId: trip._id,
     });
+    
+    // Lưu thông báo vào DB
+    await createNotification({
+      recipientId: trip.parentId,
+      recipientType: "parent",
+      type: "trip_start",
+      title: "Tài xế đang quay xe tới!",
+      body: "Tài xế đã bắt đầu di chuyển đến điểm đón bé.",
+      tripId: trip._id,
+    });
 
     // Bắn Socket 2: Bàn giao chìa khóa OTP cho Mẹ
     if (otpCode) {
@@ -86,6 +97,15 @@ export const driverStartPickup = async (tripId) => {
         message:
           "Khi tài xế chui ra mở cửa, vui lòng đọc MÃ PIN cho bác tài để chứng minh đón đúng mã bé.",
         tripId: trip._id.toString(),
+      });
+      
+      await createNotification({
+        recipientId: trip.parentId,
+        recipientType: "parent",
+        type: "alert",
+        title: "Mã PIN đón con",
+        body: "Khi tài xế chui ra mở cửa, vui lòng đọc MÃ PIN cho bác tài để chứng minh đón đúng mã bé. Mã của bạn là: " + otpCode,
+        tripId: trip._id,
       });
     }
 
@@ -231,6 +251,15 @@ export const driverPickupKid = async (tripId) => {
         "Xác thực thành công. Hành khách nhí đã yên vị trên ghế và bắt đầu di chuyển.",
       tripId: trip._id,
     });
+    
+    await createNotification({
+      recipientId: trip.parentId,
+      recipientType: "parent",
+      type: "trip_start",
+      title: "Đã đón bé",
+      body: "Xác thực thành công. Hành khách nhí đã yên vị trên ghế và bắt đầu di chuyển.",
+      tripId: trip._id,
+    });
 
     return { success: true, message: "Kid picked up", data: trip };
   } catch (error) {
@@ -273,6 +302,15 @@ export const driverDropoffKid = async (tripId) => {
       driverId: populatedTrip?.driverId?._id?.toString() || trip.driverId?.toString(),
       driverName: populatedTrip?.driverId?.user?.fullName || null,
       driverAvatar: populatedTrip?.driverId?.user?.avatar || null,
+    });
+    
+    await createNotification({
+      recipientId: trip.parentId,
+      recipientType: "parent",
+      type: "system",
+      title: "Hành trình Mỹ Vãn",
+      body: "Bé con đã được thả xuống điểm trả một cách hoàn hảo.",
+      tripId: trip._id,
     });
 
     return { success: true, message: "Trip completed", data: trip };
@@ -458,6 +496,15 @@ export const cancelTrip = async (tripId, userId, role) => {
     tripId: trip._id,
     message: "Chuyến đi đã bị huỷ.",
     cancelledBy: role,
+  });
+  
+  await createNotification({
+    recipientId: trip.parentId,
+    recipientType: "parent",
+    type: "alert",
+    title: "Huỷ chuyến đi",
+    body: "Chuyến đi đã bị huỷ.",
+    tripId: trip._id,
   });
 
   return { success: true, message: "Trip cancelled", data: trip };

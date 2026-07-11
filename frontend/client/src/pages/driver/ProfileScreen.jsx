@@ -9,6 +9,7 @@ import {
   Car,
   PaintBucket,
   Users,
+  Phone,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useAuthStore } from "../../store/useAuthStore";
@@ -143,6 +144,17 @@ export const ProfileScreen = () => {
                 <p className="text-xs text-gray-500">Email</p>
                 <p className="font-semibold text-sm text-gray-800">
                   {user?.email || "Chưa cập nhật"}
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-green-500 shrink-0">
+                <Phone size={18} />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Số điện thoại</p>
+                <p className="font-semibold text-sm text-gray-800">
+                  {driverInfo?.user?.phone || "Chưa cập nhật"}
                 </p>
               </div>
             </div>

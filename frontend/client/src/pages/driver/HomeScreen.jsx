@@ -5,6 +5,7 @@ import {
   getDriverDailySchedules,
   getDriverEarningsStats,
   getDriverTripsStats,
+  toggleDriverStatus,
 } from "../../services/driver.service";
 import { useNavigate } from "react-router-dom";
 import DriverLiveMap from "../../components/DriverLiveMap";
@@ -20,6 +21,9 @@ export const HomeScreen = () => {
   const { user, logout } = useAuthStore();
 
   useEffect(() => {
+    // Reset ride status to free when entering home screen
+    toggleDriverStatus({ rideStatus: "free" }).catch(console.error);
+
     const fetchData = async () => {
       try {
         const [profRes, tripsRes] = await Promise.all([

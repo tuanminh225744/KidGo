@@ -46,6 +46,9 @@ export default function Schedules() {
     const now = new Date();
 
     const validSchedules = schedules.filter((s) => {
+      // Ẩn luôn các lịch trình đã tắt
+      if (!s.isActive) return false;
+
       // Có lặp lại
       if (s.repeatDays && s.repeatDays.length > 0) return true;
       // Hoặc trong tương lai/hôm nay

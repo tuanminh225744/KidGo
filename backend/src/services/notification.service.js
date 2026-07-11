@@ -36,7 +36,8 @@ export const createNotification = async (data) => {
  * - Parent/Driver: chỉ lấy của mình
  */
 export const getNotifications = async (user, { page = 1, limit = 30 } = {}) => {
-  const query = user.role === "admin" ? {} : { recipientId: user.id };
+  // Chỉ lấy những thông báo chưa đọc (isRead: false)
+  const query = user.role === "admin" ? { isRead: false } : { recipientId: user.id, isRead: false };
   const skip = (page - 1) * limit;
 
   const [notifications, total] = await Promise.all([
