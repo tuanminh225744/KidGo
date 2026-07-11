@@ -17,6 +17,7 @@ export default function HistoryPage() {
   const loadHistoryTrips = async () => {
     setLoading(true);
     const result = await getTrips({ status: "completed" });
+    console.log(result);
     if (result.success) {
       const tripsData = result.data?.trips || [];
       const formatted = tripsData.map((t) => ({
@@ -51,6 +52,8 @@ export default function HistoryPage() {
             ? `${t.routeId.actualDuration} phút`
             : "0 phút",
         driver: t.driverId,
+        pickupPhoto: t.pickupPhoto?.data?.photo,
+        dropoffPhoto: t.dropoffPhoto?.data?.photo,
       }));
       setHistoryTrips(formatted);
     } else {

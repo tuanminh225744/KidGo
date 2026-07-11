@@ -120,9 +120,11 @@ export default function Home() {
       String(today.getDate()).padStart(2, "0"),
     ].join("-");
     const result = await getTripSchedulesByDate(dateParam);
+    console.log("Today schedules:", result);
     if (result.success) {
       console.log(result);
-      setTodaySchedules(result.data.data || []);
+      // backend returns result.data as the array of schedules
+      setTodaySchedules(result.data || []);
     } else {
       setTodaySchedules([]);
     }

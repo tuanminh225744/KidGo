@@ -1,9 +1,11 @@
+import { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { X, MapPin, Clock, Car, Wallet, Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
   const navigate = useNavigate();
+  const [viewingPhoto, setViewingPhoto] = useState(null);
 
   if (!isOpen || !trip) return null;
 
@@ -127,6 +129,29 @@ export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
                 </div>
                 <span className="text-lg font-black text-green-700">{trip.price || (trip.fare ? `${trip.fare.toLocaleString()}đ` : '0đ')}</span>
               </div>
+
+
+              {/* Photos */}
+              {(trip.pickupPhoto || trip.dropoffPhoto) && (
+                <div className="flex gap-3">
+                  {trip.pickupPhoto && (
+                    <button
+                      onClick={() => setViewingPhoto(trip.pickupPhoto)}
+                      className="flex-1 py-3 bg-blue-50 text-blue-600 text-sm font-bold rounded-2xl active:scale-95 transition-transform"
+                    >
+                      Xem ảnh đón
+                    </button>
+                  )}
+                  {trip.dropoffPhoto && (
+                    <button
+                      onClick={() => setViewingPhoto(trip.dropoffPhoto)}
+                      className="flex-1 py-3 bg-blue-50 text-blue-600 text-sm font-bold rounded-2xl active:scale-95 transition-transform"
+                    >
+                      Xem ảnh trả
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="flex gap-3 mt-6">
@@ -149,6 +174,30 @@ export const TripDetailsModal = ({ isOpen, onClose, trip, role }) => {
               </button>
             </div>
           </motion.div>
+        </motion.div>
+      )}
+
+      {/* Image Viewing Modal */}
+      {viewingPhoto && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-[70] flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setViewingPhoto(null)}
+        >
+          <button
+            onClick={() => setViewingPhoto(null)}
+            className="absolute top-4 right-4 p-2 bg-white/10 rounded-full text-white hover:bg-white/20 active:scale-95 transition-all"
+          >
+            <X size={24} />
+          </button>
+          <img
+            src={viewingPhoto}
+            alt="Trip Photo"
+            className="max-w-full max-h-full rounded-2xl object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
         </motion.div>
       )}
     </AnimatePresence>
