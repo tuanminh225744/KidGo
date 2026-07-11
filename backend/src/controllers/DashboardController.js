@@ -10,6 +10,15 @@ export const getAdminStats = async (req, res, next) => {
   }
 };
 
+export const getFullAdminStats = async (req, res, next) => {
+  try {
+    const result = await dashboardService.getFullAdminDashboardStats();
+    return success(res, result.data, result.message, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getReports = async (req, res, next) => {
   try {
     const result = await dashboardService.getAdvancedReports();

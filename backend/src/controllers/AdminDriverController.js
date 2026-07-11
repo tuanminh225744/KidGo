@@ -8,7 +8,24 @@ import {
   updateCertification,
   getLiveDriverLocation,
 } from "../services/driver.service.js";
+import * as tripService from "../services/trip.service.js";
 import { success, error } from "../utils/response.js";
+
+/**
+ * GET /api/v1/admin/drivers/:driverId/earnings
+ * Lấy thu nhập của tài xế
+ * Role: admin
+ */
+export const getDriverEarningsAdmin = async (req, res, next) => {
+  try {
+    const { driverId } = req.params;
+    const { period, month, date } = req.query;
+    const result = await tripService.getDriverEarningsStats(driverId, { period, month, date });
+    return success(res, result.data, result.message, 200);
+  } catch (error) {
+    next(error);
+  }
+};
 
 /**
  * GET /api/v1/admin/drivers

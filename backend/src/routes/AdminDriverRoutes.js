@@ -8,6 +8,7 @@ import {
   reactivateDriverHandler,
   updateCertificationHandler,
   getDriverLiveLocation,
+  getDriverEarningsAdmin,
 } from "../controllers/AdminDriverController.js";
 import {
   authenticateToken,
@@ -27,6 +28,7 @@ router.use(authorize("admin"));
 
 router.get("/", validateListDriversQuery, validate, listDrivers);
 router.get("/:driverId", validateDriverIdParam, validate, getDriverDetail);
+router.get("/:driverId/earnings", validateDriverIdParam, validate, getDriverEarningsAdmin);
 router.patch(
   "/:driverId/approve",
   validateDriverIdParam,

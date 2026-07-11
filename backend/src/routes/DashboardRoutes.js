@@ -1,5 +1,5 @@
 import express from "express";
-import { getAdminStats, getReports } from "../controllers/DashboardController.js";
+import { getAdminStats, getFullAdminStats, getReports } from "../controllers/DashboardController.js";
 import {
   authenticateToken,
   authorize,
@@ -15,6 +15,12 @@ router.use(authorize("admin"));
  * Tổng quan: trips hôm nay, drivers online, open alerts
  */
 router.get("/dashboard", getAdminStats);
+
+/**
+ * GET /api/v1/admin/dashboard/full
+ * Full Dashboard
+ */
+router.get("/dashboard/full", getFullAdminStats);
 
 /**
  * GET /api/v1/admin/reports

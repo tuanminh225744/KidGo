@@ -1,6 +1,8 @@
 import Trip from "../models/operational/trip.model.js";
 import Driver from "../models/core/driver.model.js";
 import Review from "../models/support/review.model.js";
+import Payment from "../models/operational/payment.model.js";
+import User from "../models/core/user.model.js";
 
 // ── Dashboard ───────────────────────────────────────────────────────────────────
 
@@ -24,6 +26,69 @@ export const getAdminDashboardStats = async () => {
     success: true,
     message: "Dashboard stats fetched",
     data: { totalTripsToday, onlineDrivers, activeTrips, openAlerts: 0 },
+  };
+};
+
+/**
+ * GET /api/v1/admin/dashboard/full
+ * Full dashboard stats: trips, earnings, driver count, parent count, rankings
+ */
+export const getFullAdminDashboardStats = async () => {
+  const startOfDay = new Date();
+  startOfDay.setHours(0, 0, 0, 0);
+
+  const startOfWeek = new Date();
+  const day = startOfWeek.getDay() || 7; 
+  if (day !== 1) startOfWeek.setHours(-24 * (day - 1), 0, 0, 0);
+
+  const startOfMonth = new Date();
+  startOfMonth.setDate(1);
+  startOfMonth.setHours(0, 0, 0, 0);
+
+  const [
+    tripsToday,
+    tripsWeek,
+    tripsMonth,
+    totalDrivers,
+    totalParents,
+    paymentsToday,
+    paymentsWeek,
+    paymentsMonth,
+    rankingsResult
+  ] = await Promise.all([
+    Trip.countDocuments({ createdAt: { $gte: startOfDay } }),
+    Trip.countDocuments({ createdAt: { $gte: startOfWeek } }),
+    Trip.countDocuments({ createdAt: { $gte: startOfMonth } }),
+    Driver.countDocuments(),
+    User.countDocuments({ role: "parent" }),
+    Payment.aggregate([
+      { $match: { createdAt: { $gte: startOfDay }, status: "completed" } },
+      { $group: { _id: null, total: { $sum: { $subtract: ["$amount", "$driverEarning"] } } } }
+    ]),
+    Payment.aggregate([
+      { $match: { createdAt: { $gte: startOfWeek }, status: "completed" } },
+      { $group: { _id: null, total: { $sum: { $subtract: ["$amount", "$driverEarning"] } } } }
+    ]),
+    Payment.aggregate([
+      { $match: { createdAt: { $gte: startOfMonth }, status: "completed" } },
+      { $group: { _id: null, total: { $sum: { $subtract: ["$amount", "$driverEarning"] } } } }
+    ]),
+    getDriverRankingReport()
+  ]);
+
+  const earningsToday = paymentsToday[0]?.total || 0;
+  const earningsWeek = paymentsWeek[0]?.total || 0;
+  const earningsMonth = paymentsMonth[0]?.total || 0;
+
+  return {
+    success: true,
+    message: "Full dashboard stats fetched",
+    data: {
+      trips: { today: tripsToday, week: tripsWeek, month: tripsMonth },
+      earnings: { today: earningsToday, week: earningsWeek, month: earningsMonth },
+      users: { drivers: totalDrivers, parents: totalParents },
+      driverRankings: rankingsResult.data
+    }
   };
 };
 
@@ -105,16 +170,33 @@ export const getDriverRankingReport = async () => {
     },
     { $unwind: { path: "$userInfo", preserveNullAndEmptyArrays: true } },
     {
+      $lookup: {
+        from: "trips",
+        localField: "_id",
+        foreignField: "driverId",
+        as: "driverTrips",
+      },
+    },
+    {
+      $lookup: {
+        from: "reviews",
+        localField: "_id",
+        foreignField: "driverId",
+        as: "driverReviews",
+      },
+    },
+    {
       $project: {
         driverId: "$_id",
         certificationLevel: { $ifNull: ["$certificationLevel", 0] },
-        totalTrips: { $ifNull: ["$totalTrips", 0] },
+        totalTrips: { $size: "$driverTrips" },
+        avgRating: { $avg: "$driverReviews.rating" },
         driverName: "$userInfo.fullName",
         licenseNumber: "$licenseNumber",
         status: "$status",
       },
     },
-    { $sort: { certificationLevel: -1, totalTrips: -1 } },
+    { $sort: { avgRating: -1, totalTrips: -1, certificationLevel: -1 } },
   ]);
 
   return { success: true, message: "Driver rankings fetched", data: rankings };

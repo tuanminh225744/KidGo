@@ -4,6 +4,8 @@ import {
   getDriverDetail,
   suspendDriver,
   reactivateDriver,
+  updateDriverCertification,
+  getDriverEarnings,
 } from "../../services/admin.service";
 import { useNavigate } from "react-router-dom";
 import {
@@ -17,6 +19,7 @@ import {
   Unlock,
   MapPin,
   Map,
+  Wallet,
 } from "lucide-react";
 
 export default function DriverList() {
@@ -26,6 +29,7 @@ export default function DriverList() {
   const [selectedDriver, setSelectedDriver] = useState(null);
   const [actionLoading, setActionLoading] = useState(false);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [driverEarnings, setDriverEarnings] = useState(null);
 
   // States for search and filter
   const [search, setSearch] = useState("");
@@ -62,10 +66,17 @@ export default function DriverList() {
   const handleSelectDriver = async (driver) => {
     setDetailLoading(true);
     setSelectedDriver(driver);
+    setDriverEarnings(null);
     try {
       const response = await getDriverDetail(driver._id);
       setSelectedDriver(response?.data || driver);
-      console.log("select dirver: ", response?.data)
+      console.log("Selected driver:", response?.data);
+
+      const earningsRes = await getDriverEarnings(driver._id, { period: 'month' });
+      console.log("Driver earnings:", earningsRes?.data);
+      if (earningsRes?.data) {
+        setDriverEarnings(earningsRes.data);
+      }
     } catch (error) {
       console.error("Error fetching driver details:", error);
     } finally {
@@ -94,12 +105,31 @@ export default function DriverList() {
     if (!window.confirm("Bạn có chắc muốn mở khóa tài xế này?")) return;
     setActionLoading(true);
     try {
-      await reactivateDriver(selectedDriver._id);
-      setSelectedDriver((prev) => ({ ...prev, status: "active" }));
-      fetchDrivers();
+      const result = await reactivateDriver(selectedDriver._id);
+      if (result.success) {
+        alert("Đã mở khóa tài xế!");
+        setSelectedDriver(null);
+        fetchDrivers();
+      }
     } catch (error) {
-      console.error("Error reactivating driver:", error);
-      alert("Lỗi khi mở khóa tài xế.");
+      alert("Lỗi khi mở khóa tài xế: " + error.message);
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleUpdateCertification = async (level) => {
+    if (!window.confirm(`Bạn có chắc muốn cập nhật chứng chỉ thành cấp ${level}?`)) return;
+    setActionLoading(true);
+    try {
+      const result = await updateDriverCertification(selectedDriver._id, level);
+      if (result.success) {
+        alert("Cập nhật chứng chỉ thành công!");
+        setSelectedDriver((prev) => ({ ...prev, certificationLevel: level }));
+        fetchDrivers();
+      }
+    } catch (error) {
+      alert("Lỗi khi cập nhật chứng chỉ: " + error.message);
     } finally {
       setActionLoading(false);
     }
@@ -192,7 +222,7 @@ export default function DriverList() {
               <option value="false">Offline</option>
             </select>
 
-            <select
+            {/* <select
               value={rideStatusFilter}
               onChange={(e) => {
                 setRideStatusFilter(e.target.value);
@@ -205,7 +235,7 @@ export default function DriverList() {
               <option value="driving_to_pickup">Đang đi đón khách</option>
               <option value="waiting_for_kid">Đang chờ khách</option>
               <option value="in_trip">Đang trong chuyến</option>
-            </select>
+            </select> */}
             <button
               onClick={() => {
                 setSearch("");
@@ -270,6 +300,9 @@ export default function DriverList() {
                     <th className="px-6 py-5 font-bold hidden lg:table-cell">
                       Trạng thái xe
                     </th>
+                    <th className="px-6 py-5 font-bold hidden md:table-cell">
+                      Chứng chỉ
+                    </th>
                     <th className="px-6 py-5 font-bold">Hồ sơ</th>
                     <th className="px-6 py-5 font-bold text-right">Thao tác</th>
                   </tr>
@@ -324,6 +357,11 @@ export default function DriverList() {
                             Trong chuyến
                           </span>
                         )}
+                      </td>
+                      <td className="px-6 py-4 hidden md:table-cell">
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                          Cấp {driver.certificationLevel || 1}
+                        </span>
                       </td>
                       <td className="px-6 py-4">
                         {getStatusBadge(driver.status)}
@@ -398,14 +436,24 @@ export default function DriverList() {
             <div className="px-8 py-8 overflow-y-auto">
               <div className="flex items-center gap-4 mb-8">
                 <div className="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-2xl font-bold relative">
-                  {(selectedDriver.userInfo?.fullName || "U")[0].toUpperCase()}
+                  {selectedDriver.user?.avatar ? (
+                    <img
+                      src={selectedDriver.user.avatar}
+                      alt={selectedDriver.user?.fullName || "Driver"}
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <span className="text-2xl font-bold text-blue-600">
+                      {(selectedDriver.user?.fullName || "U")[0].toUpperCase()}
+                    </span>
+                  )}
                   {selectedDriver.isOnline && (
                     <span className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"></span>
                   )}
                 </div>
                 <div>
                   <h3 className="text-xl font-bold text-gray-900">
-                    {selectedDriver.userInfo?.fullName || "Chưa cập nhật"}
+                    {selectedDriver.user?.fullName || "Chưa cập nhật"}
                   </h3>
                   <div className="mt-2 flex flex-wrap gap-2">
                     {getStatusBadge(selectedDriver.status)}
@@ -429,7 +477,7 @@ export default function DriverList() {
                       Số điện thoại
                     </label>
                     <p className="font-semibold text-gray-900 text-lg">
-                      {selectedDriver.userInfo?.phone || "N/A"}
+                      {selectedDriver.user?.phone || "N/A"}
                     </p>
                   </div>
                   <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
@@ -438,9 +486,9 @@ export default function DriverList() {
                     </label>
                     <p
                       className="font-semibold text-gray-900 text-lg truncate"
-                      title={selectedDriver.userInfo?.email || "N/A"}
+                      title={selectedDriver.user?.email || "N/A"}
                     >
-                      {selectedDriver.userInfo?.email || "N/A"}
+                      {selectedDriver.user?.email || "N/A"}
                     </p>
                   </div>
                 </div>
@@ -453,6 +501,67 @@ export default function DriverList() {
                     {selectedDriver.licenseNumber || "Chưa cập nhật"}
                   </p>
                 </div>
+
+                <div className="bg-gray-50 p-4 rounded-2xl border border-gray-100">
+                  <label className="text-xs font-bold text-gray-500 uppercase tracking-wider block mb-2">
+                    Cấp chứng chỉ
+                  </label>
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5].map((level) => (
+                      <button
+                        key={level}
+                        onClick={() => handleUpdateCertification(level)}
+                        disabled={actionLoading}
+                        className={`px-4 py-2 rounded-xl text-sm font-bold border transition-colors ${(selectedDriver.certificationLevel || 1) === level
+                          ? "bg-amber-100 text-amber-800 border-amber-300"
+                          : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                          }`}
+                      >
+                        Cấp {level}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Earnings section */}
+                {driverEarnings && (
+                  <div className="bg-green-50 p-5 rounded-2xl border border-green-100">
+                    <h4 className="font-bold text-green-900 mb-4 flex items-center gap-2">
+                      <Wallet size={18} /> Thu nhập tháng này
+                    </h4>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-xs font-bold text-green-700/70 uppercase mb-1">Tổng thu nhập</p>
+                        <p className="text-xl font-black text-green-700">
+                          {driverEarnings.actualEarnings?.toLocaleString() || 0}đ
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-xs font-bold text-green-700/70 uppercase mb-1">Tiền mặt đã thu</p>
+                        <p className="text-xl font-black text-green-700">
+                          {driverEarnings.cashReceived?.toLocaleString() || 0}đ
+                        </p>
+                      </div>
+                    </div>
+                    <div className="mt-4 pt-4 border-t border-green-200">
+                      {driverEarnings.actualEarnings - driverEarnings.cashReceived >= 0 ? (
+                        <div>
+                          <p className="text-sm font-bold text-gray-700 mb-1">Hệ thống nợ tài xế:</p>
+                          <p className="text-2xl font-black text-blue-600">
+                            {Math.abs(driverEarnings.actualEarnings - driverEarnings.cashReceived).toLocaleString()}đ
+                          </p>
+                        </div>
+                      ) : (
+                        <div>
+                          <p className="text-sm font-bold text-gray-700 mb-1">Tài xế nợ hệ thống:</p>
+                          <p className="text-2xl font-black text-red-600">
+                            {Math.abs(driverEarnings.actualEarnings - driverEarnings.cashReceived).toLocaleString()}đ
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
 
                 {selectedDriver.activeTripId && (
                   <div className="bg-blue-50/50 p-5 rounded-2xl border border-blue-100">

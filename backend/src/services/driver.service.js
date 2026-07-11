@@ -396,7 +396,7 @@ export const listDriversAdmin = async ({
 export const getDriverDetailAdmin = async (driverId) => {
   const driver = await Driver.findById(driverId)
     .populate("user", "-password")
-    .populate("vehicles")
+    .populate("vehicleId")
     .lean();
   if (!driver) throw new Error("Tài xế không tồn tại.");
 
