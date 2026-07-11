@@ -1,7 +1,17 @@
 import React from "react";
 import { motion } from "motion/react";
 import { Phone, Map, MoreVertical, Car } from "lucide-react";
+import { useSocketStore } from "../../../store/useSocketStore";
+
 export default function TripCard({ trip, navigate }) {
+  const events = useSocketStore((state) => state.events);
+
+  // Lấy sự kiện OTP mới nhất của trip này
+  const otpEvent = events
+    .filter((e) => e.type === "trip_otp_created" && String(e.payload?.tripId) === String(trip._id))
+    .pop();
+
+
   return (
     <section>
       <motion.div
@@ -53,6 +63,17 @@ export default function TripCard({ trip, navigate }) {
             </span>
           </div>
         </div>
+        {otpEvent && (
+          <div className="bg-red-50 p-3 rounded-2xl flex flex-col items-center gap-1 mb-4 border border-red-100">
+            <p className="text-red-700 font-bold text-sm">{otpEvent.payload?.title || "Mã PIN đón con"}</p>
+            <p className="text-3xl font-black text-red-600 tracking-widest">{otpEvent.payload?.otp}</p>
+            <p className="text-xs text-red-500 text-center px-2">
+              {otpEvent.payload?.message || "Vui lòng cung cấp mã này cho tài xế."}
+            </p>
+          </div>
+        )}
+
+
 
         <div className="grid grid-cols-2 gap-3 mt-4">
           <button

@@ -84,8 +84,8 @@ export const driverStartPickup = async (tripId) => {
         title: "Mã PIN đón con",
         otp: otpCode,
         message:
-          "Khi tài xế chui ra mở cửa, vui lòng đọc hoặc Chat gửi MÃ PIN NÀY cho bác tài để chứng minh đón đúng mã bé.",
-        tripId: trip._id,
+          "Khi tài xế chui ra mở cửa, vui lòng đọc MÃ PIN cho bác tài để chứng minh đón đúng mã bé.",
+        tripId: trip._id.toString(),
       });
     }
 
@@ -352,7 +352,7 @@ export const getTripsByDriver = async (
     const end = new Date(start.getFullYear(), start.getMonth() + 1, 0, 23, 59, 59, 999);
     dateFilter = { $gte: start, $lte: end };
   }
-  
+
   if (Object.keys(dateFilter).length > 0) {
     query.createdAt = dateFilter;
   }
