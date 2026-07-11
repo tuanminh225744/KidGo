@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { useDriverStore } from './useDriverStore.js';
+import { logoutApi } from '../services/auth.service.js';
 
 const storedUser = sessionStorage.getItem('kidgo_user');
 const initialState = storedUser ? JSON.parse(storedUser) : null;
@@ -18,9 +19,15 @@ export const useAuthStore = create((set) => ({
     }
     set({ user: userData });
   },
-  logout: () => {
-    sessionStorage.clear();
-    useDriverStore.getState().clearDriverData();
-    set({ user: null });
+  logout: async () => {
+    try {
+      await logoutApi();
+    } catch (error) {
+      console.error("Lỗi khi gọi API đăng xuất:", error);
+    } finally {
+      sessionStorage.clear();
+      useDriverStore.getState().clearDriverData();
+      set({ user: null });
+    }
   }
 }));

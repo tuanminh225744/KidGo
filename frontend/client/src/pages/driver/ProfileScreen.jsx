@@ -52,7 +52,7 @@ export const ProfileScreen = () => {
     try {
       const res = await uploadAvatar(file);
       console.log(res)
-      if (res.success && res.data?.avatar) {
+      if (res.success && res.data?.avatarUrl) {
         // Update user state
         setUser({ ...user, avatar: res.data.avatarUrl });
       }

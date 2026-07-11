@@ -28,6 +28,10 @@ export const refreshAuthToken = async (refreshToken) => {
   return api.post("/auth/refresh", { refreshToken });
 };
 
+export const logoutApi = async () => {
+  return api.post("/auth/logout");
+};
+
 export const setAuthTokens = ({ accessToken, refreshToken }) => {
   if (accessToken) {
     sessionStorage.setItem(ACCESS_TOKEN_KEY, accessToken);

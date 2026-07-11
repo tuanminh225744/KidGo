@@ -494,6 +494,10 @@ export const logout = async (userId) => {
         data: null,
       };
     }
+
+    // Set Driver isOnline to false if user is a driver
+    await Driver.findOneAndUpdate({ user: userId }, { isOnline: false });
+
     await redisClient.del(`refreshToken:${userId}`);
     return { success: true, message: "Đăng xuất thành công", data: null };
   } catch (error) {

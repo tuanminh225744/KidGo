@@ -63,7 +63,7 @@ export default function Register() {
 
   return (
     <div className="flex-1 flex flex-col bg-surface min-h-screen">
-      <header className="p-5 flex items-center justify-between sticky top-0 bg-transparent z-10">
+      {/* <header className="p-5 flex items-center justify-between sticky top-0 bg-transparent z-10">
         <button
           onClick={() => navigate("/client/login")}
           className="w-10 h-10 flex items-center justify-center text-primary rounded-full hover:bg-surface-container-low active:scale-90 transition-transform"
@@ -72,7 +72,7 @@ export default function Register() {
         </button>
         <div className="text-2xl font-bold text-primary-container">Kid Go</div>
         <div className="w-10" />
-      </header>
+      </header> */}
 
       <main className="px-6 pt-10 flex-1 pb-28">
         <div className="text-center mb-10">
@@ -181,23 +181,6 @@ export default function Register() {
               {loading ? "Đang đăng ký..." : "Đăng ký"}
             </button>
           </form>
-
-          <div className="flex items-center my-8">
-            <div className="flex-1 h-px bg-outline-variant/30" />
-            <span className="px-4 text-[10px] font-bold text-outline uppercase tracking-widest">
-              Hoặc tiếp tục với
-            </span>
-            <div className="flex-1 h-px bg-outline-variant/30" />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <button className="flex items-center justify-center gap-2 border border-outline-variant rounded-2xl py-3.5 hover:bg-surface-container transition-colors font-bold text-xs">
-              <Google size={18} /> Google
-            </button>
-            <button className="flex items-center justify-center gap-2 border border-outline-variant rounded-2xl py-3.5 hover:bg-surface-container transition-colors font-bold text-xs">
-              <Facebook size={18} /> Facebook
-            </button>
-          </div>
         </div>
 
         <div className="mt-8 text-center">
