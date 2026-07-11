@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { motion } from "motion/react";
-import { CalendarDays, Clock3, MapPin, RefreshCw } from "lucide-react";
-import { getTripSchedules } from "../../services/booking.service.js";
+import { CalendarDays, Clock3, MapPin, RefreshCw, Trash2 } from "lucide-react";
+import { getTripSchedules, deleteTripSchedule } from "../../services/booking.service.js";
 
 const formatDate = (value) =>
   new Intl.DateTimeFormat("vi-VN", {
@@ -31,13 +31,43 @@ export default function Schedules() {
     loadSchedules();
   }, []);
 
-  const sortedSchedules = useMemo(
-    () =>
-      [...schedules].sort((a, b) =>
-        String(a.pickupTime || "").localeCompare(String(b.pickupTime || "")),
-      ),
-    [schedules],
-  );
+  const handleDelete = async (e, id) => {
+    e.stopPropagation(); // prevent navigating to /client/home
+    if (!window.confirm("Bạn có chắc chắn muốn hủy lịch trình này?")) return;
+    try {
+      await deleteTripSchedule(id);
+      loadSchedules();
+    } catch (err) {
+      alert("Hủy lịch trình thất bại: " + err.message);
+    }
+  };
+
+  const sortedSchedules = useMemo(() => {
+    const now = new Date();
+
+    const validSchedules = schedules.filter((s) => {
+      // Có lặp lại
+      if (s.repeatDays && s.repeatDays.length > 0) return true;
+      // Hoặc trong tương lai/hôm nay
+      if (s.startDate) {
+        const d = new Date(s.startDate);
+        // Nếu có pickupTime (VD: "14:30") thì thiết lập giờ phút để so sánh chính xác
+        if (s.pickupTime) {
+          const [hours, minutes] = s.pickupTime.split(":");
+          if (hours) d.setHours(parseInt(hours, 10), parseInt(minutes || 0, 10), 0, 0);
+        } else {
+          // Nếu không có pickupTime thì chỉ so sánh đến cuối ngày
+          d.setHours(23, 59, 59, 999);
+        }
+        return d.getTime() >= now.getTime();
+      }
+      return false;
+    });
+
+    return validSchedules.sort((a, b) =>
+      String(a.pickupTime || "").localeCompare(String(b.pickupTime || "")),
+    );
+  }, [schedules]);
 
   return (
     <div className="flex-1 flex flex-col pb-24">
@@ -85,14 +115,20 @@ export default function Schedules() {
         ) : (
           <div className="space-y-3">
             {sortedSchedules.map((schedule) => (
-              <motion.button
+              <motion.div
                 key={schedule._id}
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 onClick={() => navigate("/client/home")}
-                className="w-full bg-white rounded-3xl p-4 shadow-md border border-outline-variant/30 text-left active:scale-[0.99] transition-transform"
+                className="w-full bg-white rounded-3xl p-4 shadow-md border border-outline-variant/30 text-left active:scale-[0.99] transition-transform cursor-pointer relative"
               >
-                <div className="flex items-start justify-between gap-3">
+                <button
+                  onClick={(e) => handleDelete(e, schedule._id)}
+                  className="absolute top-3 right-3 w-8 h-8 rounded-full bg-red-50 text-red-500 flex items-center justify-center hover:bg-red-100 transition-colors z-10"
+                >
+                  <Trash2 size={16} />
+                </button>
+                <div className="flex items-start justify-between gap-3 mt-1">
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <span
@@ -107,7 +143,7 @@ export default function Schedules() {
                         {schedule.repeatDays?.length || 0} ngày/tuần
                       </span>
                     </div>
-                    <h3 className="font-bold text-on-surface">
+                    <h3 className="font-bold text-on-surface pr-8">
                       {schedule.kidId?.fullName || "Bé của bạn"}
                     </h3>
 
@@ -115,7 +151,7 @@ export default function Schedules() {
                       {schedule.routeId?.estimatedPickupAddress || schedule.routeId?.actualPickupAddress || "Chưa có điểm đón"}
                     </p>
                   </div>
-                  <div className="text-right shrink-0">
+                  <div className="text-right shrink-0 mt-4">
                     <div className="w-24 h-14 rounded-2xl bg-primary-container text-white flex items-center justify-center font-black text-base">
                       {schedule.pickupTime || "--:--"}
                     </div>
@@ -124,7 +160,7 @@ export default function Schedules() {
                     </p>
                   </div>
                 </div>
-              </motion.button>
+              </motion.div>
             ))}
           </div>
         )}

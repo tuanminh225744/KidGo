@@ -104,10 +104,7 @@ export const verifySecurityAnswer = async (kidId, answer) => {
     throw new NotFoundError("Kid này chưa thiết lập security answer.");
   }
 
-  const match = await bcrypt.compare(
-    answer.toLowerCase().trim(),
-    kid.securityAnswer,
-  );
+  const match = answer.toLowerCase().trim() === kid.securityAnswer.toLowerCase().trim();
   return { success: true, message: "Security answer verified", data: match };
 };
 

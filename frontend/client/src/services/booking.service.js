@@ -35,3 +35,7 @@ export const getTripSchedulesByDate = async (date) => {
 export const toggleTripSchedule = async (scheduleId, isActive) => {
   return api.patch(`/bookings/schedules/${scheduleId}/toggle`, { isActive });
 };
+
+export const deleteTripSchedule = async (scheduleId) => {
+  return api.delete(`/bookings/schedules/${scheduleId}`);
+};
