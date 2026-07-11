@@ -83,7 +83,7 @@ export default function ScheduleView() {
       </div>
 
       <div className="p-4">
-        <h2 className="font-bold text-gray-800 mb-4">Chuyến trong ngày đã chọn</h2>
+        <h2 className="font-bold text-gray-800 mb-4">Các chuyến trong ngày</h2>
 
         <div className="space-y-6 relative">
           <div className="absolute left-6 top-8 bottom-8 w-0.5 bg-gray-100" />
@@ -97,16 +97,16 @@ export default function ScheduleView() {
               const time = trip.pickupTime || new Date(trip.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
               const isFirst = idx === 0;
               return (
-                <div key={trip._id} className="relative pl-14">
-                  <div className={`absolute left-3 top-2 w-7 h-7 rounded-lg flex items-center justify-center z-10 ${isFirst ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
+                <div key={trip._id} className="relative">
+                  {/* <div className={`absolute left-3 top-2 w-7 h-7 rounded-lg flex items-center justify-center z-10 ${isFirst ? 'bg-green-600 text-white' : 'bg-gray-200 text-gray-500'}`}>
                     {isFirst ? <Car className="w-4 h-4" /> : <Clock className="w-4 h-4" />}
-                  </div>
+                  </div> */}
                   <div className={`bg-white p-4 rounded-2xl border border-gray-100 shadow-sm ${isFirst ? '' : 'opacity-80 hover:opacity-100 transition-opacity'}`}>
                     <div className="flex justify-between items-center mb-3">
-                      <span className={`font-bold ${isFirst ? 'text-[#1D7C45]' : 'text-gray-600'}`}>{time}</span>
-                      <span className={`text-[10px] px-3 py-1 rounded-full font-bold ${isFirst ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
+                      <span className={`font-bold text-[#1D7C45]`}>{time}</span>
+                      {/* <span className={`text-[10px] px-3 py-1 rounded-full font-bold ${isFirst ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
                         {isFirst ? 'Sắp diễn ra' : 'Đã lên lịch'}
-                      </span>
+                      </span> */}
                     </div>
                     <h3 className="font-bold text-gray-800 mb-3">{trip.kidId?.fullName || 'Bé Gia Bảo'}</h3>
                     <div className="flex gap-3 mb-4">
