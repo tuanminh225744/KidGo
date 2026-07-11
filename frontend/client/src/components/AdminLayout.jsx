@@ -1,6 +1,6 @@
 import React from "react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import { Users, FileText, LogOut, Truck, UsersRound, LayoutDashboard } from "lucide-react";
+import { Users, FileText, LogOut, Truck, UsersRound, LayoutDashboard, Route as RouteIcon } from "lucide-react";
 import { useAuthStore } from "../store/useAuthStore";
 
 export default function AdminLayout() {
@@ -15,6 +15,7 @@ export default function AdminLayout() {
 
   const navItems = [
     { path: "/admin/dashboard", label: "Bảng điều khiển", icon: <LayoutDashboard size={20} /> },
+    { path: "/admin/trips", label: "Quản lý Chuyến xe", icon: <RouteIcon size={20} /> },
     { path: "/admin/driver-approval", label: "Duyệt tài xế", icon: <Users size={20} /> },
     { path: "/admin/drivers", label: "Quản lý Tài xế", icon: <Truck size={20} /> },
     { path: "/admin/parents", label: "Quản lý Phụ huynh", icon: <UsersRound size={20} /> },

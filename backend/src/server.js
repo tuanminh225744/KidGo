@@ -17,6 +17,7 @@ import DashboardRoutes from "./routes/DashboardRoutes.js";
 import AdminDriverRoutes from "./routes/AdminDriverRoutes.js";
 import AdminUserRoutes from "./routes/AdminUserRoutes.js";
 import AdminKidRoutes from "./routes/AdminKidRoutes.js";
+import AdminTripRoutes from "./routes/AdminTripRoutes.js";
 import AuthRoutes from "./routes/AuthRoutes.js";
 import UserRoutes from "./routes/UserRoutes.js";
 import KidRoutes from "./routes/KidRoutes.js";
@@ -100,6 +101,7 @@ app.use("/api/v1/admin", DashboardRoutes);
 app.use("/api/v1/admin/drivers", AdminDriverRoutes);
 app.use("/api/v1/admin/users", AdminUserRoutes);
 app.use("/api/v1/admin/kids", AdminKidRoutes);
+app.use("/api/v1/admin/trips", AdminTripRoutes);
 
 // 5. 404 Handler (trước error handler)
 app.use(notFoundHandler);

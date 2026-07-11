@@ -15,6 +15,7 @@ import AdminDashboard from "./pages/admin/AdminDashboard.jsx";
 import DriverList from "./pages/admin/DriverList.jsx";
 import ParentList from "./pages/admin/ParentList.jsx";
 import AdminLiveTrip from "./pages/admin/AdminLiveTrip.jsx";
+import TripList from "./pages/admin/TripList.jsx";
 
 export default function AdminApp() {
   const user = useAuthStore((state) => state.user);
@@ -47,6 +48,7 @@ export default function AdminApp() {
               element={<Navigate to="/admin/dashboard" replace />}
             />
             <Route path="dashboard" element={<AdminDashboard />} />
+            <Route path="trips" element={<TripList />} />
             <Route path="report" element={<Report />} />
             <Route path="driver-approval" element={<DriverApproval />} />
             <Route path="drivers" element={<DriverList />} />

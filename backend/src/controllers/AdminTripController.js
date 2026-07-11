@@ -22,12 +22,34 @@ export const getAllTrips = async (req, res, next) => {
         .skip(skip)
         .limit(+limit)
         .populate("routeId")
-        .populate("driverId", "user licenseNumber certificationLevel")
+        .populate({
+          path: "driverId",
+          select: "user licenseNumber certificationLevel",
+          populate: { path: "user", select: "fullName" }
+        })
         .populate("parentId", "fullName email phone")
         .populate("kidId", "fullName")
         .populate("vehicleId", "licensePlate model color"),
       Trip.countDocuments(query),
     ]);
+
+    // Lấy thông báo cảnh báo (alerts) cho các chuyến này
+    const tripIds = trips.map(t => t._id);
+    // Cần import Notification
+    const Notification = (await import("../models/support/notification.model.js")).default;
+    const notifications = await Notification.find({
+      tripId: { $in: tripIds },
+      type: { $in: ["alert", "danger"] },
+      recipientType: "driver"
+    });
+
+    const data = trips.map(trip => {
+      const tripAlerts = notifications.filter(n => n.tripId.toString() === trip._id.toString());
+      return {
+        ...trip.toObject(),
+        alerts: tripAlerts
+      };
+    });
 
     return success(
       res,
@@ -35,7 +57,7 @@ export const getAllTrips = async (req, res, next) => {
         page: +page,
         total,
         totalPages: Math.ceil(total / +limit),
-        data: trips,
+        data: data,
       },
       "Trips fetched",
       200,

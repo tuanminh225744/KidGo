@@ -8,6 +8,10 @@ export const getFullAdminDashboard = async () => {
   return api.get("/admin/dashboard/full");
 };
 
+export const getAdminTrips = async (params = {}) => {
+  return api.get("/admin/trips", { params });
+};
+
 export const approveDriver = async (driverId) => {
   return api.patch(`/admin/drivers/${driverId}/approve`);
 };
