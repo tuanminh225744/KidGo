@@ -21,11 +21,25 @@ export const verifyOtp = async (tripId, data) => {
 };
 
 export const verifyPickupPhoto = async (tripId, data) => {
-  return api.post(`/trips/${tripId}/verify-pickup-photo`, data);
+  if (data instanceof File || data instanceof Blob) {
+    const formData = new FormData();
+    formData.append("photo", data);
+    return api.post(`/trips/${tripId}/verify-pickup-photo`, formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+  }
+  return api.post(`/trips/${tripId}/verify-pickup-photo`, { photo: data });
 };
 
 export const verifyDropoffPhoto = async (tripId, data) => {
-  return api.post(`/trips/${tripId}/verify-dropoff-photo`, data);
+  if (data instanceof File || data instanceof Blob) {
+    const formData = new FormData();
+    formData.append("photo", data);
+    return api.post(`/trips/${tripId}/verify-dropoff-photo`, formData, {
+      headers: { "Content-Type": "multipart/form-data" }
+    });
+  }
+  return api.post(`/trips/${tripId}/verify-dropoff-photo`, { photo: data });
 };
 
 export const verifySecurityQuestion = async (tripId, data) => {

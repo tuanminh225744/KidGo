@@ -96,32 +96,30 @@ export const verifyOtpHandler = async (req, res, next) => {
   }
 };
 
-/**
- * POST /api/v1/trips/:tripId/verify-pickup-photo
- * Tài xế xác thực ảnh chụp đón
- * Role: driver
- */
 export const verifyPickupPhotoHandler = async (req, res, next) => {
   try {
     const { tripId } = req.params;
-    const { photo } = req.body;
-    const result = await verifyTripPickupPhoto(tripId, photo);
+    let photoUrl = req.body.photo;
+    if (req.file) {
+      photoUrl = `${req.protocol}://${req.get("host")}/uploads/confirmations/${req.file.filename}`;
+    }
+    if (!photoUrl) throw new AppError("Không tìm thấy ảnh", 400);
+    const result = await verifyTripPickupPhoto(tripId, photoUrl);
     return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);
   }
 };
 
-/**
- * POST /api/v1/trips/:tripId/verify-dropoff-photo
- * Tài xế xác thực ảnh chụp trả
- * Role: driver
- */
 export const verifyDropoffPhotoHandler = async (req, res, next) => {
   try {
     const { tripId } = req.params;
-    const { photo } = req.body;
-    const result = await verifyTripDropoffPhoto(tripId, photo);
+    let photoUrl = req.body.photo;
+    if (req.file) {
+      photoUrl = `${req.protocol}://${req.get("host")}/uploads/confirmations/${req.file.filename}`;
+    }
+    if (!photoUrl) throw new AppError("Không tìm thấy ảnh", 400);
+    const result = await verifyTripDropoffPhoto(tripId, photoUrl);
     return success(res, result.data, result.message, 200);
   } catch (error) {
     next(error);

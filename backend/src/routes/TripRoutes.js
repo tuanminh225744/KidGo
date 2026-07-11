@@ -29,6 +29,7 @@ import {
   validateTripsQuery,
   validateEstimatedWaypoints,
 } from "../validators/tripValidators.js";
+import { uploadConfirmation } from "../middlewares/upload.middleware.js";
 
 const router = express.Router();
 
@@ -106,8 +107,8 @@ router.post(
 router.post(
   "/:tripId/verify-pickup-photo",
   authorize("driver"),
+  uploadConfirmation.single("photo"),
   validateTripIdParam,
-  validateVerifyPhoto,
   validate,
   verifyPickupPhotoHandler
 );
@@ -120,8 +121,8 @@ router.post(
 router.post(
   "/:tripId/verify-dropoff-photo",
   authorize("driver"),
+  uploadConfirmation.single("photo"),
   validateTripIdParam,
-  validateVerifyPhoto,
   validate,
   verifyDropoffPhotoHandler
 );

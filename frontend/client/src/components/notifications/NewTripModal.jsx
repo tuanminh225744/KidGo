@@ -80,19 +80,11 @@ export const NewTripModal = ({ tripRequest, onAccept, onSkip }) => {
   };
 
   const handleSkip = async () => {
-    if (!bookingId) {
-      onSkip();
-      return;
-    }
-
-    try {
-      setLoading(true);
-      const response = await rejectBooking(bookingId);
-      onSkip();
-    } catch (error) {
-      console.error("Lỗi khi từ chối chuyến:", error);
-    } finally {
-      setLoading(false);
+    onSkip(); // Ẩn modal ngay lập tức
+    if (bookingId) {
+      rejectBooking(bookingId).catch((error) => {
+        console.error("Lỗi khi từ chối chuyến:", error);
+      });
     }
   };
 

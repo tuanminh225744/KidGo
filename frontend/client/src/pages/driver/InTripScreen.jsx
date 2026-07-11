@@ -131,18 +131,15 @@ export const InTripScreen = () => {
   };
 
   const submitPhoto = async () => {
-    if (!photoInput) {
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) {
       setErrorMsg("Vui lòng chụp hoặc chọn ảnh");
       return;
     }
     setLoading(true);
     setErrorMsg("");
     try {
-      // Temporarily sending the blob URL or a mock string to pass validation since we don't have a real file upload setup yet
-      // In a real scenario, you would upload the file to S3/Cloudinary and get a URL, then pass it here.
-      const fakePhotoUrl = "https://example.com/mock-photo.jpg";
-      const res = await verifyPickupPhoto(trip._id, { photo: fakePhotoUrl });
-      console.log(res.data);
+      const res = await verifyPickupPhoto(trip._id, file);
       if (res.success) {
         setTripData(res.data);
         checkNextVerification(res.data);
@@ -163,7 +160,12 @@ export const InTripScreen = () => {
     setErrorMsg("");
     try {
       // 1. Verify answer using kid service
-      await verifySecurityAnswer(trip.kidId, securityAnswer);
+      const verifyRes = await verifySecurityAnswer(trip.kidId, securityAnswer);
+      if (!verifyRes?.data?.isValid) {
+        setErrorMsg("Câu trả lời không chính xác!");
+        setLoading(false);
+        return;
+      }
 
       // 2. Mark trip verification as passed
       const res = await verifySecurityQuestion(trip._id, {
@@ -182,6 +184,10 @@ export const InTripScreen = () => {
 
   const handleConfirmPickup = async () => {
     setCurrentVerificationStep(null);
+    setPhotoInput(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
     setLoading(true);
     try {
       const res = await confirmPickup(trip._id);
@@ -198,15 +204,15 @@ export const InTripScreen = () => {
   };
 
   const submitDropoffPhoto = async () => {
-    if (!photoInput) {
+    const file = fileInputRef.current?.files?.[0];
+    if (!file) {
       setErrorMsg("Vui lòng chụp hoặc chọn ảnh");
       return;
     }
     setLoading(true);
     setErrorMsg("");
     try {
-      const fakePhotoUrl = "https://example.com/mock-dropoff-photo.jpg";
-      const res = await verifyDropoffPhoto(trip._id, { photo: fakePhotoUrl });
+      const res = await verifyDropoffPhoto(trip._id, file);
       if (res?.success) {
         setTripData(res.data);
         setTripStatus("dropping_off");
